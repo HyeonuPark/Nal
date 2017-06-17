@@ -1,8 +1,10 @@
-use ast::*;
+use super::*;
 
 #[derive(Debug)]
 pub enum Ty {
     Ref(Ast<Ident>, Vec<Ast<Ty>>),
+    Add(Ast<Ty>, Ast<Ty>),
+    Tuple(Vec<Ast<TupleTypeElem>>),
     Record {
         name: Option<Ast<Ident>>,
         body: Vec<Ast<TypeElem>>,
@@ -11,7 +13,6 @@ pub enum Ty {
         name: Option<Ast<Ident>>,
         body: Vec<Ast<TypeElem>>,
     },
-    Tuple(Vec<Ast<TupleTypeElem>>),
 }
 
 #[derive(Debug)]

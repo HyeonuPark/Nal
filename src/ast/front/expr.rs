@@ -1,17 +1,18 @@
-use ast::*;
+use super::*;
 
 #[derive(Debug)]
 pub enum Expr {
     Ident(Ast<Ident>),
     Literal(Ast<Literal>),
     EnumVar(Ast<Ident>, Ast<Expr>),
-    Tuple(Vec<Ast<TupleElem>>),
     ShortFunc(Ast<Expr>),
     Binary(BinaryOp, Ast<Expr>, Ast<Expr>),
     Unary(UnaryOp, Ast<Expr>),
+    IsType(Ast<Expr>, Ast<Ty>),
     Call(Ast<Expr>, Vec<Ast<TupleElem>>),
     IndexGet(Ast<Expr>, Vec<Ast<Expr>>),
     IndexSet(Ast<Expr>, Vec<(Ast<Expr>, Ast<Expr>)>),
+    Match(Ast<Expr>, Vec<(Ast<CondPattern>, Ast<Expr>)>),
 }
 
 #[derive(Debug)]
@@ -26,10 +27,4 @@ pub enum BinaryOp {
 pub enum UnaryOp {
     Neg,
     Not,
-}
-
-#[derive(Debug)]
-pub enum TupleElem {
-    Simple(Ast<Expr>),
-    Spread(Ast<Expr>),
 }

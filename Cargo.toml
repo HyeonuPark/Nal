@@ -4,3 +4,5 @@ version = "0.1.0"
 authors = ["hyeonupark"]
 
 [dependencies]
+unicode-segmentation = "1.2"
+nom = "3.1"
