@@ -1,14 +1,12 @@
-use super::*;
+use super::{Ast, Ident, Literal, TupleElem, CondPattern};
 
 #[derive(Debug)]
 pub enum Expr {
     Ident(Ast<Ident>),
     Literal(Ast<Literal>),
     EnumVar(Ast<Ident>, Ast<Expr>),
-    ShortFunc(Ast<Expr>),
     Binary(BinaryOp, Ast<Expr>, Ast<Expr>),
     Unary(UnaryOp, Ast<Expr>),
-    IsType(Ast<Expr>, Ast<Ty>),
     Call(Ast<Expr>, Vec<Ast<TupleElem>>),
     IndexGet(Ast<Expr>, Vec<Ast<Expr>>),
     IndexSet(Ast<Expr>, Vec<(Ast<Expr>, Ast<Expr>)>),

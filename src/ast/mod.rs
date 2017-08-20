@@ -3,15 +3,11 @@ use std::ops::Deref;
 
 mod source;
 
-pub use self::source::{SrcFile, SrcPos};
+pub use self::source::{Src, SrcPos};
 
 pub mod front;
 
 pub type Ast<T> = Rc<AstNode<T>>;
-
-pub fn create<T>(content_struct: T, file: Rc<SrcFile>, start_byte: usize, end_byte: usize) -> Ast<T> {
-    Rc::new(AstNode {content_struct, pos: SrcPos {file, start_byte, end_byte}})
-}
 
  #[derive(Debug)]
 pub struct AstNode<T> {
@@ -19,10 +15,22 @@ pub struct AstNode<T> {
     pub pos: SrcPos,
 }
 
-impl<T> AstNode<T> {
-    pub fn replace<U>(content_struct: T, prev_ast: Ast<U>) -> Ast<T> {
-        Rc::new(AstNode {content_struct, pos: prev_ast.pos.clone()})
-    }
+pub fn create<T>(ast_data: T, file: Src, start_byte: usize, end_byte: usize) -> Ast<T> {
+    Rc::new(AstNode {
+        content_struct: ast_data, 
+        pos: SrcPos {
+            file, 
+            start_byte, 
+            end_byte
+        }
+    })
+}
+
+pub fn replace<T, U>(prev_ast: Ast<T>, new_data: U) -> Ast<U> {
+    Rc::new(AstNode {
+        content_struct: new_data,
+        pos: prev_ast.pos.clone(),
+    })
 }
 
 impl<T> Deref for AstNode<T> {

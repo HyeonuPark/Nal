@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use nom::{IResult, Offset};
 
-use ast::{self, SrcFile};
+use ast::{self, Src};
 use ast::front::*;
 
 pub const IDENT_CHARS: &'static str
@@ -33,32 +33,33 @@ named!(
             tag_s!("trait") |
             tag_s!("true") |
             tag_s!("type") |
-            tag_s!("while")
+            tag_s!("while") |
+            tag_s!("with")
         ),
         not!(one_of!(IDENT_CHARS))
     )
 );
 
 named!(
-    ident_str(&str) -> &str,
+    ident_inner(&str) -> &str,
     preceded!(
         not!(keywords),
         is_a_s!(IDENT_CHARS)
     )
 );
 
-pub fn ident<'a>(input: &'a str, src: Rc<SrcFile>) -> IResult<&'a str, Ast<Ident>> {
-    ident_str(input).map(|tok| {
+pub fn ident<'a>(input: &'a str, src: Src) -> IResult<&'a str, Ast<Ident>> {
+    ident_inner(input).map(|tok| {
         let offset = src.as_str().offset(tok);
-        ast::create(Ident(tok.into()), src, offset, offset + tok.len())
+        ast::create(Ident(tok.into()), src, offset, offset + tok.len() - 1)
     })
 }
 
 #[test]
 fn test_ident() {
-    assert_eq!(ident_str("foo bar"), IResult::Done(" bar", "foo"));
-    assert_eq!(ident_str("foo[bar]"), IResult::Done("[bar]", "foo"));
+    assert_eq!(ident_inner("foo bar"), IResult::Done(" bar", "foo"));
+    assert_eq!(ident_inner("foo[bar]"), IResult::Done("[bar]", "foo"));
     
-    assert!(ident_str("is foo").is_err());
-    assert_eq!(ident_str("is_foo"), IResult::Done("", "is_foo"));
+    assert!(ident_inner("is foo").is_err());
+    assert_eq!(ident_inner("is_foo"), IResult::Done("", "is_foo"));
 }

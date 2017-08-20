@@ -1,4 +1,4 @@
-use super::*;
+use super::{Ast, Ident, Ty, Expr};
 
 #[derive(Debug)]
 pub struct IdentPattern {
@@ -19,7 +19,7 @@ pub enum Pattern {
 #[derive(Debug)]
 pub enum CondPattern {
     ValueEq(Ast<Expr>),
-    EnumMatch(Ast<Ident>, Ast<CondPattern>),
+    EnumMatch(Ast<Ident>, Option<Ast<CondPattern>>),
     Void(Option<Ast<Ty>>),
     Ident(IdentPattern),
     Record(Vec<(Ast<Ident>, Option<Ast<CondPattern>>)>),

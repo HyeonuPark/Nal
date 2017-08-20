@@ -1,8 +1,8 @@
-use super::*;
+use super::{Ast, Ident};
 
 #[derive(Debug)]
 pub enum Ty {
-    Ref(Ast<Ident>, Vec<Ast<Ty>>),
+    Named(Ast<Ident>, Vec<Ast<Ty>>),
     Add(Ast<Ty>, Ast<Ty>),
     Tuple(Vec<Ast<TupleTypeElem>>),
     Record {
@@ -16,22 +16,10 @@ pub enum Ty {
 }
 
 #[derive(Debug)]
-pub enum TyDecl {
-    Alias {
-        name: Ast<Ident>,
-        params: Vec<Ast<Ident>>,
-        body: Ast<Ty>,
-    },
-    Record {
-        name: Ast<Ident>,
-        params: Vec<Ast<Ident>>,
-        body: Vec<Ast<TypeElem>>,
-    },
-    Enum {
-        name: Ast<Ident>,
-        params: Vec<Ast<Ident>>,
-        body: Vec<Ast<TypeElem>>,
-    }
+pub struct TyDecl {
+    name: Ast<Ident>,
+    params: Vec<Ast<Ident>>,
+    body: Ast<Ty>,
 }
 
 #[derive(Debug)]

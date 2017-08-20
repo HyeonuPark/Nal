@@ -1,9 +1,9 @@
-use super::*;
+use super::{Ast, Ident, Expr, Ty, Pattern, Stmt};
 
 #[derive(Debug)]
 pub enum Literal {
     Str(String),
-    TmplStr(String, Vec<(Ast<Expr>, String)>),
+    FormatStr(String, Vec<(Ast<Expr>, String)>),
     Bool(bool),
     Int(i32),
     Num(f64),
@@ -11,7 +11,8 @@ pub enum Literal {
     Func {
         name: Option<Ast<Ident>>,
         qualifiers: Vec<(Ast<Ident>, Option<Ast<Ty>>)>,
-        params: Ast<FuncParam>,
+        params: Vec<(Ast<Pattern>, Option<Ast<Ty>>)>,
+        rest_param: Option<Ast<FuncRestParam>>,
         return_ty: Option<Ast<Ty>>,
         body: Ast<FuncBody>,
     },
@@ -22,7 +23,7 @@ pub enum Literal {
     Trait {
         name: Option<Ast<Ident>>,
         qualifiers: Vec<(Ast<Ident>, Option<Ast<Ty>>)>,
-        req: Option<Ast<Ty>>,
+        input: Option<Ast<Ty>>,
         body: Vec<Ast<TraitElem>>,
     },
 }
@@ -32,7 +33,8 @@ pub enum NamedLiteral {
     Func {
         name: Ast<Ident>,
         qualifiers: Vec<(Ast<Ident>, Option<Ast<Ty>>)>,
-        params: Ast<FuncParam>,
+        params: Vec<(Ast<Pattern>, Option<Ast<Ty>>)>,
+        rest_param: Option<Ast<FuncRestParam>>,
         return_ty: Option<Ast<Ty>>,
         body: Ast<FuncBody>,
     },
@@ -43,13 +45,17 @@ pub enum NamedLiteral {
     Trait {
         name: Ast<Ident>,
         qualifiers: Vec<(Ast<Ident>, Option<Ast<Ty>>)>,
-        req: Option<Ast<Ty>>,
+        input: Option<Ast<Ty>>,
         body: Vec<Ast<TraitElem>>,
     },
 }
 
 #[derive(Debug)]
-pub struct FuncParam(Vec<Ast<Pattern>>, Option<(Ast<Ident>, Vec<Ast<Pattern>>)>);
+pub struct FuncRestParam {
+    name: Ast<Ident>,
+    is_mut: bool,
+    ty: Ast<Ty>,
+}
 
 #[derive(Debug)]
 pub enum FuncBody {
@@ -78,7 +84,8 @@ pub enum TraitElem {
         name: Ast<Ident>,
         is_override: bool,
         qualifiers: Vec<(Ast<Ident>, Option<Ast<Ty>>)>,
-        params: Ast<FuncParam>,
+        params: Vec<(Ast<Pattern>, Option<Ast<Ty>>)>,
+        rest_param: Option<Ast<FuncRestParam>>,
         return_ty: Option<Ast<Ty>>,
         body: Ast<FuncBody>,
     },
