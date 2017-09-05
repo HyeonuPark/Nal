@@ -2,31 +2,6 @@ use std::ops::Deref;
 
 use nom_locate::LocatedSpan;
 
-#[macro_use]
-mod ast_macro {
-  macro_rules! ast {
-    ($i:expr, $submac:ident!( $($args:tt)* )) => (
-      map!($i,
-        tuple!(
-          position!(),
-          $submac!($($args)*),
-          position!()
-        ),
-        (|(left, body, right)| $crate::ast::Ast::with_merge(body, left, right))
-      )
-    );
-    ($i:expr, $f:ident) => (
-      ast!($i, call!($f))
-    );
-  }
-}
-
-pub mod parser;
-pub mod interpreter;
-
-mod literal;
-pub use self::literal::*;
-
 mod expr;
 pub use self::expr::*;
 
@@ -63,7 +38,7 @@ impl<'a, T> Ast<'a, T> {
     }
   }
 
-  pub fn inner(ast: Ast<'a, T>) -> T {
+  pub fn unwrap(ast: Ast<'a, T>) -> T {
     *ast.inner_value
   }
 
@@ -85,6 +60,6 @@ impl<'a, T> Deref for Ast<'a, T> {
   type Target = T;
 
   fn deref(&self) -> &T {
-    &self.inner_value.deref()
+    &self.inner_value
   }
 }
