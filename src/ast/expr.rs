@@ -40,18 +40,18 @@ named!(parse_primary_expr(Span) -> Ast<Expr>, ast!(alt_complete!(
 )));
 
 named!(parse_binary_op(Span) -> BinaryOp, alt_complete!(
-  value!(BinaryOp::Or, tag!("||")) |
+  value!(BinaryOp::Or,  tag!("||")) |
   value!(BinaryOp::And, tag!("&&")) |
-  value!(BinaryOp::Eq, tag!("==")) |
+  value!(BinaryOp::Eq,  tag!("==")) |
   value!(BinaryOp::Neq, tag!("!=")) |
   value!(BinaryOp::Gte, tag!(">=")) |
-  value!(BinaryOp::Gt, tag!(">")) |
+  value!(BinaryOp::Gt,  tag!(">" )) |
   value!(BinaryOp::Lte, tag!("<=")) |
-  value!(BinaryOp::Lt, tag!("<")) |
-  value!(BinaryOp::Add, tag!("+")) |
-  value!(BinaryOp::Sub, tag!("-")) |
-  value!(BinaryOp::Mul, tag!("*")) |
-  value!(BinaryOp::Div, tag!("/"))
+  value!(BinaryOp::Lt,  tag!("<" )) |
+  value!(BinaryOp::Add, tag!("+" )) |
+  value!(BinaryOp::Sub, tag!("-" )) |
+  value!(BinaryOp::Mul, tag!("*" )) |
+  value!(BinaryOp::Div, tag!("/" ))
 ));
 
 named!(parse_binary_expr(Span) -> Ast<Expr>, map!(
