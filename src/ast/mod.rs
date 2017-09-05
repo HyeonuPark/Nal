@@ -32,7 +32,7 @@ pub use self::expr::*;
 
 pub type Span<'a> = LocatedSpan<&'a str>;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct Ast<'a, T> {
   inner_value: Box<T>,
   pub span: Span<'a>,
@@ -65,6 +65,19 @@ impl<'a, T> Ast<'a, T> {
 
   pub fn inner(ast: Ast<'a, T>) -> T {
     *ast.inner_value
+  }
+
+  pub fn dummy(value: T) -> Self {
+    Ast {
+      inner_value: value.into(),
+      span: Span::new(""),
+    }
+  }
+}
+
+impl<'a, T: PartialEq> PartialEq for Ast<'a, T> {
+  fn eq(&self,other: &Self) -> bool {
+    self.inner_value == other.inner_value
   }
 }
 

@@ -38,14 +38,7 @@ mod test {
         line: 1,
         fragment: "",
       },
-      Ast::new(
-        Span {
-          offset: 0,
-          line: 1,
-          fragment: "999",
-        },
-        Value::Number(999.0),
-      )
+      Ast::dummy(Value::Number(999.0))
     ));
     assert_eq!(parse_number(Span::new("42.7d")), IResult::Done(
       Span {
@@ -53,14 +46,7 @@ mod test {
         line: 1,
         fragment: "d",
       },
-      Ast::new(
-        Span {
-          offset: 0,
-          line: 1,
-          fragment: "42.7",
-        },
-        Value::Number(42.7),
-      )
+      Ast::dummy(Value::Number(42.7))
     ));
 
     assert_eq!(parse_number(Span::new("119gh")), IResult::Done(
@@ -69,14 +55,7 @@ mod test {
         line: 1,
         fragment: "gh",
       },
-      Ast::new(
-        Span {
-          offset: 0,
-          line: 1,
-          fragment: "119",
-        },
-        Value::Number(119.0),
-      )
+      Ast::dummy(Value::Number(119.0))
     ))
   }
 }

@@ -140,106 +140,29 @@ mod test {
 
   #[test]
   fn test_ast_binary_expr() {
-      assert_eq!(
-        parse_expr(Span::new("3+7*5-6")),
-        IResult::Done(
-          Span {
-            offset: 7,
-            line: 1,
-            fragment: "",
-          },
-          Ast::new(
-            Span {
-              offset: 0,
-              line: 1,
-              fragment: "3+7*5-6",
-            },
-            Binary(
-              BinaryOp::Sub,
-              Ast::new(
-                Span {
-                  offset: 0,
-                  line: 1,
-                  fragment: "3+7*5",
-                },
-                Binary(
-                  BinaryOp::Add,
-                  Ast::new(
-                    Span {
-                      offset: 0,
-                      line: 1,
-                      fragment: "3",
-                    },
-                    Literal(Ast::new(
-                      Span {
-                        offset: 0,
-                        line: 1,
-                        fragment: "3",
-                      },
-                      Number(3.0)
-                    )),
-                  ),
-                  Ast::new(
-                    Span {
-                      offset: 2,
-                      line: 1,
-                      fragment: "7*5",
-                    },
-                    Binary(
-                      BinaryOp::Mul,
-                      Ast::new(
-                        Span {
-                          offset: 2,
-                          line: 1,
-                          fragment: "7",
-                        },
-                        Literal(Ast::new(
-                          Span {
-                            offset: 2,
-                            line: 1,
-                            fragment: "7",
-                          },
-                          Number(7.0)
-                        )),
-                      ),
-                      Ast::new(
-                        Span {
-                          offset: 4,
-                          line: 1,
-                          fragment: "5",
-                        },
-                        Literal(Ast::new(
-                          Span {
-                            offset: 4,
-                            line: 1,
-                            fragment: "5",
-                          },
-                          Number(5.0)
-                        )),
-                      )
-                    )
-                  )
-                )
-              ),
-              Ast::new(
-                Span {
-                  offset: 6,
-                  line: 1,
-                  fragment: "6",
-                },
-                Literal(Ast::new(
-                  Span {
-                    offset: 6,
-                    line: 1,
-                    fragment: "6",
-                  },
-                  Number(6.0)
-                )),
-              ),
-            )
-          )
-        )
-      );
+    assert_eq!(
+      parse_expr(Span::new("3+7*5-6")),
+      IResult::Done(
+        Span {
+          offset: 7,
+          line: 1,
+          fragment: "",
+        },
+        Ast::dummy(Binary(
+          BinaryOp::Sub,
+          Ast::dummy(Binary(
+            BinaryOp::Add,
+            Ast::dummy(Literal(Ast::dummy(Number(3.0)))),
+            Ast::dummy(Binary(
+              BinaryOp::Mul,
+              Ast::dummy(Literal(Ast::dummy(Number(7.0)))),
+              Ast::dummy(Literal(Ast::dummy(Number(5.0)))),
+            )),
+          )),
+          Ast::dummy(Literal(Ast::dummy(Number(6.0)))),
+        )),
+      )
+    );
   }
 
   #[test]
