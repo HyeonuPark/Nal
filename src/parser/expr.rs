@@ -1,7 +1,7 @@
 use std::iter;
 use std::vec;
 
-use ast::{Ast, Span, Expr, BinaryOp};
+use ast::{Ast, Span, Expr, BinaryOp, UnaryOp};
 use parser::space;
 use parser::literal::parse_literal;
 use parser::ident::parse_ident;
@@ -42,10 +42,23 @@ named!(parse_binary_op(Span) -> BinaryOp, alt_complete!(
   value!(BinaryOp::Div, tag!("/" ))
 ));
 
+named!(parse_unary_op(Span) -> UnaryOp, alt_complete!(
+  value!(UnaryOp::Neg, tag!("-")) |
+  value!(UnaryOp::Not, tag!("!"))
+));
+
+named!(parse_unary_expr(Span) -> Ast<Expr>, alt_complete!(
+  ast!(map!(
+    tuple!(parse_unary_op, space, parse_primary_expr),
+    |(op, _, expr)| Expr::Unary(op, expr)
+  )) |
+  parse_primary_expr
+));
+
 named!(parse_binary_expr(Span) -> Ast<Expr>, map!(
-  tuple!(parse_primary_expr, many0!(
+  tuple!(parse_unary_expr, many0!(
     map!(
-      tuple!(space, parse_binary_op, space, parse_primary_expr),
+      tuple!(space, parse_binary_op, space, parse_unary_expr),
       |(_, op, _, expr)| (op, expr)
     )
   )),

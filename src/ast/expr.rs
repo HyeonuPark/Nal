@@ -5,6 +5,7 @@ use ast::Ast;
 pub enum Expr<'a> {
   Literal(Ast<'a, Literal>),
   Binary(BinaryOp, Ast<'a, Expr<'a>>, Ast<'a, Expr<'a>>),
+  Unary(UnaryOp, Ast<'a, Expr<'a>>),
   Identifier(&'a str),
 }
 
@@ -19,4 +20,10 @@ pub enum BinaryOp {
     Add, Sub, Mul, Div,
     Eq, Neq, Gt, Gte, Lt, Lte,
     And, Or,
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum UnaryOp {
+  Neg,
+  Not,
 }
