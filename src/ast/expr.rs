@@ -5,6 +5,7 @@ use ast::Ast;
 pub enum Expr<'a> {
   Literal(Ast<'a, Literal>),
   Binary(BinaryOp, Ast<'a, Expr<'a>>, Ast<'a, Expr<'a>>),
+  Identifier(&'a str),
 }
 
 #[derive(Debug, PartialEq, Clone)]

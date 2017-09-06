@@ -1,7 +1,10 @@
 
+mod env;
 mod expr;
 
-#[derive(Debug, PartialEq)]
+pub use self::env::Env;
+
+#[derive(Debug, PartialEq, Clone)]
 pub enum Value {
   None,
   Number(f64),

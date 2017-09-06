@@ -1,10 +1,10 @@
 use std::ops::Deref;
 
 use ast::{Expr, Literal, BinaryOp};
-use eval::{Result, Value, Control};
+use eval::{Result, Value, Control, Env};
 
 impl<'a> Expr<'a> {
-  pub fn evaluate(&self) -> Result<Value> {
+  pub fn evaluate(&self, env: &mut Env) -> Result<Value> {
     use self::Expr::*;
     use self::BinaryOp::*;
     use self::Literal as L;
@@ -15,7 +15,7 @@ impl<'a> Expr<'a> {
         L::Number(value) => V::Number(value),
         L::Bool(value) => V::Bool(value),
       }),
-      Binary(op, ref left, ref right) => match (left.evaluate()?, right.evaluate()?) {
+      Binary(op, ref left, ref right) => match (left.evaluate(env)?, right.evaluate(env)?) {
         (V::Number(left), V::Number(right)) => Ok(match op {
           Add => V::Number(left + right),
           Sub => V::Number(left - right),
@@ -38,6 +38,7 @@ impl<'a> Expr<'a> {
         }),
         _ => Err(Control::RuntimeError("Cannot calculate bool or None".into())),
       },
+      Identifier(id) => env.get(id)
     }
   }
 }
@@ -48,18 +49,22 @@ mod test {
   use ast::Span;
   use parser::parse_expr;
 
+  fn d<D: Default>() -> D {
+    Default::default()
+  }
+
   #[test]
   fn test_evaluate_binary_expr() {
     assert_eq!(
-      parse_expr(Span::new("3+7*5-6")).unwrap().1.evaluate().unwrap(),
+      parse_expr(Span::new("3+7*5-6")).unwrap().1.evaluate(&mut d()).unwrap(),
       Number(32.0)
     );
     assert_eq!(
-      parse_expr(Span::new("5 + 2 * 4 * 5 * 9")).unwrap().1.evaluate().unwrap(),
+      parse_expr(Span::new("5 + 2 * 4 * 5 * 9")).unwrap().1.evaluate(&mut d()).unwrap(),
       Number(365.0)
     );
     assert_eq!(
-      parse_expr(Span::new("7 > 2 + 4")).unwrap().1.evaluate().unwrap(),
+      parse_expr(Span::new("7 > 2 + 4")).unwrap().1.evaluate(&mut d()).unwrap(),
       Bool(true)
     );
   }

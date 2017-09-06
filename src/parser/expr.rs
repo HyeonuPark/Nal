@@ -4,6 +4,7 @@ use std::vec;
 use ast::{Ast, Span, Expr, BinaryOp};
 use parser::space;
 use parser::literal::parse_literal;
+use parser::ident::parse_ident;
 
 impl BinaryOp {
   #[inline]
@@ -22,6 +23,7 @@ impl BinaryOp {
 
 named!(parse_primary_expr(Span) -> Ast<Expr>, ast!(alt_complete!(
   map!(parse_literal, Expr::Literal) |
+  map!(parse_ident, Expr::Identifier) |
   map!(tuple!(tag!("("), space, parse_expr, space, tag!(")")), |(_, _, expr, _, _)| Ast::unwrap(expr))
 )));
 

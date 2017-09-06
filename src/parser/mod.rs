@@ -21,6 +21,7 @@ mod ast_macro {
 
 mod expr;
 mod literal;
+mod ident;
 
 pub use self::expr::parse_expr;
 
