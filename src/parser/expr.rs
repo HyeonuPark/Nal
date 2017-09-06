@@ -2,7 +2,7 @@ use std::iter;
 use std::vec;
 
 use ast::{Ast, Span, Expr, BinaryOp, UnaryOp};
-use parser::space;
+use parser::{space, new_line};
 use parser::literal::parse_literal;
 use parser::ident::parse_ident;
 
@@ -24,7 +24,10 @@ impl BinaryOp {
 named!(parse_primary_expr(Span) -> Ast<Expr>, ast!(alt_complete!(
   map!(parse_literal, Expr::Literal) |
   map!(parse_ident, Expr::Identifier) |
-  map!(tuple!(tag!("("), space, parse_expr, space, tag!(")")), |(_, _, expr, _, _)| Ast::unwrap(expr))
+  map!(
+    tuple!(tag!("("), new_line, parse_expr, new_line, tag!(")")),
+    |(_, _, expr, _, _)| Ast::unwrap(expr)
+  )
 )));
 
 named!(parse_binary_op(Span) -> BinaryOp, alt_complete!(
@@ -67,7 +70,9 @@ named!(parse_binary_expr(Span) -> Ast<Expr>, map!(
 
 type Ops<'a> = iter::Peekable<vec::IntoIter<(BinaryOp, Ast<'a, Expr<'a>>)>>;
 
-fn operator_precedence<'a>(head: Ast<'a, Expr<'a>>, tail: &mut Ops<'a>, min_prec: usize) -> Ast<'a, Expr<'a>> {
+fn operator_precedence<'a>(
+  head: Ast<'a, Expr<'a>>, tail: &mut Ops<'a>, min_prec: usize
+) -> Ast<'a, Expr<'a>> {
   let mut head = head;
 
   while let Some(&(op, _)) = tail.peek() {
