@@ -1,10 +1,10 @@
 use std::ops::Deref;
 
 use ast::{Expr, Literal, BinaryOp, UnaryOp};
-use eval::{Result, Value, Control, Env};
+use eval::{Result, Value, Control, Env, Eval};
 
-impl<'a> Expr<'a> {
-  pub fn evaluate(&self, env: &mut Env) -> Result<Value> {
+impl<'a> Eval for Expr<'a> {
+  fn eval(&self, env: &mut Env) -> Result<Value> {
     use self::Expr::*;
     use self::BinaryOp::*;
     use self::UnaryOp::*;
@@ -16,7 +16,7 @@ impl<'a> Expr<'a> {
         L::Number(value) => V::Number(value),
         L::Bool(value) => V::Bool(value),
       }),
-      Binary(op, ref left, ref right) => match (left.evaluate(env)?, right.evaluate(env)?) {
+      Binary(op, ref left, ref right) => match (left.eval(env)?, right.eval(env)?) {
         (V::Number(left), V::Number(right)) => Ok(match op {
           Add => V::Number(left + right),
           Sub => V::Number(left - right),
@@ -40,7 +40,7 @@ impl<'a> Expr<'a> {
         _ => Err(Control::RuntimeError("Cannot calculate bool or None".into())),
       },
       Identifier(id) => env.get(id),
-      Unary(op, ref expr) => Ok(match (op, expr.evaluate(env)?) {
+      Unary(op, ref expr) => Ok(match (op, expr.eval(env)?) {
         (Neg, V::Number(value)) => V::Number(-value),
         (Not, V::Bool(value)) => V::Bool(!value),
         _ => return Err(Control::RuntimeError("TypeError".into())),
@@ -57,11 +57,11 @@ mod test {
   use parser::parse_expr;
 
   fn eval(src: &str) -> Value {
-    parse_expr(Span::new(src)).unwrap().1.evaluate(&mut Env::default()).unwrap()
+    parse_expr(Span::new(src)).unwrap().1.eval(&mut Env::default()).unwrap()
   }
 
   #[test]
-  fn test_evaluate_binary_expr() {
+  fn test_eval_binary_expr() {
     assert_eq!(
       eval("3+7*5-6"),
       Number(32.0)
@@ -77,7 +77,7 @@ mod test {
   }
 
   #[test]
-  fn test_evaluate_unary_expr() {
+  fn test_eval_unary_expr() {
       assert_eq!(
         eval("-99.8p"),
         Number(-99.8)

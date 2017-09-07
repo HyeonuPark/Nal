@@ -19,4 +19,12 @@ pub enum Control {
   RuntimeError(String),
 }
 
+pub trait Eval {
+  fn eval(&self, env: &mut Env) -> Result<Value>;
+}
+
+pub trait Exec {
+  fn exec(&self, env: &mut Env) -> Result<()>;
+}
+
 pub type Result<T> = ::std::result::Result<T, Control>;
