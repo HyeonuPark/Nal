@@ -63,3 +63,6 @@ impl<'a, T> Deref for Ast<'a, T> {
     &self.inner_value
   }
 }
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub struct Ident<'a>(pub &'a str);

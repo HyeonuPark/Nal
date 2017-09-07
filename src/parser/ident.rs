@@ -1,6 +1,6 @@
 use nom::{alpha, alphanumeric};
 
-use ast::Span;
+use ast::{Span, Ident};
 
 named!(ident_head(Span) -> (), alt_complete!(
   map!(alpha, |_| ()) |
@@ -12,10 +12,10 @@ named!(ident_char(Span) -> (), alt_complete!(
   map!(one_of!("_"), |_| ())
 ));
 
-named!(pub parse_ident(Span) -> &str, map!(
+named!(pub parse_ident(Span) -> Ident, map!(
   recognize!(tuple!(
     ident_head,
     fold_many0!(ident_char, (), |_, _| ())
   )),
-  |span| span.fragment
+  |span| Ident(span.fragment)
 ));

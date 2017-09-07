@@ -1,12 +1,12 @@
 
-use ast::Ast;
+use ast::{Ast, Ident};
 
 #[derive(Debug, PartialEq)]
 pub enum Expr<'a> {
   Literal(Ast<'a, Literal>),
   Binary(BinaryOp, Ast<'a, Expr<'a>>, Ast<'a, Expr<'a>>),
   Unary(UnaryOp, Ast<'a, Expr<'a>>),
-  Identifier(&'a str),
+  Identifier(Ident<'a>),
 }
 
 #[derive(Debug, PartialEq, Clone)]

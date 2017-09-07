@@ -39,7 +39,7 @@ impl<'a> Eval for Expr<'a> {
         }),
         _ => Err(Control::RuntimeError("Cannot calculate bool or None".into())),
       },
-      Identifier(id) => env.get(id),
+      Identifier(ref id) => env.get(id),
       Unary(op, ref expr) => Ok(match (op, expr.eval(env)?) {
         (Neg, V::Number(value)) => V::Number(-value),
         (Not, V::Bool(value)) => V::Bool(!value),

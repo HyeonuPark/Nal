@@ -2,6 +2,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use std::collections::HashMap;
 
+use ast::Ident;
 use eval::{Value, Result, Control};
 
 #[derive(Debug, PartialEq, Clone)]
@@ -11,22 +12,22 @@ pub enum Element {
 }
 
 #[derive(Debug, Default, Clone)]
-pub struct Env<'a>(HashMap<&'a str, Element>);
+pub struct Env<'a>(HashMap<Ident<'a>, Element>);
 
 impl<'a> Env<'a> {
   pub fn new() -> Self {
     Self::default()
   }
 
-  pub fn declare(&mut self, id: &'a str, value: Value) {
+  pub fn declare(&mut self, id: Ident<'a>, value: Value) {
     self.0.insert(id, Element::Value(value));
   }
 
-  pub fn declare_mut(&mut self, id: &'a str, value: Value) {
+  pub fn declare_mut(&mut self, id: Ident<'a>, value: Value) {
     self.0.insert(id, Element::ValueMut(Rc::new(value.into())));
   }
 
-  pub fn get(&self, id: &'a str) -> Result<Value> {
+  pub fn get(&self, id: &Ident<'a>) -> Result<Value> {
     match self.0.get(id) {
       None => Err(Control::RuntimeError("UndeclaredVariableError".into())),
       Some(elem) => match *elem {
@@ -36,7 +37,7 @@ impl<'a> Env<'a> {
     }
   }
 
-  pub fn set(&mut self, id: &'a str, value: Value) -> Result<()> {
+  pub fn set(&mut self, id: &Ident<'a>, value: Value) -> Result<()> {
     match self.0.get(id) {
       None => Err(Control::RuntimeError("UndeclaredVariableError".into())),
       Some(elem) => match *elem {
