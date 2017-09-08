@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 use ast::{Expr, Literal, BinaryOp, UnaryOp};
 use eval::{Result, Value, Control, Env, Eval};
 
@@ -12,7 +10,7 @@ impl<'a> Eval for Expr<'a> {
     use self::Value as V;
 
     match *self {
-      Literal(ref value) => Ok(match *value.deref() {
+      Literal(ref value) => Ok(match *value.as_ref() {
         L::Number(value) => V::Number(value),
         L::Bool(value) => V::Bool(value),
       }),

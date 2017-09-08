@@ -25,3 +25,50 @@ impl<'a> Exec for Stmt<'a> {
     })
   }
 }
+
+#[cfg(test)]
+mod test {
+  use super::*;
+  use eval::Value;
+  use eval::Value::*;
+  use ast::Span;
+  use parser::parse_stmt_block;
+
+  fn eval(src: &str) -> Value {
+    let block = parse_stmt_block(Span::new(src)).unwrap().1;
+    let env = &mut Env::new();
+
+    assert!(block.len() > 0);
+
+    for stmt in &block[..block.len() - 1] {
+      stmt.exec(env).unwrap();
+    }
+
+    match block.last().unwrap().as_ref() {
+      &Stmt::Expr(ref expr) => expr.eval(env).unwrap(),
+      _ => Value::None,
+    }
+  }
+
+  #[test]
+  fn test_eval_stmt() {
+    assert_eq!(
+      eval("{
+        let foo = 3
+        let bar = 4
+        foo + bar
+      }"),
+      Number(7.0)
+    );
+
+    assert_eq!(
+      eval("{
+        let foo = 3
+
+        let foo = 4 < 5
+        foo
+      }"),
+      Bool(true)
+    );
+  }
+}

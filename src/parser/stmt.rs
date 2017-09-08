@@ -27,11 +27,8 @@ named!(parse_stmt(Span) -> Ast<Stmt>, alt_complete!(
   ))
 ));
 
-named!(pub parse_stmt_block(Span) -> StmtBlock, map!(
-  delimited!(
-    tuple!(tag!("{"), new_line),
-    separated_list_complete!(new_line_force, parse_stmt),
-    tuple!(new_line, tag!("}"))
-  ),
-  |block| block.into()
+named!(pub parse_stmt_block(Span) -> StmtBlock, delimited!(
+  tuple!(tag!("{"), new_line),
+  separated_list_complete!(new_line_force, parse_stmt),
+  tuple!(new_line, tag!("}"))
 ));

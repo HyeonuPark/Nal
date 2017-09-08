@@ -67,5 +67,11 @@ impl<'a, T> Deref for Ast<'a, T> {
   }
 }
 
+impl<'a, T> AsRef<T> for Ast<'a, T> {
+  fn as_ref(&self) -> &T {
+    &self.inner_value
+  }
+}
+
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Ident(pub String);
