@@ -20,17 +20,34 @@ mod ast_macro {
 }
 
 mod expr;
-mod literal;
-mod ident;
+pub use self::expr::*;
 
-pub use self::expr::parse_expr;
+mod literal;
+pub use self::literal::*;
+
+mod ident;
+pub use self::ident::*;
+
+mod stmt;
+pub use self::stmt::*;
+
 
 named!(pub space(Span) -> (), map!(
   fold_many0!(is_a!(" \t\r"), (), |_, _| ()),
   |_| ()
 ));
 
+named!(pub space_force(Span) -> (), map!(
+  tuple!(is_a!(" \t"), space),
+  |_| ()
+));
+
 named!(pub new_line(Span) -> (), map!(
   tuple!(space, fold_many0!(tuple!(tag!("\n"), space), (), |_, _| ())),
+  |_| ()
+));
+
+named!(pub new_line_force(Span) -> (), map!(
+  tuple!(space, fold_many1!(tuple!(tag!("\n"), space), (), |_, _| ())),
   |_| ()
 ));

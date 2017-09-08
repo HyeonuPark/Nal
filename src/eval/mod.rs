@@ -1,6 +1,7 @@
 
 mod env;
 mod expr;
+mod stmt;
 
 pub use self::env::Env;
 

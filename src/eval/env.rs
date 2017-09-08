@@ -12,22 +12,22 @@ pub enum Element {
 }
 
 #[derive(Debug, Default, Clone)]
-pub struct Env<'a>(HashMap<Ident<'a>, Element>);
+pub struct Env(HashMap<Ident, Element>);
 
-impl<'a> Env<'a> {
+impl Env {
   pub fn new() -> Self {
     Self::default()
   }
 
-  pub fn declare(&mut self, id: Ident<'a>, value: Value) {
+  pub fn declare(&mut self, id: Ident, value: Value) {
     self.0.insert(id, Element::Value(value));
   }
 
-  pub fn declare_mut(&mut self, id: Ident<'a>, value: Value) {
+  pub fn declare_mut(&mut self, id: Ident, value: Value) {
     self.0.insert(id, Element::ValueMut(Rc::new(value.into())));
   }
 
-  pub fn get(&self, id: &Ident<'a>) -> Result<Value> {
+  pub fn get(&self, id: &Ident) -> Result<Value> {
     match self.0.get(id) {
       None => Err(Control::RuntimeError("UndeclaredVariableError".into())),
       Some(elem) => match *elem {
@@ -37,7 +37,7 @@ impl<'a> Env<'a> {
     }
   }
 
-  pub fn set(&mut self, id: &Ident<'a>, value: Value) -> Result<()> {
+  pub fn set(&mut self, id: &Ident, value: Value) -> Result<()> {
     match self.0.get(id) {
       None => Err(Control::RuntimeError("UndeclaredVariableError".into())),
       Some(elem) => match *elem {

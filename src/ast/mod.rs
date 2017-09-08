@@ -5,6 +5,9 @@ use nom_locate::LocatedSpan;
 mod expr;
 pub use self::expr::*;
 
+mod stmt;
+pub use self::stmt::*;
+
 pub type Span<'a> = LocatedSpan<&'a str>;
 
 #[derive(Debug)]
@@ -65,4 +68,4 @@ impl<'a, T> Deref for Ast<'a, T> {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub struct Ident<'a>(pub &'a str);
+pub struct Ident(pub String);
