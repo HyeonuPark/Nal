@@ -17,16 +17,6 @@ impl<'a> Exec for Stmt<'a> {
           let value = expr.eval(env)?;
           env.declare(name.clone(), value);
         }
-        match is_mut {
-          true => {
-            let value = expr.eval(env)?;
-            env.declare_mut(name.clone(), value);
-          },
-          false => {
-            let value = expr.eval(env)?;
-            env.declare(name.clone(), value);
-          },
-        };
       },
       Assign(ref name, ref expr) => {
         let value = expr.eval(env)?;
