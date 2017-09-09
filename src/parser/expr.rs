@@ -2,7 +2,7 @@ use std::iter;
 use std::vec;
 
 use ast::{Ast, Span, Expr, BinaryOp, UnaryOp};
-use parser::{space, new_line, parse_literal, parse_function_expr, parse_ident};
+use parser::{space, new_line, parse_literal, parse_ident};
 
 impl BinaryOp {
   #[inline]

@@ -1,5 +1,5 @@
 
-use ast::{Ast, Ident, StmtBlock};
+use ast::{Ast, Ident};
 
 #[derive(Debug, PartialEq)]
 pub enum Expr<'a> {

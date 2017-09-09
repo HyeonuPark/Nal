@@ -31,7 +31,6 @@ pub use self::ident::*;
 mod stmt;
 pub use self::stmt::*;
 
-
 named!(pub space(Span) -> (), map!(
   fold_many0!(is_a!(" \t\r"), (), |_, _| ()),
   |_| ()
