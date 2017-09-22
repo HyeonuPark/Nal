@@ -12,5 +12,5 @@ pub type StmtBlock<'src> = Vec<Ast<'src, Stmt<'src>>>;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Pattern<'src> {
-    Ident(Ast<'src, Ident<'src>>, bool),
+    Ident(Ident<'src>, bool),
 }

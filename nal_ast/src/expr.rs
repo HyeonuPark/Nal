@@ -2,10 +2,10 @@ use super::{Ast, Ident};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expr<'src> {
-    Literal(Ast<'src, Literal>),
+    Literal(Literal),
     Binary(BinaryOp, Ast<'src, Expr<'src>>, Ast<'src, Expr<'src>>),
     Unary(UnaryOp, Ast<'src, Expr<'src>>),
-    Ident(Ast<'src, Ident<'src>>),
+    Ident(Ident<'src>),
 }
 
 #[derive(Debug, PartialEq, Clone)]
