@@ -11,3 +11,7 @@ keywords = ["language", "ast"]
 license = "MIT/Apache-2.0"
 
 [dependencies]
+nal_ast = { version = "0.1.1", path = "../nal_ast" }
+
+nom = "3.2"
+nom_locate = "0.1"

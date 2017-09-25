@@ -1,11 +1,11 @@
-use super::{Ast, Ident, Expr};
+use super::{Ast, Ident, AExpr};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Stmt<'src> {
-    Let(Ast<'src, Pattern<'src>>, Ast<'src, Expr<'src>>),
-    Assign(Ast<'src, Pattern<'src>>, Ast<'src, Expr<'src>>),
-    Expr(Ast<'src, Expr<'src>>),
-    If(Ast<'src, Expr<'src>>, StmtBlock<'src>, Option<StmtBlock<'src>>),
+    Let(Ast<'src, Pattern<'src>>, AExpr<'src>),
+    Assign(Ast<'src, Pattern<'src>>, AExpr<'src>),
+    If(AExpr<'src>, StmtBlock<'src>, Option<StmtBlock<'src>>),
+    Expr(AExpr<'src>),
 }
 
 pub type StmtBlock<'src> = Vec<Ast<'src, Stmt<'src>>>;

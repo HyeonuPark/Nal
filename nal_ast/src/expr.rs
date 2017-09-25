@@ -1,10 +1,12 @@
 use super::{Ast, Ident};
 
+pub type AExpr<'src> = Ast<'src, Expr<'src>>;
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum Expr<'src> {
     Literal(Literal),
-    Binary(BinaryOp, Ast<'src, Expr<'src>>, Ast<'src, Expr<'src>>),
-    Unary(UnaryOp, Ast<'src, Expr<'src>>),
+    Binary(BinaryOp, AExpr<'src>, AExpr<'src>),
+    Unary(UnaryOp, AExpr<'src>),
     Ident(Ident<'src>),
 }
 
@@ -14,7 +16,7 @@ pub enum Literal {
     Bool(bool),
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum BinaryOp {
     Add, Sub, Mul, Div,
     Eq, Neq, Gt, Gte, Lt, Lte,

@@ -23,6 +23,10 @@ impl<'src, T> Ast<'src, T> {
             }
         }
     }
+
+    pub fn into_inner(self) -> T {
+        *self.inner_value
+    }
 }
 
 impl<'src, T: PartialEq> PartialEq for Ast<'src, T> {
@@ -51,13 +55,13 @@ pub struct Span<'src> {
 }
 
 impl<'src> Span<'src> {
-    pub fn merge(left: Span<'src>, right: Span<'src>) -> Span<'src> {
-        assert!(left.offset < right.offset + right.input.len());
-        let length = right.offset + right.input.len() - left.offset;
+    pub fn merge(&self, right: &Self) -> Self {
+        assert!(self.offset < right.offset + right.input.len());
+        let length = right.offset + right.input.len() - self.offset;
 
         Span {
-            offset: left.offset,
-            input: unsafe { left.input.slice_unchecked(0, length) }
+            offset: self.offset,
+            input: unsafe { self.input.slice_unchecked(0, length) }
         }
     }
 }
