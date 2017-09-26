@@ -1,77 +1,81 @@
-use std::ops::Deref;
+use std::ops::{Deref, Add};
+
+use serde::{Serialize, Serializer, Deserialize, Deserializer};
 
 #[derive(Debug, Clone)]
-pub struct Ast<'src, T> {
+pub struct Ast<T> {
     inner_value: Box<T>,
-    pub span: Span<'src>,
+    pub span: Span,
 }
 
-impl<'src, T> Ast<'src, T> {
-    pub fn new(value: T, span: Span<'src>) -> Self {
+impl<T> Ast<T> {
+    pub fn new(value: T, span: Span) -> Self {
         Ast {
             inner_value: value.into(),
             span
         }
     }
 
-    pub fn dummy(value: T) -> Self {
-        Ast {
-            inner_value: value.into(),
-            span: Span {
-                offset: 0,
-                input: "",
-            }
-        }
-    }
-
     pub fn into_inner(self) -> T {
         *self.inner_value
     }
+
+    pub fn dummy(value: T) -> Self {
+        Ast {
+            inner_value: value.into(),
+            span: Span(0, 0),
+        }
+    }
 }
 
-impl<'src, T: PartialEq> PartialEq for Ast<'src, T> {
+impl<T: PartialEq> PartialEq for Ast<T> {
     fn eq(&self, other: &Self) -> bool {
         self.inner_value.eq(&other.inner_value)
     }
 }
 
-impl<'src, T> AsRef<T> for Ast<'src, T> {
+impl<T> AsRef<T> for Ast<T> {
     fn as_ref(&self) -> &T {
         &*self.inner_value
     }
 }
 
-impl<'src, T> Deref for Ast<'src, T> {
+impl<T> Deref for Ast<T> {
     type Target = T;
     fn deref(&self) -> &Self::Target {
         &*self.inner_value
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct Span<'src> {
-    pub offset: usize,
-    pub input: &'src str,
-}
-
-impl<'src> Span<'src> {
-    pub fn merge(&self, right: &Self) -> Self {
-        assert!(self.offset < right.offset + right.input.len());
-        let length = right.offset + right.input.len() - self.offset;
-
-        Span {
-            offset: self.offset,
-            input: unsafe { self.input.slice_unchecked(0, length) }
-        }
+impl<T: Serialize> Serialize for Ast<T> {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        self.inner_value.serialize(s)
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct Ident<'src>(pub &'src str);
+impl<'d, T: Deserialize<'d>> Deserialize<'d> for Ast<T> {
+    fn deserialize<D: Deserializer<'d>>(d: D) -> Result<Self, D::Error> {
+        T::deserialize(d).map(Ast::dummy)
+    }
+}
 
-impl<'src> Deref for Ident<'src> {
+#[derive(Debug, Clone, Copy)]
+pub struct Span(pub usize, pub usize);
+
+impl Add for Span {
+    type Output = Self;
+    fn add(self, other: Self) -> Self {
+        assert!(self.0 < other.1);
+        Span(self.0, other.1)
+    }
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct Ident(pub Box<str>);
+
+impl Deref for Ident {
     type Target = str;
     fn deref(&self) -> &Self::Target {
-        self.0
+        &*self.0
     }
 }

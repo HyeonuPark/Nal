@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate serde_derive;
+extern crate serde;
 
 mod common;
 pub use common::*;

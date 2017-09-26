@@ -1,16 +1,16 @@
-use super::{Ast, Ident, AExpr};
+use super::{Ast, Ident, Expr};
 
-#[derive(Debug, PartialEq, Clone)]
-pub enum Stmt<'src> {
-    Let(Ast<'src, Pattern<'src>>, AExpr<'src>),
-    Assign(Ast<'src, Pattern<'src>>, AExpr<'src>),
-    If(AExpr<'src>, StmtBlock<'src>, Option<StmtBlock<'src>>),
-    Expr(AExpr<'src>),
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum Stmt {
+    Let(Ast<Pattern>, Ast<Expr>),
+    Assign(Ast<Pattern>, Ast<Expr>),
+    If(Ast<Expr>, StmtBlock, Option<StmtBlock>),
+    Expr(Ast<Expr>),
 }
 
-pub type StmtBlock<'src> = Vec<Ast<'src, Stmt<'src>>>;
+pub type StmtBlock = Vec<Ast<Stmt>>;
 
-#[derive(Debug, PartialEq, Clone)]
-pub enum Pattern<'src> {
-    Ident(Ident<'src>, bool),
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum Pattern {
+    Ident(Ident, bool),
 }

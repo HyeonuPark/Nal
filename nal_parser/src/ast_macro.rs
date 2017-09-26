@@ -8,9 +8,7 @@ macro_rules! ast {
                 position!()
             ),
             |(l, b, r)| {
-                let l = $crate::common::convert_span(l);
-                let r = $crate::common::convert_span(r);
-                ::ast::Ast::new(b, l.merge(&r))
+                $crate::ast::Ast::new(b, $crate::ast::Span(l.offset, r.offset))
             }
         )
     );

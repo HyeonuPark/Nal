@@ -18,5 +18,5 @@ named!(pub parse_ident(Input) -> Ident, map!(
             ident_head,
             fold_many0!(ident_char, (), |_, _| ())
         )),
-    |name| Ident(name.fragment)
+    |name| Ident(name.fragment.into())
 ));

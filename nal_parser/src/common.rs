@@ -1,14 +1,6 @@
 use nom_locate::LocatedSpan;
-use ast::Span;
 
 pub type Input<'src> = LocatedSpan<&'src str>;
-
-pub fn convert_span<'src>(input: Input<'src>) -> Span<'src> {
-    Span {
-        offset: input.offset,
-        input: input.fragment,
-    }
-}
 
 pub fn noop<T>(_: T) {}
 
