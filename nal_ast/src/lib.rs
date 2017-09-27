@@ -10,3 +10,6 @@ pub use expr::*;
 
 mod stmt;
 pub use stmt::*;
+
+mod module;
+pub use module::*;

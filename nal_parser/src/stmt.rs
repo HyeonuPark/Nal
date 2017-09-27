@@ -1,6 +1,6 @@
 use ast::{Ast, Stmt, StmtBlock};
 
-use common::{Input, sp, nl, nl_f};
+use common::{Input, sp, nl, nl_f, noop};
 use pattern::parse_pattern;
 use expr::parse_expr;
 
@@ -48,10 +48,15 @@ named!(pub parse_stmt(Input) -> Ast<Stmt>, ast!(alt_complete!(
     )
 )));
 
+named!(pub parse_stmt_sep(Input) -> (), alt_complete!(
+    map!(tuple!(nl, tag!(";"), nl), noop) |
+    map!(nl_f, noop)
+));
+
 named!(pub parse_stmt_block(Input) -> StmtBlock, delimited!(
     tuple!(tag!("{"), nl),
     separated_list_complete!(
-        nl_f,
+        parse_stmt_sep,
         parse_stmt
     ),
     tuple!(tag!("}"), nl)

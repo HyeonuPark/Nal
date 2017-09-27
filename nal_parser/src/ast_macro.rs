@@ -12,6 +12,9 @@ macro_rules! ast {
             }
         )
     );
+    ($i:expr, $e:expr) => (
+        ast!($i, call!($e))
+    );
 }
 
 macro_rules! word {
