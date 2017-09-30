@@ -1,0 +1,28 @@
+
+if balance >= price {
+  let foo = 1
+}
+
+if this && that {
+  777
+}
+else {
+  let bar = -2
+}
+
+while foo {
+  let mut foo = 0
+}
+
+for x in arr {
+  x + 7
+  x - 5
+}
+
+if true {
+  while false {
+    for elem in container {
+      42
+    }
+  }
+}

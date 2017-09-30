@@ -22,5 +22,6 @@ fn test_fixtures() {
         "atom"
         "binary"
         "variable"
+        "branch"
     );
 }

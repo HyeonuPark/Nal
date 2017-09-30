@@ -5,6 +5,8 @@ pub enum Stmt {
     Let(Ast<Pattern>, Ast<Expr>),
     Assign(Ast<Pattern>, Ast<Expr>),
     If(Ast<Expr>, StmtBlock, Option<StmtBlock>),
+    While(Ast<Expr>, StmtBlock),
+    ForIn(Ast<Pattern>, Ast<Expr>, StmtBlock),
     Expr(Ast<Expr>),
 }
 

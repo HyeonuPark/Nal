@@ -4,7 +4,7 @@ use common::{Input, nl};
 use stmt::{parse_stmt, parse_stmt_sep};
 
 named!(parse_module_stmt(Input) -> ModuleStmt, alt_complete!(
-    map!(parse_stmt, |stmt| ModuleStmt::Stmt(stmt))
+    map!(parse_stmt, ModuleStmt::Stmt)
 ));
 
 named!(parse_body(Input) -> Vec<Ast<ModuleStmt>>, separated_list_complete!(
