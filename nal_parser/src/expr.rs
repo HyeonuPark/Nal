@@ -3,10 +3,12 @@ use std::{iter, vec};
 use ast::{Ast, Expr, BinaryOp, UnaryOp};
 
 use literal::parse_literal;
+use ident::parse_ident;
 use common::{Input, nl, sp};
 
-named!(parse_primary_expr(Input) -> Ast<Expr>, ast!(alt_complete!(
+named!(parse_atom_expr(Input) -> Ast<Expr>, ast!(alt_complete!(
     map!(parse_literal, Expr::Literal) |
+    map!(parse_ident, Expr::Ident) |
     map!(
         tuple!(tag!("("), nl, parse_expr, nl, tag!(")")),
         |(_, _, expr, _, _)| expr.into_inner()
@@ -20,10 +22,10 @@ named!(parse_unary_op(Input) -> UnaryOp, alt_complete!(
 
 named!(parse_unary_expr(Input) -> Ast<Expr>, alt_complete!(
     ast!(map!(
-        tuple!(parse_unary_op, sp, parse_primary_expr),
+        tuple!(parse_unary_op, sp, parse_atom_expr),
         |(op, _, expr)| Expr::Unary(op, expr)
     )) |
-    parse_primary_expr
+    parse_atom_expr
 ));
 
 named!(parse_binary_op(Input) -> BinaryOp, alt_complete!(
@@ -58,12 +60,12 @@ impl Operator for BinaryOp {
         use self::BinaryOp::*;
 
         match *self {
-            Or => 1,
-            And => 2,
-            Gt | Gte | Lt | Lte => 3,
-            Eq | Neq => 4,
-            Add | Sub => 5,
-            Mul | Div => 6,
+            Eq | Neq => 1,
+            Add | Sub => 2,
+            Mul | Div => 3,
+            Gt | Gte | Lt | Lte => 4,
+            And => 5,
+            Or => 6,
         }
     }
 }

@@ -14,3 +14,7 @@ pub mod expr;
 pub mod pattern;
 pub mod stmt;
 pub mod module;
+
+pub fn parse(src: &str) -> Result<ast::Module, nom::IError> {
+    module::parse_module(common::Input::new(src)).to_full_result()
+}

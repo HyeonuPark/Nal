@@ -15,3 +15,7 @@ nal_ast = { version = "0.1.1", path = "../nal_ast" }
 
 nom = "3.2"
 nom_locate = "0.1"
+
+[dev-dependencies]
+serde = "1.0"
+serde_yaml = "0.7"

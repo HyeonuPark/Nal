@@ -13,6 +13,6 @@ named!(parse_body(Input) -> Vec<Ast<ModuleStmt>>, separated_list_complete!(
 ));
 
 named!(pub parse_module(Input) -> Module, map!(
-    tuple!(nl, parse_body, eof!()),
-    |(_, body, _)| Module { body }
+    tuple!(nl, parse_body, nl, eof!()),
+    |(_, body, _, _)| Module { body }
 ));

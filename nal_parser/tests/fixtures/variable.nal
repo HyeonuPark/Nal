@@ -1,0 +1,4 @@
+let foo = 4.2
+let mut bar = 2
+bar = 3
+foo + bar

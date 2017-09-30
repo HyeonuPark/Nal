@@ -1,0 +1,38 @@
+---
+body:
+  - Stmt:
+      Expr:
+        Binary:
+          - Add:
+          - Literal:
+              Num: 3
+          - Literal:
+              Num: 4
+  - Stmt:
+      Expr:
+        Binary:
+          - Sub:
+          - Literal:
+              Num: 2
+          - Binary:
+            - Mul:
+            - Literal:
+                Num: 3
+            - Literal:
+                Bool: false
+  - Stmt:
+      Expr:
+        Binary:
+          - Lt:
+          - Binary:
+            - And:
+            - Binary:
+              - And:
+              - Literal:
+                  Bool: true
+              - Literal:
+                  Bool: true
+            - Literal:
+                Bool: false
+          - Literal:
+              Num: 3

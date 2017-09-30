@@ -2,7 +2,7 @@ use std::ops::{Deref, Add};
 
 use serde::{Serialize, Serializer, Deserialize, Deserializer};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Ast<T> {
     inner_value: Box<T>,
     pub span: Span,
@@ -27,6 +27,19 @@ impl<T> Ast<T> {
         }
     }
 }
+
+mod dbg {
+    use super::Ast;
+    use std::fmt::{Debug, Formatter, Error};
+
+    impl<T: Debug> Debug for Ast<T> {
+        fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+            f.write_str("Ast:")?;
+            self.inner_value.fmt(f)
+        }
+    }
+}
+
 
 impl<T: PartialEq> PartialEq for Ast<T> {
     fn eq(&self, other: &Self) -> bool {

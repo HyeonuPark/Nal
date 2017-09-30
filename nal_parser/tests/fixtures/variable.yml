@@ -1,0 +1,29 @@
+---
+body:
+  - Stmt:
+      Let:
+        - Ident:
+          - foo
+          - false
+        - Literal:
+            Num: 4.2
+  - Stmt:
+      Let:
+        - Ident:
+          - bar
+          - true
+        - Literal:
+            Num: 2
+  - Stmt:
+      Assign:
+        - Ident:
+          - bar
+          - false
+        - Literal:
+            Num: 3
+  - Stmt:
+      Expr:
+        Binary:
+          - Add:
+          - Ident: foo
+          - Ident: bar

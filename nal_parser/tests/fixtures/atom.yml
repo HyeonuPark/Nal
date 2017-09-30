@@ -1,0 +1,35 @@
+---
+body:
+  - Stmt:
+      Expr:
+        Ident: foo
+  - Stmt:
+      Expr:
+        Ident: bar32_example
+  - Stmt:
+      Expr:
+        Literal:
+          Num: 42
+  - Stmt:
+      Expr:
+        Literal:
+          Num: 1.999
+  - Stmt:
+      Expr:
+        Literal:
+          Bool: true
+  - Stmt:
+      Expr:
+        Literal:
+          Bool: false
+  - Stmt:
+      Expr:
+        Unary:
+          - Neg:
+          - Literal:
+              Num: 999
+  - Stmt:
+      Expr:
+        Unary:
+          - Not:
+          - Ident: foo
