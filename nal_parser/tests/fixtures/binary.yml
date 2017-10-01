@@ -23,16 +23,55 @@ body:
   - Stmt:
       Expr:
         Binary:
-          - Lt:
+          - And:
           - Binary:
             - And:
-            - Binary:
-              - And:
-              - Literal:
-                  Bool: true
-              - Literal:
-                  Bool: true
+            - Literal:
+                Bool: true
+            - Literal:
+                Bool: true
+          - Binary:
+            - Lt:
             - Literal:
                 Bool: false
-          - Literal:
-              Num: 3
+            - Literal:
+                Num: 3
+  - Stmt:
+      Expr:
+        Binary:
+          - Or:
+          - Ident: a
+          - Binary:
+            - And:
+            - Ident: b
+            - Binary:
+              - Neq:
+              - Binary:
+                - Eq:
+                - Ident: c
+                - Ident: d
+              - Binary:
+                - Lte:
+                - Binary:
+                  - Lt:
+                  - Binary:
+                    - Gte:
+                    - Binary:
+                      - Gt:
+                      - Ident: e
+                      - Ident: f
+                    - Ident: g
+                  - Ident: h
+                - Binary:
+                  - Sub:
+                  - Binary:
+                    - Add:
+                    - Ident: i
+                    - Ident: j
+                  - Binary:
+                    - Div:
+                    - Binary:
+                      - Mul:
+                      - Ident: k
+                      - Ident: l
+                    - Ident: m

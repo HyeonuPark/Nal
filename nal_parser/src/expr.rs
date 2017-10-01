@@ -60,12 +60,12 @@ impl Operator for BinaryOp {
         use self::BinaryOp::*;
 
         match *self {
-            Eq | Neq => 1,
-            Add | Sub => 2,
-            Mul | Div => 3,
+            Or => 1,
+            And => 2,
+            Eq | Neq => 3,
             Gt | Gte | Lt | Lte => 4,
-            And => 5,
-            Or => 6,
+            Add | Sub => 5,
+            Mul | Div => 6,
         }
     }
 }
