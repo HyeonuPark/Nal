@@ -1,7 +1,8 @@
-use ast::{Ast, Module, ModuleStmt};
+use ast::common::Ast;
+use ast::module::{Module, ModuleStmt};
 
-use common::{Input, nl};
-use stmt::{parse_stmt, parse_stmt_sep};
+use super::common::{Input, nl};
+use super::stmt::{parse_stmt, parse_stmt_sep};
 
 named!(parse_module_stmt(Input) -> ModuleStmt, alt_complete!(
     map!(parse_stmt, ModuleStmt::Stmt)

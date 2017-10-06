@@ -1,7 +1,8 @@
-use ast::{Ast, Pattern};
+use ast::common::Ast;
+use ast::stmt::Pattern;
 
-use common::{Input, sp_f};
-use ident::parse_ident;
+use super::common::{Input, sp_f};
+use super::ident::parse_ident;
 
 named!(parse_ident_pattern(Input) -> Pattern, map!(
     tuple!(

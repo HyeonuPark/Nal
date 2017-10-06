@@ -1,4 +1,5 @@
-use super::{Ast, Stmt};
+use super::common::Ast;
+use super::stmt::Stmt;
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Module {

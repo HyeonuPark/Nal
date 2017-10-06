@@ -1,8 +1,9 @@
-use ast::{Ast, Stmt, StmtBlock};
+use ast::common::Ast;
+use ast::stmt::{Stmt, StmtBlock};
 
-use common::{Input, sp, nl, nl_f, noop};
-use pattern::parse_pattern;
-use expr::parse_expr;
+use super::common::{Input, sp, nl, nl_f, noop};
+use super::pattern::parse_pattern;
+use super::expr::parse_expr;
 
 named!(parse_if_stmt(Input) -> Stmt, alt_complete!(
     map!(
@@ -72,7 +73,7 @@ named!(pub parse_stmt(Input) -> Ast<Stmt>, ast!(alt_complete!(
     parse_assign_stmt |
     map!(
         parse_expr,
-        |expr| Stmt::Expr(expr)
+        Stmt::Expr
     )
 )));
 

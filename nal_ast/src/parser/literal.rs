@@ -1,7 +1,8 @@
 use nom::{digit};
-use ast::{Literal};
 
-use common::{Input};
+use ast::expr::Literal;
+
+use super::common::Input;
 
 named!(parse_number(Input) -> Literal, map!(
     alt_complete!(

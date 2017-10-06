@@ -1,7 +1,8 @@
 use nom::{alpha, alphanumeric};
-use ast::Ident;
 
-use common::{Input, noop};
+use ast::common::Ident;
+
+use super::common::{Input, noop};
 
 named!(ident_head(Input) -> (), alt_complete!(
     map!(alpha, noop) |

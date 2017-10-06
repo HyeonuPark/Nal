@@ -1,5 +1,7 @@
-extern crate nal_parser as parser;
+extern crate nal_ast;
 extern crate serde_yaml as yaml;
+
+use nal_ast::parser;
 
 macro_rules! compare_fixtures {
     ($($test:expr)*) => ($(

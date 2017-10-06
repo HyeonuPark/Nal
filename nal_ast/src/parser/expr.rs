@@ -1,10 +1,11 @@
 use std::{iter, vec};
 
-use ast::{Ast, Expr, BinaryOp, UnaryOp};
+use ast::common::Ast;
+use ast::expr::{Expr, BinaryOp, UnaryOp};
 
-use literal::parse_literal;
-use ident::parse_ident;
-use common::{Input, nl, sp};
+use super::common::{Input, nl, sp};
+use super::literal::parse_literal;
+use super::ident::parse_ident;
 
 named!(parse_atom_expr(Input) -> Ast<Expr>, ast!(alt_complete!(
     map!(parse_literal, Expr::Literal) |

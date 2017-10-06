@@ -1,4 +1,4 @@
-use super::{Ast, Ident};
+use super::common::{Ast, Ident};
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Expr {

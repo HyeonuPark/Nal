@@ -1,15 +1,11 @@
 #[macro_use]
 extern crate serde_derive;
+#[macro_use]
+extern crate nom;
+#[macro_use]
+extern crate nom_locate;
+
 extern crate serde;
 
-mod common;
-pub use common::*;
-
-mod expr;
-pub use expr::*;
-
-mod stmt;
-pub use stmt::*;
-
-mod module;
-pub use module::*;
+pub mod ast;
+pub mod parser;

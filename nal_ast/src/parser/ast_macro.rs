@@ -8,7 +8,7 @@ macro_rules! ast {
                 position!()
             ),
             |(l, b, r)| {
-                $crate::ast::Ast::new(b, $crate::ast::Span(l.offset, r.offset))
+                $crate::ast::common::Ast::new(b, $crate::ast::common::Span(l.offset, r.offset))
             }
         )
     );
@@ -21,7 +21,7 @@ macro_rules! word {
     ($i:expr, $t:expr) => (
         map!($i,
             tuple!(tag!($t), not!(peek!(
-                $crate::ident::ident_char
+                $crate::parser::ident::ident_char
             ))),
             |(res, _)| res
         )

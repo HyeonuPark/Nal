@@ -18,5 +18,4 @@ license = "MIT/Apache-2.0"
 members = [
   "nal_ast",
   "nal_check",
-  "nal_parser",
 ]
