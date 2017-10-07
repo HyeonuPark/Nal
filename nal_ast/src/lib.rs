@@ -9,3 +9,6 @@ extern crate serde;
 
 pub mod ast;
 pub mod parser;
+
+mod buffer;
+pub use buffer::SourceBuffer;
