@@ -5,7 +5,7 @@ pub enum Expr {
     Literal(Literal),
     Binary(BinaryOp, Ast<Expr>, Ast<Expr>),
     Unary(UnaryOp, Ast<Expr>),
-    Ident(Ident),
+    Ident(Ast<Ident>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
