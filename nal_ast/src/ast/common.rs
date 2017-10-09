@@ -47,12 +47,6 @@ impl<T: PartialEq> PartialEq for Ast<T> {
     }
 }
 
-impl<T> AsRef<T> for Ast<T> {
-    fn as_ref(&self) -> &T {
-        &*self.inner_value
-    }
-}
-
 impl<T> Deref for Ast<T> {
     type Target = T;
     fn deref(&self) -> &Self::Target {

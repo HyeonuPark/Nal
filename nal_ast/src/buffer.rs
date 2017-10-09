@@ -1,4 +1,5 @@
 use std::str::FromStr;
+use std::ops::Deref;
 
 use ast::common::Span;
 use ast::module::Module;
@@ -41,6 +42,14 @@ impl FromStr for SourceBuffer {
             line_pos,
             module,
         })
+    }
+}
+
+impl Deref for SourceBuffer {
+    type Target = Module;
+
+    fn deref(&self) -> &Self::Target {
+        &self.module
     }
 }
 
