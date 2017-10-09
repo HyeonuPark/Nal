@@ -10,7 +10,7 @@ pub trait Check {
     fn check(&self, scope: Scope, acc: Acc);
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum Error {
     Scope(ScopeError),
     Ident(ident::Error),

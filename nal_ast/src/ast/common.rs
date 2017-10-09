@@ -66,7 +66,7 @@ impl<'d, T: Deserialize<'d>> Deserialize<'d> for Ast<T> {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
 pub struct Span(pub usize, pub usize);
 
 impl Add for Span {

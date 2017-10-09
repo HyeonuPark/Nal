@@ -18,7 +18,7 @@ lazy_static! {
     );
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum Error {
     ConflictWithKeyword,
 }

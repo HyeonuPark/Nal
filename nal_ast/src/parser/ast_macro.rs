@@ -8,7 +8,7 @@ macro_rules! ast {
                 position!()
             ),
             |(l, b, r)| {
-                $crate::ast::common::Ast::new(b, $crate::ast::common::Span(l.offset, r.offset))
+                $crate::ast::common::Ast::new(b, $crate::ast::common::Span(l.offset, r.offset - 1))
             }
         )
     );

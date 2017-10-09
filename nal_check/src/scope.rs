@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use nal_ast::ast::common::Span;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum Error {
     NotExist,
     NotMutable,

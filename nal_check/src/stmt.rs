@@ -4,7 +4,7 @@ use nal_ast::ast::stmt::{Stmt, Pattern, StmtBlock};
 use scope::DeclInfo;
 use common::{Check, Scope, Acc};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum Error {
     MutInAssignStmt,
 }

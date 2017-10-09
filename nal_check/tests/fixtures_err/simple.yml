@@ -1,0 +1,13 @@
+---
+-
+  - Scope:
+      NotMutable:
+  - [12, 14]
+-
+  - Scope:
+      NotExist:
+  - [21, 25]
+-
+  - Scope:
+      NotExist:
+  - [37, 39]
