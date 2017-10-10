@@ -109,4 +109,18 @@ baz
         assert_eq!(srcbuf.offset_byte_pos(5), (1, 1));
         assert_eq!(srcbuf.offset_byte_pos(10), (2, 2));
     }
+
+    #[test]
+    fn test_span_content() {
+        let src = "
+foo
+bar
+baz+ 1
+        ".trim();
+        let srcbuf: SourceBuffer = src.parse().unwrap();
+
+        assert_eq!(srcbuf.span_content(srcbuf.body[0].span), "foo");
+        assert_eq!(srcbuf.span_content(srcbuf.body[1].span), "bar");
+        assert_eq!(srcbuf.span_content(srcbuf.body[2].span), "baz+ 1");
+    }
 }
