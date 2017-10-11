@@ -1,3 +1,5 @@
+#[macro_use]
+extern crate pretty_assertions;
 extern crate nal_ast;
 extern crate serde_yaml as yaml;
 
@@ -12,7 +14,7 @@ macro_rules! compare_fixtures {
             yaml::from_str(include_str!(
                 concat!("fixtures/", $test, ".yml")))
                     .expect(concat!("Failed to parse ", $test, ".yml")),
-            concat!("\n\nFailed to test fixture: ", $test, "\n\n")
+            concat!("\n\nFailed: ", $test, ", nal != yml\n\n")
         );
     )*);
 }

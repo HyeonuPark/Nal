@@ -19,3 +19,4 @@ nom_locate = "0.1"
 
 [dev-dependencies]
 serde_yaml = "0.7"
+pretty_assertions = "0.3"
