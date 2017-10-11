@@ -1,0 +1,34 @@
+
+fn foo(a, b) {
+  let c = a
+}
+
+fn bar {
+  let a = b
+}
+
+fn(a) {
+  a + b
+}
+
+fn{
+  a + b
+}
+
+fn bar(a) = a
+
+fn task = a / b
+
+fn(a) = -a
+
+fn= a + b
+
+static fn foo(a) = a + 1
+static fn bar(mut a) {
+  a || false
+}
+
+let foo = fn= a + 1
+let bar = fn baz{
+  a + b
+}

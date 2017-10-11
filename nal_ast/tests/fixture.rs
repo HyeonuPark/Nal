@@ -27,5 +27,6 @@ fn test_fixtures() {
         "binary"
         "variable"
         "branch"
+        "func"
     );
 }

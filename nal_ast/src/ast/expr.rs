@@ -1,10 +1,12 @@
 use super::common::{Ast, Ident};
+use super::function::Function;
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Expr {
     Literal(Literal),
     Binary(BinaryOp, Ast<Expr>, Ast<Expr>),
     Unary(UnaryOp, Ast<Expr>),
+    Function(Ast<Function>),
     Ident(Ast<Ident>),
 }
 

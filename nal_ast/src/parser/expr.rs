@@ -3,12 +3,14 @@ use std::{iter, vec};
 use ast::common::Ast;
 use ast::expr::{Expr, BinaryOp, UnaryOp};
 
-use super::common::{Input, nl, sp};
+use super::common::{Input, nl, nl_f, sp, noop};
 use super::literal::parse_literal;
 use super::ident::parse_ident;
+use super::function::parse_function;
 
 named!(parse_atom_expr(Input) -> Ast<Expr>, ast!(alt_complete!(
     map!(parse_literal, Expr::Literal) |
+    map!(parse_function, Expr::Function) |
     map!(parse_ident, Expr::Ident) |
     map!(
         tuple!(tag!("("), nl, parse_expr, nl, tag!(")")),
@@ -100,4 +102,9 @@ fn parse_prec(head: Ast<Expr>, tail: &mut Tail, min_prec: usize) -> Ast<Expr> {
 
 named!(pub parse_expr(Input) -> Ast<Expr>, alt_complete!(
     parse_binary_expr
+));
+
+named!(pub parse_expr_sep(Input) -> (), alt_complete!(
+    map!(tuple!(sp, tag!(","), sp), noop) |
+    nl_f
 ));

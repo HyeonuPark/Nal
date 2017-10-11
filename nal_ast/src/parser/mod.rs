@@ -8,6 +8,7 @@ pub mod expr;
 pub mod pattern;
 pub mod stmt;
 pub mod module;
+pub mod function;
 
 pub use nom::IError as ParseError;
 

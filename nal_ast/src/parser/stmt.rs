@@ -4,6 +4,7 @@ use ast::stmt::{Stmt, StmtBlock};
 use super::common::{Input, sp, nl, nl_f, noop};
 use super::pattern::parse_pattern;
 use super::expr::parse_expr;
+use super::function::parse_function;
 
 named!(parse_if_stmt(Input) -> Stmt, map!(
     tuple!(
@@ -38,6 +39,14 @@ named!(parse_for_in_stmt(Input) -> Stmt, map!(
     |(_, _, pat, _, _, _, expr, _, block)| Stmt::ForIn(pat, expr, block)
 ));
 
+named!(parse_function_stmt(Input) -> Stmt, map!(
+    tuple!(
+        opt!(tuple!(word!("static"), sp)),
+        parse_function
+    ),
+    |(is_static, func)| Stmt::Function(is_static.is_some(), func)
+));
+
 named!(parse_let_stmt(Input) -> Stmt, map!(
     tuple!(
         word!("let"), sp,
@@ -61,6 +70,7 @@ named!(pub parse_stmt(Input) -> Ast<Stmt>, ast!(alt_complete!(
     parse_if_stmt |
     parse_while_stmt |
     parse_for_in_stmt |
+    parse_function_stmt |
     parse_let_stmt |
     parse_assign_stmt |
     map!(
