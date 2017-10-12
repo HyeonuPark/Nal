@@ -1,5 +1,6 @@
 use nom::{digit};
 
+use ast::common::Ast;
 use ast::expr::Literal;
 
 use super::common::Input;
@@ -20,7 +21,7 @@ named!(parse_bool(Input) -> Literal, map!(
     |input| Literal::Bool(input.fragment.parse().unwrap())
 ));
 
-named!(pub parse_literal(Input) -> Literal, alt_complete!(
+named!(pub parse_literal(Input) -> Ast<Literal>, ast!(alt_complete!(
     parse_number |
     parse_bool
-));
+)));

@@ -11,6 +11,6 @@ pub struct Function {
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum FunctionBody {
-    Stmt(StmtBlock),
+    Stmt(Ast<StmtBlock>),
     Expr(Ast<Expr>),
 }

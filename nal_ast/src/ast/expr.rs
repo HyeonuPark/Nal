@@ -3,7 +3,7 @@ use super::function::Function;
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Expr {
-    Literal(Literal),
+    Literal(Ast<Literal>),
     Binary(BinaryOp, Ast<Expr>, Ast<Expr>),
     Unary(UnaryOp, Ast<Expr>),
     Function(Ast<Function>),

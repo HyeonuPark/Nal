@@ -4,9 +4,9 @@ use super::function::Function;
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Stmt {
-    If(Ast<Expr>, StmtBlock, Option<StmtBlock>),
-    While(Ast<Expr>, StmtBlock),
-    ForIn(Ast<Pattern>, Ast<Expr>, StmtBlock),
+    If(Ast<Expr>, Ast<StmtBlock>, Option<Ast<StmtBlock>>),
+    While(Ast<Expr>, Ast<StmtBlock>),
+    ForIn(Ast<Pattern>, Ast<Expr>, Ast<StmtBlock>),
     Function(bool, Ast<Function>),
     Let(Ast<Pattern>, Ast<Expr>),
     Assign(Ast<Pattern>, Ast<Expr>),

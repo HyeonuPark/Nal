@@ -84,11 +84,11 @@ named!(pub parse_stmt_sep(Input) -> (), alt_complete!(
     map!(nl_f, noop)
 ));
 
-named!(pub parse_stmt_block(Input) -> StmtBlock, delimited!(
+named!(pub parse_stmt_block(Input) -> Ast<StmtBlock>, ast!(delimited!(
     tuple!(tag!("{"), nl),
     separated_list_complete!(
         parse_stmt_sep,
         parse_stmt
     ),
     tuple!(nl, tag!("}"))
-));
+)));
