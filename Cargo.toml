@@ -17,5 +17,4 @@ license = "MIT/Apache-2.0"
 [workspace]
 members = [
   "nal_ast",
-  "nal_check",
 ]

@@ -10,10 +10,13 @@ pub mod stmt;
 pub mod module;
 pub mod function;
 
-pub use nom::IError as ParseError;
+pub use nom::Err as ParseError;
 
 use ast::module::Module;
 
 pub fn parse(src: &str) -> Result<Module, ParseError> {
-    module::parse_module(common::Input::new(src)).to_full_result()
+    module::parse_module(common::Input::new(src)).to_result()
 }
+
+#[cfg(test)]
+mod tests;

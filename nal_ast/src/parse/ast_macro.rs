@@ -21,7 +21,7 @@ macro_rules! word {
     ($i:expr, $t:expr) => (
         map!($i,
             tuple!(tag!($t), not!(peek!(
-                $crate::parser::ident::ident_char
+                $crate::parse::ident::ident_char
             ))),
             |(res, _)| res
         )

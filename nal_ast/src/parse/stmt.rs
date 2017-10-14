@@ -6,17 +6,25 @@ use super::pattern::parse_pattern;
 use super::expr::parse_expr;
 use super::function::parse_function;
 
-named!(parse_if_stmt(Input) -> Stmt, map!(
-    tuple!(
-        word!("if"), sp,
-        parse_expr, sp,
-        parse_stmt_block,
-        opt!(preceded!(
+named!(parse_if_stmt(Input) -> Stmt, alt_complete!(
+    map!(
+        tuple!(
+            word!("if"),
+            delimited!(sp, parse_expr, sp),
+            parse_stmt_block,
             tuple!(nl, word!("else"), sp),
             parse_stmt_block
-        ))
-    ),
-    |(_, _, cond, _, pos, neg)| Stmt::If(cond, pos, neg)
+        ),
+        |(_, cond, pos, _, neg)| Stmt::If(cond, pos, Some(neg))
+    ) |
+    map!(
+        tuple!(
+            word!("if"),
+            delimited!(sp, parse_expr, sp),
+            parse_stmt_block
+        ),
+        |(_, cond, pos)| Stmt::If(cond, pos, None)
+    )
 ));
 
 named!(parse_while_stmt(Input) -> Stmt, map!(

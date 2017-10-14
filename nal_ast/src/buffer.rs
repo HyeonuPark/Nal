@@ -3,7 +3,9 @@ use std::ops::Deref;
 
 use ast::common::Span;
 use ast::module::Module;
-use parser::{parse, ParseError};
+use parse::parse;
+use check::check;
+use Report;
 
 #[derive(Debug)]
 pub struct SourceBuffer {
@@ -31,15 +33,15 @@ fn parse_line_pos(src: &str) -> Vec<usize> {
 }
 
 impl FromStr for SourceBuffer {
-    type Err = ParseError;
+    type Err = Report;
 
-    fn from_str(src: &str) -> Result<Self, Self::Err> {
+    fn from_str(src: &str) -> Result<Self, Report> {
         let module = parse(src)?;
-        let line_pos = parse_line_pos(src);
+        check(&module)?;
 
         Ok(Self {
-            src: src.into(),
-            line_pos,
+            src: src.to_string(),
+            line_pos: parse_line_pos(src),
             module,
         })
     }
@@ -79,48 +81,40 @@ impl SourceBuffer {
 }
 
 #[cfg(test)]
-mod test_offset_pos {
+mod test {
     use super::*;
-
-    fn dummy(src: &str) -> SourceBuffer {
-        SourceBuffer {
-            src: src.into(),
-            module: unsafe { ::std::mem::zeroed() },
-            line_pos: parse_line_pos(src),
-        }
-    }
 
     #[test]
     fn test_srcbuf_offset() {
         let src = "
-foo
-bar
-baz
+            true\n\
+            true\n\
+            false
         ".trim();
-        assert_eq!(src.len(), 11);
+        assert_eq!(src.len(), 15);
 
-        let srcbuf = dummy(src);
-        assert_eq!(srcbuf.line_pos, vec![3, 7, 10]);
+        let srcbuf: SourceBuffer = src.parse().unwrap();
+        assert_eq!(srcbuf.line_pos, vec![4, 9, 14]);
 
         assert_eq!(srcbuf.offset_byte_pos(0), (0, 0));
         assert_eq!(srcbuf.offset_byte_pos(1), (0, 1));
-        assert_eq!(srcbuf.offset_byte_pos(3), (0, 3));
-        assert_eq!(srcbuf.offset_byte_pos(4), (1, 0));
-        assert_eq!(srcbuf.offset_byte_pos(5), (1, 1));
-        assert_eq!(srcbuf.offset_byte_pos(10), (2, 2));
+        assert_eq!(srcbuf.offset_byte_pos(4), (0, 4));
+        assert_eq!(srcbuf.offset_byte_pos(5), (1, 0));
+        assert_eq!(srcbuf.offset_byte_pos(6), (1, 1));
+        assert_eq!(srcbuf.offset_byte_pos(13), (2, 3));
     }
 
     #[test]
     fn test_span_content() {
         let src = "
-foo
-bar
-baz+ 1
+            333
+            true && -false
+            5+ 6
         ".trim();
         let srcbuf: SourceBuffer = src.parse().unwrap();
 
-        assert_eq!(srcbuf.span_content(srcbuf.body[0].span), "foo");
-        assert_eq!(srcbuf.span_content(srcbuf.body[1].span), "bar");
-        assert_eq!(srcbuf.span_content(srcbuf.body[2].span), "baz+ 1");
+        assert_eq!(srcbuf.span_content(srcbuf.body[0].span), "333");
+        assert_eq!(srcbuf.span_content(srcbuf.body[1].span), "true && -false");
+        assert_eq!(srcbuf.span_content(srcbuf.body[2].span), "5+ 6");
     }
 }
