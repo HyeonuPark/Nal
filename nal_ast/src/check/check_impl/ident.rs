@@ -7,8 +7,9 @@ lazy_static! {
     static ref RESERVED: HashSet<&'static str> = [
         "if", "else",
         "while", "for", "in",
-        "fn", "let", "mut",
+        "static", "fn", "let", "mut",
         "num", "bool",
+        "return", "break", "continue",
     ].into_iter().map(|&e| e).collect();
 }
 

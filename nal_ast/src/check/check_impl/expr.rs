@@ -2,7 +2,7 @@ use ast::common::Ast;
 use ast::expr::{Expr, Literal};
 use self::Expr::*;
 
-use check::{Check, Ctx};
+use check::{Check, Ctx, Error as E};
 
 impl Check for Ast<Expr> {
     fn check(&self, ctx: &mut Ctx) {
@@ -16,6 +16,25 @@ impl Check for Ast<Expr> {
             }
             Unary(_, ref expr) => {
                 expr.check(ctx);
+            }
+            Call(ref callee, ref args) => {
+                callee.check(ctx);
+
+                for expr in args {
+                    expr.check(ctx);
+                }
+            }
+            Return(ref expr) => {
+                expr.check(ctx);
+
+                if !ctx.is_fn() {
+                    ctx.report(E::ControlContextNotFound(self.span));
+                }
+            }
+            Break | Continue => {
+                if !ctx.is_loop() {
+                    ctx.report(E::ControlContextNotFound(self.span));
+                }
             }
             Function(ref func) => {
                 func.check(ctx);

@@ -8,6 +8,8 @@ use super::Error as E;
 pub struct Ctx {
     scope: Scope,
     error_list: Vec<E>,
+    within_fn: bool,
+    within_loop: bool,
 }
 
 impl Ctx {
@@ -16,8 +18,7 @@ impl Ctx {
     }
 
     pub fn subscope<F: FnOnce(&mut Self)>(&mut self, sub: F) {
-        let scope = Scope::default();
-        let prev = replace(&mut self.scope, scope);
+        let prev = replace(&mut self.scope, Scope::default());
         self.scope.parent = Some(prev.into());
 
         sub(self);
@@ -49,10 +50,40 @@ impl Ctx {
     pub fn errors(self) -> Vec<E> {
         self.error_list
     }
+
+    pub fn with_fn<F: FnOnce(&mut Self)>(&mut self, sub: F) {
+        let prev_fn = self.within_fn;
+        let prev_loop = self.within_loop;
+
+        self.within_fn = true;
+        self.within_loop = false;
+
+        sub(self);
+
+        self.within_fn = prev_fn;
+        self.within_loop = prev_loop;
+    }
+
+    pub fn with_loop<F: FnOnce(&mut Self)>(&mut self, sub: F) {
+        let prev_loop = self.within_loop;
+        self.within_loop = true;
+
+        sub(self);
+
+        self.within_loop = prev_loop;
+    }
+
+    pub fn is_fn(&self) -> bool {
+        self.within_fn
+    }
+
+    pub fn is_loop(&self) -> bool {
+        self.within_loop
+    }
 }
 
 #[derive(Debug, Default)]
-pub struct Scope {
+struct Scope {
     map: HashMap<String, DeclInfo>,
     parent: Option<Box<Scope>>,
 }

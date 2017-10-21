@@ -16,14 +16,20 @@ impl Check for Ast<Stmt> {
             }
             While(ref cond, ref body) => {
                 cond.check(ctx);
-                body.check(ctx);
+
+                ctx.with_loop(|ctx| {
+                    body.check(ctx);
+                });
             }
             ForIn(ref each, ref seq, ref body) => {
                 seq.check(ctx);
 
                 ctx.subscope(|ctx| {
                     check_pattern_decl(each, ctx);
-                    body.check(ctx);
+                    
+                    ctx.with_loop(|ctx| {
+                        body.check(ctx);
+                    });
                 });
             }
             Function(is_static, ref func) => {

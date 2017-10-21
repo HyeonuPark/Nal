@@ -13,14 +13,16 @@ impl Check for Ast<Function> {
                 check_pattern_decl(param, ctx);
             }
 
-            match self.body {
-                FB::Stmt(ref stmt) => {
-                    stmt.check(ctx);
+            ctx.with_fn(|ctx| {
+                match self.body {
+                    FB::Stmt(ref stmt) => {
+                        stmt.check(ctx);
+                    }
+                    FB::Expr(ref expr) => {
+                        expr.check(ctx);
+                    }
                 }
-                FB::Expr(ref expr) => {
-                    expr.check(ctx);
-                }
-            }
+            });
         });
     }
 }

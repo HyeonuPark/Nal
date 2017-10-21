@@ -6,6 +6,10 @@ pub enum Expr {
     Literal(Ast<Literal>),
     Binary(BinaryOp, Ast<Expr>, Ast<Expr>),
     Unary(UnaryOp, Ast<Expr>),
+    Call(Ast<Expr>, Vec<Ast<Expr>>),
+    Return(Option<Ast<Expr>>),
+    Break,
+    Continue,
     Function(Ast<Function>),
     Ident(Ast<Ident>),
 }

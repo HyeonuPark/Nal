@@ -21,5 +21,11 @@ pub enum Error {
     /// Function statement should always be named
     ///
     /// FuncStmtNotNamed(func stmt)
-    FuncStmtNotNamed(Span)
+    FuncStmtNotNamed(Span),
+    /// Control expressions should live inside their matching context
+    /// For example, "return" can only be used inside function body
+    /// as well as "break" and "continue" for while/for-in body
+    ///
+    /// ControlContextNotFound(control expr)
+    ControlContextNotFound(Span),
 }

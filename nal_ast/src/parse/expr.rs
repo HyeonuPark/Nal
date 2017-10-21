@@ -1,6 +1,6 @@
 use std::{iter, vec};
 
-use ast::common::Ast;
+use ast::common::{Ast, Span};
 use ast::expr::{Expr, BinaryOp, UnaryOp};
 
 use super::common::{Input, nl, nl_f, sp, noop};
@@ -9,6 +9,12 @@ use super::ident::parse_ident;
 use super::function::parse_function;
 
 named!(parse_atom_expr(Input) -> Ast<Expr>, ast!(alt_complete!(
+    map!(
+        preceded!(word!("return"), opt!(preceded!(sp, parse_expr))),
+        Expr::Return
+    ) |
+    value!(Expr::Break, word!("break")) |
+    value!(Expr::Continue, word!("continue")) |
     map!(parse_literal, Expr::Literal) |
     map!(parse_function, Expr::Function) |
     map!(parse_ident, Expr::Ident) |
@@ -18,6 +24,41 @@ named!(parse_atom_expr(Input) -> Ast<Expr>, ast!(alt_complete!(
     )
 )));
 
+#[derive(Debug)]
+enum Attachment {
+    Call(Vec<Ast<Expr>>),
+}
+
+named!(parse_attachment(Input) -> Attachment, alt_complete!(
+    map!(
+        delimited!(
+            tuple!(sp, tag!("("), nl),
+            separated_list_complete!(parse_expr_sep, parse_expr),
+            tuple!(nl, tag!(")"))
+        ),
+        Attachment::Call
+    )
+));
+
+named!(parse_primary_expr(Input) -> Ast<Expr>, do_parse!(
+    lspan: position!() >>
+    head: parse_atom_expr >>
+    res: fold_many0!(
+        tuple!(parse_attachment, position!()),
+        head,
+        |prev, (next, rspan)| {
+            use self::Attachment::*;
+
+            let expr = match next {
+                Call(args) => Expr::Call(prev, args),
+            };
+
+            Ast::new(expr, Span(lspan.offset, (rspan as Input).offset))
+        }
+    ) >>
+    (res)
+));
+
 named!(parse_unary_op(Input) -> UnaryOp, alt_complete!(
     value!(UnaryOp::Not, tag!("!")) |
     value!(UnaryOp::Neg, tag!("-"))
@@ -25,10 +66,10 @@ named!(parse_unary_op(Input) -> UnaryOp, alt_complete!(
 
 named!(parse_unary_expr(Input) -> Ast<Expr>, alt_complete!(
     ast!(map!(
-        tuple!(parse_unary_op, sp, parse_atom_expr),
+        tuple!(parse_unary_op, sp, parse_primary_expr),
         |(op, _, expr)| Expr::Unary(op, expr)
     )) |
-    parse_atom_expr
+    parse_primary_expr
 ));
 
 named!(parse_binary_op(Input) -> BinaryOp, alt_complete!(
