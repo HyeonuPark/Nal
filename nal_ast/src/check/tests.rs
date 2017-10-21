@@ -1,5 +1,5 @@
 use serde_yaml::from_str as yaml;
-use super::super::parse::parse;
+use parse::parse;
 use super::check;
 
 macro_rules! fixture_ok {
@@ -39,5 +39,6 @@ fn test_checker_err() {
     fixture_err!(
         "simple"
         "order"
+        "ident"
     );
 }

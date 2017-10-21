@@ -1,0 +1,10 @@
+let foo = 0
+let if = 0
+let else = 0
+let while = 0
+let for = 0
+let fn = 0
+let let = 0
+let mut mut = 0
+let num = 0
+let bool = 0
