@@ -1,13 +1,13 @@
 use std::collections::HashSet;
 
 use ast::common::{Ast, Ident};
-use super::{Check, Ctx, Error as E};
+use check::{Check, Ctx, Error as E};
 
 lazy_static! {
     static ref RESERVED: HashSet<&'static str> = [
         "if", "else",
         "while", "for", "in",
-        "fn", "let",
+        "fn", "let", "mut",
         "num", "bool",
     ].into_iter().map(|&e| e).collect();
 }

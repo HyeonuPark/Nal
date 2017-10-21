@@ -18,4 +18,8 @@ pub enum Error {
     ///
     /// IdentIsKeyword(identifier)
     IdentIsKeyword(Span),
+    /// Function statement should always be named
+    ///
+    /// FuncStmtNotNamed(func stmt)
+    FuncStmtNotNamed(Span)
 }

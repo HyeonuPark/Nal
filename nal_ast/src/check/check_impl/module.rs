@@ -1,10 +1,10 @@
 use ast::prelude::*;
 
-use super::{Check, Ctx};
+use check::{Check, Ctx};
 
 impl Check for Module {
     fn check(&self, ctx: &mut Ctx) {
-        for stmt in self.body.iter() {
+        for stmt in &self.body {
             stmt.check(ctx);
         }
     }

@@ -6,12 +6,7 @@ pub use self::ctx::{Ctx, DeclInfo};
 mod error;
 pub use self::error::Error;
 
-mod module;
-mod stmt;
-mod pattern;
-mod expr;
-mod function;
-mod ident;
+mod check_impl;
 
 pub fn check(module: &Module) -> Result<(), Vec<Error>> {
     let mut ctx = Ctx::default();

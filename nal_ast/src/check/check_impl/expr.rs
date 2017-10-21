@@ -2,7 +2,7 @@ use ast::common::Ast;
 use ast::expr::{Expr, Literal};
 use self::Expr::*;
 
-use super::{Check, Ctx};
+use check::{Check, Ctx};
 
 impl Check for Ast<Expr> {
     fn check(&self, ctx: &mut Ctx) {

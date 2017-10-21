@@ -1,7 +1,7 @@
 use ast::common::Ast;
 use ast::stmt::{Stmt, StmtBlock};
 
-use super::{Check, Ctx};
+use check::{Check, Ctx, DeclInfo, Error as E};
 use super::pattern::{check_pattern_decl, check_pattern_assign};
 
 impl Check for Ast<Stmt> {
@@ -27,6 +27,10 @@ impl Check for Ast<Stmt> {
                 });
             }
             Function(is_static, ref func) => {
+                if func.name.is_none() {
+                    ctx.report(E::FuncStmtNotNamed(self.span));
+                }
+
                 if !is_static {
                     func.check(ctx);
                 }
@@ -52,15 +56,28 @@ impl Check for Ast<StmtBlock> {
             for stmt in self.iter() {
                 match **stmt {
                     Stmt::Function(is_static, ref func) if is_static => {
-                        func.check(ctx);
+                        if let Some(ref name) = func.name {
+                            ctx.insert(name, DeclInfo::new(name.span));
+                        }
                     }
                     _ => {}
                 }
             }
 
             for stmt in self.iter() {
-                stmt.check(ctx);
+                match **stmt {
+                    Stmt::Function(is_static, ref func) if is_static => {
+                        func.check(ctx);
+                    }
+                    _ => {}
+                }
             }
+
+            ctx.subscope(|ctx| {
+                for stmt in self.iter() {
+                    stmt.check(ctx);
+                }
+            })
         });
     }
 }
