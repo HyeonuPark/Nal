@@ -64,8 +64,7 @@ impl SourceBuffer {
     pub fn offset_line(&self, offset: usize) -> usize {
         assert!(offset < self.src.len());
         match self.line_pos.binary_search(&offset) {
-            Ok(n) => n,
-            Err(n) => n,
+            Ok(n) | Err(n) => n,
         }
     }
 

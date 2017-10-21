@@ -8,6 +8,9 @@ pub use self::error::Error;
 
 mod check_impl;
 
+#[cfg(test)]
+mod tests;
+
 pub fn check(module: &Module) -> Result<(), Vec<Error>> {
     let mut ctx = Ctx::default();
 
@@ -15,10 +18,10 @@ pub fn check(module: &Module) -> Result<(), Vec<Error>> {
 
     let errors = ctx.errors();
 
-    if errors.len() == 0 {
+    if errors.is_empty() {
         Ok(())
     } else {
-        Err(errors.into())
+        Err(errors)
     }
 }
 
@@ -28,11 +31,8 @@ pub trait Check {
 
 impl<T: Check> Check for Option<T> {
     fn check(&self, ctx: &mut Ctx) {
-        if let &Some(ref inner) = self {
+        if let Some(ref inner) = *self {
             inner.check(ctx);
         }
     }
 }
-
-#[cfg(test)]
-mod tests;

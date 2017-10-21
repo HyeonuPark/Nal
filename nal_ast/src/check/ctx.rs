@@ -12,7 +12,7 @@ pub struct Ctx {
 
 impl Ctx {
     pub fn report(&mut self, err: E) {
-        self.error_list.push(err.into());
+        self.error_list.push(err);
     }
 
     pub fn subscope<F: FnOnce(&mut Self)>(&mut self, sub: F) {
