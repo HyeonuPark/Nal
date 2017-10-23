@@ -27,7 +27,7 @@ pub enum BinaryOp {
     And, Or,
 }
 
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
 pub enum UnaryOp {
     Neg,
     Not,
