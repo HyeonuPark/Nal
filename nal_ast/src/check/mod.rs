@@ -11,18 +11,25 @@ mod check_impl;
 #[cfg(test)]
 mod tests;
 
-pub fn check(module: &Module) -> Result<(), Vec<Error>> {
-    let mut ctx = Ctx::default();
+pub fn check<'a, G>(module: &Module, globals: G) -> Result<(), Vec<Error>>
+    where G: IntoIterator<Item=&'a str> {
+        use ast::common::Span;
+        
+        let mut ctx = Ctx::default();
 
-    module.check(&mut ctx);
+        for g in globals {
+            ctx.insert(g, DeclInfo::new(Span(0, 0)));
+        }
 
-    let errors = ctx.errors();
+        module.check(&mut ctx);
 
-    if errors.is_empty() {
-        Ok(())
-    } else {
-        Err(errors)
-    }
+        let errors = ctx.errors();
+
+        if errors.is_empty() {
+            Ok(())
+        } else {
+            Err(errors)
+        }
 }
 
 pub trait Check {

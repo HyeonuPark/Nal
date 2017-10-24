@@ -1,4 +1,3 @@
-use std::str::FromStr;
 use std::ops::Deref;
 
 use ast::common::Span;
@@ -32,21 +31,6 @@ fn parse_line_pos(src: &str) -> Vec<usize> {
     line_pos
 }
 
-impl FromStr for SourceBuffer {
-    type Err = Report;
-
-    fn from_str(src: &str) -> Result<Self, Report> {
-        let module = parse(src)?;
-        check(&module)?;
-
-        Ok(Self {
-            src: src.to_string(),
-            line_pos: parse_line_pos(src),
-            module,
-        })
-    }
-}
-
 impl Deref for SourceBuffer {
     type Target = Module;
 
@@ -56,6 +40,19 @@ impl Deref for SourceBuffer {
 }
 
 impl SourceBuffer {
+    pub fn create<'a, S, G>(src: S, globals: G) -> Result<Self, Report>
+        where S: Into<String>, G: IntoIterator<Item=&'a str> {
+            let src = src.into();
+            let module = parse(&src)?;
+            check(&module, globals)?;
+            let line_pos = parse_line_pos(&src);
+
+            Ok(Self {
+                src,
+                line_pos,
+                module,
+            })
+    }
     pub fn span_content(&self, span: Span) -> &str {
         let Span(start, end) = span;
         &self.src[start..end]
@@ -82,6 +79,7 @@ impl SourceBuffer {
 #[cfg(test)]
 mod test {
     use super::*;
+    use std::iter::empty;
 
     #[test]
     fn test_srcbuf_offset() {
@@ -92,7 +90,7 @@ mod test {
         ".trim();
         assert_eq!(src.len(), 15);
 
-        let srcbuf: SourceBuffer = src.parse().unwrap();
+        let srcbuf = SourceBuffer::create(src, empty()).unwrap();
         assert_eq!(srcbuf.line_pos, vec![4, 9, 14]);
 
         assert_eq!(srcbuf.offset_byte_pos(0), (0, 0));
@@ -110,7 +108,7 @@ mod test {
             true && -false
             5+ 6
         ".trim();
-        let srcbuf: SourceBuffer = src.parse().unwrap();
+        let srcbuf = SourceBuffer::create(src, empty()).unwrap();
 
         assert_eq!(srcbuf.span_content(srcbuf.body[0].span), "333");
         assert_eq!(srcbuf.span_content(srcbuf.body[1].span), "true && -false");
