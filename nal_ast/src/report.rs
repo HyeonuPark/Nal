@@ -5,6 +5,12 @@ use check::Error as CheckError;
 #[derive(Debug)]
 pub struct Report;
 
+impl Report {
+    pub fn to_string(&self) -> String {
+        format!("!!!PARSE ERROR!!!")
+    }
+}
+
 impl From<ParseError> for Report {
     fn from(_err: ParseError) -> Self {
         Report

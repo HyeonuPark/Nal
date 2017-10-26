@@ -40,8 +40,8 @@ impl Deref for SourceBuffer {
 }
 
 impl SourceBuffer {
-    pub fn create<'a, S, G>(src: S, globals: G) -> Result<Self, Report>
-        where S: Into<String>, G: IntoIterator<Item=&'a str> {
+    pub fn create<'a, S, K, G>(src: S, globals: G) -> Result<Self, Report>
+        where S: Into<String>, K: AsRef<str>, G: IntoIterator<Item=K> {
             let src = src.into();
             let module = parse(&src)?;
             check(&module, globals)?;
@@ -79,7 +79,11 @@ impl SourceBuffer {
 #[cfg(test)]
 mod test {
     use super::*;
-    use std::iter::empty;
+    use std::iter::{empty, Empty};
+
+    fn z() -> Empty<&'static str> {
+        empty()
+    }
 
     #[test]
     fn test_srcbuf_offset() {
@@ -90,7 +94,7 @@ mod test {
         ".trim();
         assert_eq!(src.len(), 15);
 
-        let srcbuf = SourceBuffer::create(src, empty()).unwrap();
+        let srcbuf = SourceBuffer::create(src, z()).unwrap();
         assert_eq!(srcbuf.line_pos, vec![4, 9, 14]);
 
         assert_eq!(srcbuf.offset_byte_pos(0), (0, 0));
@@ -108,7 +112,7 @@ mod test {
             true && -false
             5+ 6
         ".trim();
-        let srcbuf = SourceBuffer::create(src, empty()).unwrap();
+        let srcbuf = SourceBuffer::create(src, z()).unwrap();
 
         assert_eq!(srcbuf.span_content(srcbuf.body[0].span), "333");
         assert_eq!(srcbuf.span_content(srcbuf.body[1].span), "true && -false");

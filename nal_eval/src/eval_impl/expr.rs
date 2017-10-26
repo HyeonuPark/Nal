@@ -1,7 +1,7 @@
-use nal_ast::ast::prelude::{Expr, BinaryOp, UnaryOp, Function, FunctionBody as FB};
+use nal_ast::ast::prelude::{Expr, BinaryOp, UnaryOp};
 
 use common::{Eval, Env, Ast, Value, Control, Result};
-use super::pattern::decl_pattern;
+use super::function::eval_call;
 
 use self::Expr::*;
 
@@ -110,7 +110,8 @@ fn eval_binary(op: BinaryOp, left: Value, right: Value) -> Result<Value> {
             num type, but found {:?} and {:?}", l, r))?;
             unreachable!()
         }
-        (Eq, Func(_, _), Func(_, _)) | (Neq, Func(_, _), Func(_, _)) => {
+        (Eq, Func(_, _), Func(_, _)) | (Neq, Func(_, _), Func(_, _)) |
+        (Eq, Native(_), Native(_)) | (Neq, Native(_), Native(_)) => {
             Err(format!("Invalid type - function types cannot be compared"))?;
             unreachable!()
         }
@@ -146,57 +147,4 @@ fn eval_unary(op: UnaryOp, expr: Value) -> Result<Value> {
             unreachable!()
         }
     })
-}
-
-fn eval_call(callee: Value, args: Vec<Value>) -> Result<Value> {
-    if let Value::Func(func, env) = callee {
-        if func.params.len() != args.len() {
-            Err(format!("Param mismatch - this function requires {} \
-            parameters, but {} provided", func.params.len(), args.len()))?;
-        }
-
-        let env = &mut env.child();
-
-        func.params.iter()
-            .zip(args)
-            .map(|(param, arg)| decl_pattern(env, param, arg))
-            .collect::<Result<Vec<_>>>()?;
-
-        match func.body {
-            FB::Stmt(_) => {
-                setup_mapto!(mapto_vec[], func, env);
-
-                let res = mapto_vec!(Function {
-                    name: _, params: _,
-                    body: FB::Stmt(ref t)
-                } => t);
-
-                match res {
-                    Ok(_) => Ok(Value::Unit),
-                    Err(Control::Return(v)) => Ok(v),
-                    Err(Control::Error(e)) => Err(Control::Error(e)),
-                    _ => unreachable!(),
-                }
-            }
-            FB::Expr(_) => {
-                setup_mapto!(mapto, func, env);
-
-                let res = mapto!(Function {
-                    name: _, params: _,
-                    body: FB::Expr(ref t)
-                } => t);
-
-                match res {
-                    Ok(v) => Ok(v),
-                    Err(Control::Return(v)) => Ok(v),
-                    Err(Control::Error(e)) => Err(Control::Error(e)),
-                    _ => unreachable!(),
-                }
-            }
-        }
-    } else {
-        Err("You can only call functions")?;
-        unreachable!()
-    }
-
 }

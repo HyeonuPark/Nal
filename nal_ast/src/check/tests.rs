@@ -1,8 +1,12 @@
-use std::iter::empty as z;
+use std::iter::{empty, Empty};
 
 use serde_yaml::from_str as yaml;
 use parse::parse;
 use super::check;
+
+fn z() -> Empty<&'static str> {
+    empty()
+}
 
 macro_rules! fixture_ok {
     ($($test:expr)*) => ($(

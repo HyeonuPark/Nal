@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use std::cell::RefCell;
 
@@ -19,6 +19,12 @@ pub struct Env<'a> {
 }
 
 impl<'a> Env<'a> {
+    pub fn names(&self) -> HashSet<String> {
+        let mut hset = self.parent.map(|env| env.names()).unwrap_or_default();
+        hset.extend(self.map.keys().map(|k| k.clone()));
+        hset
+    }
+
     pub fn decl(&mut self, name: &str, value: Value) {
         self.map.insert(name.into(), Imm(value));
     }

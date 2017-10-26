@@ -6,12 +6,34 @@ use nal_ast::SourceBuffer;
 
 pub use env::Env;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum Value {
     Unit,
     Num(f64),
     Bool(bool),
     Func(Ast<ast::Function>, Rc<Env<'static>>),
+    Native(Rc<Fn(Vec<Value>) -> ::std::result::Result<Value, Error>>),
+}
+
+mod dbg {
+    use super::Value;
+    use super::Value::*;
+    use std::fmt::{Debug, Formatter, Error};
+
+    impl Debug for Value {
+        fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+            match *self {
+                Unit => write!(f, "Unit"),
+                Num(n) => write!(f, "Num({})", n),
+                Bool(b) => write!(f, "Bool({})", b),
+                Func(ref func, _) => match func.name {
+                    Some(ref name) => write!(f, "fn {} {{ .. }}", &***name),
+                    None => write!(f, "fn {{ .. }}"),
+                }
+                Native(_) => write!(f, "fn {{ native }}"),
+            }
+        }
+    }
 }
 
 #[derive(Debug)]

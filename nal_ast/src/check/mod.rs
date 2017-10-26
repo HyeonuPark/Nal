@@ -11,14 +11,14 @@ mod check_impl;
 #[cfg(test)]
 mod tests;
 
-pub fn check<'a, G>(module: &Module, globals: G) -> Result<(), Vec<Error>>
-    where G: IntoIterator<Item=&'a str> {
+pub fn check<'a, K, G>(module: &Module, globals: G) -> Result<(), Vec<Error>>
+    where K: AsRef<str>, G: IntoIterator<Item=K> {
         use ast::common::Span;
-        
+
         let mut ctx = Ctx::default();
 
         for g in globals {
-            ctx.insert(g, DeclInfo::new(Span(0, 0)));
+            ctx.insert(g.as_ref(), DeclInfo::new(Span(0, 0)));
         }
 
         module.check(&mut ctx);
