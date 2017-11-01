@@ -27,11 +27,14 @@ Do not use this in any serious project.
 
 ## License
 
-This repository is dual-licensed under the [MIT license][license-mit] and [Apache license 2.0][license-apl] at your option. By contributing to Nal you agree that your contributions will be licensed under these two licenses.
+This repository is dual-licensed under the [MIT license][license-mit]
+and [Apache license 2.0][license-apl] at your option.
+By contributing to Nal you agree that your contributions will be licensed
+under these two licenses.
 
 <!-- links -->
 
-[adt]: https://en.wikipedia.org/wiki/Algebraic_data_type/
+[adt]: https://en.wikipedia.org/wiki/Algebraic_data_type
 [rust]: https://www.rust-lang.org/
 [license-mit]: ./LICENSE-MIT
 [license-apl]: ./LICENSE-APACHE
