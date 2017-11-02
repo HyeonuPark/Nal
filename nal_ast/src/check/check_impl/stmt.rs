@@ -2,7 +2,7 @@ use ast::common::Ast;
 use ast::stmt::{Stmt, StmtBlock};
 
 use check::{Check, Ctx, DeclInfo, Error as E};
-use super::pattern::{check_pattern_decl, check_pattern_assign};
+use super::pattern::Decl;
 
 impl Check for Ast<Stmt> {
     fn check(&self, ctx: &mut Ctx) {
@@ -25,8 +25,8 @@ impl Check for Ast<Stmt> {
                 seq.check(ctx);
 
                 ctx.subscope(|ctx| {
-                    check_pattern_decl(each, ctx);
-                    
+                    Decl(each).check(ctx);
+
                     ctx.with_loop(|ctx| {
                         body.check(ctx);
                     });
@@ -43,11 +43,11 @@ impl Check for Ast<Stmt> {
             }
             Let(ref pat, ref expr) => {
                 expr.check(ctx);
-                check_pattern_decl(pat, ctx);
+                Decl(pat).check(ctx);
             }
             Assign(ref pat, ref expr) => {
                 expr.check(ctx);
-                check_pattern_assign(pat, ctx);
+                pat.check(ctx);
             }
             Expr(ref expr) => {
                 expr.check(ctx);

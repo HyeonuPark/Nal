@@ -2,7 +2,7 @@ use ast::common::Ast;
 use ast::function::{Function, FunctionBody as FB};
 
 use check::{Check, Ctx};
-use super::pattern::check_pattern_decl;
+use super::pattern::Decl;
 
 impl Check for Ast<Function> {
     fn check(&self, ctx: &mut Ctx) {
@@ -10,7 +10,7 @@ impl Check for Ast<Function> {
 
         ctx.subscope(|ctx| {
             for param in &self.params {
-                check_pattern_decl(param, ctx);
+                Decl(param).check(ctx);
             }
 
             ctx.with_fn(|ctx| {
