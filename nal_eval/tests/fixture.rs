@@ -11,7 +11,6 @@ extern crate nal_eval;
 
 use std::rc::Rc;
 use std::cell::RefCell;
-use std::mem::replace;
 
 use serde_yaml::from_str as yaml;
 

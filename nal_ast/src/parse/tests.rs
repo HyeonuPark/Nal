@@ -20,7 +20,8 @@ fn test_parser() {
         "atom"
         "binary"
         "variable"
-        //"branch"
+        "branch"
         "func"
+        "string"
     );
 }

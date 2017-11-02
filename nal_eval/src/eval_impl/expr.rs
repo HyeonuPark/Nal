@@ -90,12 +90,16 @@ fn eval_binary(op: BinaryOp, left: Value, right: Value) -> Result<Value> {
         (Sub, Num(l),  Num(r) ) => Num(l - r),
         (Mul, Num(l),  Num(r) ) => Num(l * r),
         (Div, Num(l),  Num(r) ) => Num(l / r),
+
+        (Add, Str(l),  Str(r) ) => Str(format!("{}{}", l, r).into()),
+
         (Eq,  Unit,    Unit   ) => Bool(true),
         (Eq,  Num(l),  Num(r) ) => Bool(l == r),
         (Eq,  Bool(l), Bool(r)) => Bool(l == r),
         (Neq, Unit,    Unit   ) => Bool(false),
         (Neq, Num(l),  Num(r) ) => Bool(l != r),
         (Neq, Bool(l), Bool(r)) => Bool(l != r),
+
         (Gt,  Num(l),  Num(r) ) => Bool(l > r),
         (Gte, Num(l),  Num(r) ) => Bool(l >= r),
         (Lt,  Num(l),  Num(r) ) => Bool(l < r),
@@ -105,7 +109,13 @@ fn eval_binary(op: BinaryOp, left: Value, right: Value) -> Result<Value> {
         (And, _, _) => unreachable!(),
         (Or, _, _) => unreachable!(),
 
-        (Add, l, r) | (Sub, l, r) | (Mul, l, r) | (Div, l, r) => {
+        (Add, l, r) => {
+            Err(format!("Invalid type - operands of Add op should be both num \
+            or both str, but found {:?} and {:?}", l, r))?;
+            unreachable!()
+        }
+
+        (Sub, l, r) | (Mul, l, r) | (Div, l, r) => {
             Err(format!("Invalid type - operands of arithmetic op should be \
             num type, but found {:?} and {:?}", l, r))?;
             unreachable!()

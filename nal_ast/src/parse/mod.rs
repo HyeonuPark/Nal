@@ -9,6 +9,7 @@ pub mod pattern;
 pub mod stmt;
 pub mod module;
 pub mod function;
+pub mod string;
 
 pub use nom::Err as ParseError;
 

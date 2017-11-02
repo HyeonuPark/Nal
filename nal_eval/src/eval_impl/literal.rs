@@ -9,6 +9,7 @@ impl Eval for Ast<L> {
         Ok(match ***self {
             L::Num(v) => V::Num(v),
             L::Bool(v) => V::Bool(v),
+            L::Str(ref v) => V::Str((v as &str).into()),
         })
     }
 }

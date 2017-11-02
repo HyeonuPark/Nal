@@ -1,0 +1,18 @@
+---
+body:
+  - Stmt:
+      Expr:
+        Literal:
+          Str: abc
+  - Stmt:
+      Expr:
+        Literal:
+          Str: abc
+  - Stmt:
+      Expr:
+        Literal:
+          Str: "abc\n\r\t\0 def"
+  - Stmt:
+      Expr:
+        Literal:
+          Str: "abc\n\r\t\0 def"

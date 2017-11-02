@@ -28,12 +28,12 @@ impl Check for Ast<Expr> {
                 expr.check(ctx);
 
                 if !ctx.is_fn() {
-                    ctx.report(E::ControlContextNotFound(self.span));
+                    ctx.report(E::ContextNotFound(self.span));
                 }
             }
             Break | Continue => {
                 if !ctx.is_loop() {
-                    ctx.report(E::ControlContextNotFound(self.span));
+                    ctx.report(E::ContextNotFound(self.span));
                 }
             }
             Function(ref func) => {
@@ -50,6 +50,10 @@ impl Check for Ast<Expr> {
 
 impl Check for Ast<Literal> {
     fn check(&self, _ctx: &mut Ctx) {
-        // Is there something needed to check?
+        match **self {
+            Literal::Num(_) => {}
+            Literal::Bool(_) => {}
+            Literal::Str(_) => {}
+        }
     }
 }

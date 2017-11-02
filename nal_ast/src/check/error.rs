@@ -26,6 +26,6 @@ pub enum Error {
     /// For example, "return" can only be used inside function body
     /// as well as "break" and "continue" for while/for-in body
     ///
-    /// ControlContextNotFound(control expr)
-    ControlContextNotFound(Span),
+    /// ContextNotFound(control expr)
+    ContextNotFound(Span),
 }
