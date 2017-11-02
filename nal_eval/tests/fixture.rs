@@ -60,19 +60,19 @@ fn eval_print(src: &str) -> Vec<SValue> {
 }
 
 macro_rules! fixtures {
-    ($($name:expr)*) => ($(
-        assert_eq!(
-            eval_print(include_str!(concat!("fixtures/", $name, ".nal"))),
-            yaml::<Vec<S>>(include_str!(concat!("fixtures/", $name, ".yml")))
-                .expect(concat!("Failed to parse ", $name, ".yml")),
-            concat!("\n\nFailed: ", $name, " - nal != yml\n\n")
-        );
+    ($($name:ident, $test:expr)*) => ($(
+        #[test]
+        fn $name() {
+            assert_eq!(
+                eval_print(include_str!(concat!("fixtures/", $test, ".nal"))),
+                yaml::<Vec<S>>(include_str!(concat!("fixtures/", $test, ".yml")))
+                    .expect(concat!("Failed to parse ", $test, ".yml")),
+                concat!("\n\nFailed: ", $test, " - nal != yml\n\n")
+            );
+        }
     )*);
 }
 
-#[test]
-fn test_fixtures() {
-    fixtures!(
-        "simple"
-    );
-}
+fixtures!(
+    simple, "simple"
+);
