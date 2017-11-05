@@ -15,7 +15,7 @@ lazy_static! {
 
 impl Check for Ast<Ident> {
     fn check(&self, ctx: &mut Ctx) {
-        if RESERVED.contains(&***self) {
+        if RESERVED.contains(self as &str) {
             ctx.report(E::IdentIsKeyword(self.span));
         }
     }

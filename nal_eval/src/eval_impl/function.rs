@@ -31,9 +31,8 @@ pub fn eval_call(callee: Value, args: Vec<Value>) -> Result<Value> {
 
             match func.body {
                 FB::Stmt(_) => {
-                    setup_mapto!(mapto_vec[], func, env);
-
-                    let res = mapto_vec!(Function {
+                    setup!(eval[], func, &mut env.child(), *);
+                    let res = eval!(Function {
                         name: _, params: _,
                         body: FB::Stmt(ref t)
                     } => t);
@@ -46,9 +45,8 @@ pub fn eval_call(callee: Value, args: Vec<Value>) -> Result<Value> {
                     }
                 }
                 FB::Expr(_) => {
-                    setup_mapto!(mapto, func, env);
-
-                    let res = mapto!(Function {
+                    setup!(eval, func, &mut env.child());
+                    let res = eval!(Function {
                         name: _, params: _,
                         body: FB::Expr(ref t)
                     } => t);

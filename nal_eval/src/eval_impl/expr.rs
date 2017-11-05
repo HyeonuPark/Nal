@@ -9,49 +9,50 @@ impl Eval for Ast<Expr> {
     type Output = Value;
 
     fn eval(&self, env: &mut Env) -> Result<Value> {
-        setup_mapto!(mapto, self, env);
-        setup_mapto!(mapto_vec[], self, env);
+        setup!(eval, self, env);
+        setup!(eval_tuple[], self, env, *);
+
         match ***self {
-            Literal(_) => mapto!(Literal(ref t) => t),
+            Literal(_) => eval!(Literal(ref t) => t),
             Binary(op, _, _) if op == BinaryOp::And || op == BinaryOp::Or => {
                 eval_short_circuit(env, op, self)
             }
             Binary(op, _, _) => eval_binary(
                 op,
-                mapto!(Binary(_, ref t, _) => t)?,
-                mapto!(Binary(_, _, ref t) => t)?,
+                eval!(Binary(_, ref t, _) => t)?,
+                eval!(Binary(_, _, ref t) => t)?,
             ),
             Unary(op, _) => eval_unary(
                 op,
-                mapto!(Unary(_, ref t) => t)?,
+                eval!(Unary(_, ref t) => t)?,
             ),
             Call(_, _) => eval_call(
-                mapto!(Call(ref t, _) => t)?,
-                mapto_vec!(Call(_, ref t) => t)?
+                eval!(Call(ref t, _) => t)?,
+                eval_tuple!(Call(_, ref t) => t)?,
             ),
             Return(ref ret_val) => Err(Control::Return(
                 if ret_val.is_some() {
-                    mapto!(Return(ref t) => t.as_ref().unwrap())?
+                    eval!(Return(ref t) => t.as_ref().unwrap())?
                 } else {
                     Value::Unit
                 }
             )),
             Break => Err(Control::Break),
             Continue => Err(Control::Continue),
-            Function(_) => mapto!(Function(ref t) => t),
+            Function(_) => eval!(Function(ref t) => t),
             Ident(ref name) => env.get(name),
         }
     }
 }
 
 fn eval_short_circuit(env: &mut Env, op: BinaryOp, expr: &Ast<Expr>) -> Result<Value> {
-    setup_mapto!(mapto, expr, env);
-    let left = mapto!(Binary(_, ref t, _) => t)?;
+    setup!(eval, expr, env);
+    let left = eval!(Binary(_, ref t, _) => t)?;
 
     Ok(match (op, left) {
         (BinaryOp::And, Value::Bool(false)) => Value::Bool(false),
         (BinaryOp::And, Value::Bool(_)) => {
-            match mapto!(Binary(_, _, ref t) => t)? {
+            match eval!(Binary(_, _, ref t) => t)? {
                 Value::Bool(v) => Value::Bool(v),
                 _ => {
                     Err("Invalid type - operands of And should be bool type")?;
@@ -65,7 +66,7 @@ fn eval_short_circuit(env: &mut Env, op: BinaryOp, expr: &Ast<Expr>) -> Result<V
         }
         (BinaryOp::Or, Value::Bool(true)) => Value::Bool(true),
         (BinaryOp::Or, Value::Bool(false)) => {
-            match mapto!(Binary(_, _, ref t) => t)? {
+            match eval!(Binary(_, _, ref t) => t)? {
                 Value::Bool(v) => Value::Bool(v),
                 _ => {
                     Err("Invalid type - operands of Or should be bool type")?;

@@ -47,4 +47,5 @@ fixture_err!(
     err_simple, "simple"
     err_order, "order"
     err_ident, "ident"
+    err_object, "object"
 );

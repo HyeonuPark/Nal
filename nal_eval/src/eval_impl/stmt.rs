@@ -1,4 +1,4 @@
-use nal_ast::ast::prelude::{Stmt};
+use nal_ast::ast::prelude::Stmt;
 
 use common::{Eval, Env, Ast, Value, Result};
 use super::pattern::{decl_pattern, assign_pattern};
@@ -9,17 +9,17 @@ impl Eval for Ast<Stmt> {
     type Output = ();
 
     fn eval(&self, env: &mut Env) -> Result<()> {
-        setup_mapto!(mapto, self, env);
-        setup_mapto!(mapto_vec[], self, &mut env.child());
+        setup!(eval, self, env);
+        setup!(eval_block[], self, &mut env.clone(), *);
 
         match ***self {
-            If(_, _, ref else_block) => match mapto!(If(ref t, _, _) => t)? {
+            If(_, _, ref else_case) => match eval!(If(ref t, _, _) => t)? {
                 Value::Bool(true) => {
-                    mapto_vec!(If(_, ref t, _) => t)?;
+                    eval_block!(If(_, ref t, _) => t)?;
                 }
                 Value::Bool(false) => {
-                    if else_block.is_some() {
-                        mapto_vec!(If(_, _, ref t) => t.as_ref().unwrap())?;
+                    if else_case.is_some() {
+                        eval_block!(If(_, _, ref t) => t.as_ref().unwrap())?;
                     }
                 }
                 _ => {
@@ -27,14 +27,14 @@ impl Eval for Ast<Stmt> {
                 }
             }
             While(_, _) => {
-                while match mapto!(While(ref t, _) => t)? {
+                while match eval!(While(ref t, _) => t)? {
                     Value::Bool(b) => b,
                     _ => {
                         Err("TypeError - While condition should be bool type")?;
                         unreachable!()
                     }
                 } {
-                    mapto_vec!(While(_, ref t) => t)?;
+                    eval_block!(While(_, ref t) => t)?;
                 }
             }
             ForIn(_, _, _) => {
@@ -42,20 +42,20 @@ impl Eval for Ast<Stmt> {
             }
             Function(is_static, ref func) => {
                 if !is_static {
-                    let v = mapto!(Function(_, ref t) => t)?;
+                    let v = eval!(Function(_, ref t) => t)?;
                     env.decl(func.name.as_ref().unwrap(), v);
                 }
             }
             Let(ref pat, _) => {
-                let v = mapto!(Let(_, ref t) => t)?;
+                let v = eval!(Let(_, ref t) => t)?;
                 decl_pattern(env, pat, v)?;
             }
             Assign(ref pat, _) => {
-                let v = mapto!(Assign(_, ref t) => t)?;
+                let v = eval!(Assign(_, ref t) => t)?;
                 assign_pattern(env, pat, v)?;
             }
             Expr(_) => {
-                mapto!(Expr(ref t) => t).map(|_| ())?;
+                eval!(Expr(ref t) => t).map(|_| ())?;
             }
         }
 

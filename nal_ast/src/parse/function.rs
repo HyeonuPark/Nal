@@ -20,19 +20,19 @@ named!(parse_function_body(Input) -> FunctionBody, alt_complete!(
 
 named!(pub parse_function(Input) -> Ast<Function>, ast!(map!(
     tuple!(
-        word!("fn"), sp,
-        opt!(delimited!(sp, parse_ident, sp)),
+        word!("fn"),
+        opt!(preceded!(sp, parse_ident)),
         opt!(delimited!(
-            tuple!(tag!("("), nl),
+            tuple!(sp, tag!("("), nl),
             separated_list_complete!(
                 parse_expr_sep,
                 parse_pattern
             ),
             tuple!(nl, tag!(")"))
         )),
-        sp, parse_function_body
+        parse_function_body
     ),
-    |(_, _, name, params, _, body)| {
+    |(_, name, params, body)| {
         Function {
             name,
             params: params.unwrap_or_default(),

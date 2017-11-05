@@ -22,9 +22,9 @@ impl Eval for Ast<ModuleStmt> {
 
     #[allow(unreachable_patterns)]
     fn eval(&self, env: &mut Env) -> Result<()> {
-        setup_mapto!(mapto, self, env);
+        setup!(eval, self, env);
         match ***self {
-            ModuleStmt::Stmt(_) => mapto!(ModuleStmt::Stmt(ref t) => t),
+            ModuleStmt::Stmt(_) => eval!(ModuleStmt::Stmt(ref t) => t),
         }
     }
 }

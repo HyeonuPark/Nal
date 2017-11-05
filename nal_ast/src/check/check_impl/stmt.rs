@@ -34,7 +34,7 @@ impl Check for Ast<Stmt> {
             }
             Function(is_static, ref func) => {
                 if func.name.is_none() {
-                    ctx.report(E::FuncStmtNotNamed(self.span));
+                    ctx.report(E::FuncNotNamed(self.span));
                 }
 
                 if !is_static {

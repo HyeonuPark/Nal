@@ -24,4 +24,5 @@ compare_fixtures!(
     branch, "branch"
     func, "func"
     string, "string"
+    object, "object"
 );

@@ -19,6 +19,14 @@ pub enum Literal {
     Num(f64),
     Bool(bool),
     Str(String),
+    Obj(Vec<Ast<ObjProp>>),
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum ObjProp {
+    Named(Ast<Ident>, Ast<Expr>),
+    Short(Ast<Ident>),
+    Method(Ast<Function>),
 }
 
 #[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]

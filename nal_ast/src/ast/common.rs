@@ -26,6 +26,15 @@ impl<T> Ast<T> {
             span: Span(0, 0),
         }
     }
+
+    pub fn map<U, F>(self, mapper: F) -> Ast<U> where F: FnOnce(T) -> U {
+        let Ast{ inner_value, span } = self;
+
+        Ast {
+            inner_value: mapper(*inner_value).into(),
+            span,
+        }
+    }
 }
 
 mod dbg {

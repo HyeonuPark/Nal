@@ -1,0 +1,8 @@
+
+let bar = 3
+
+let obj = {
+  foo = 2
+  bar
+  fn baz() = 4
+}

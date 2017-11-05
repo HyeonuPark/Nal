@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use std::collections::HashMap;
 
 use owning_ref::RcRef;
 use nal_ast::ast::prelude as ast;
@@ -14,6 +15,7 @@ pub enum Value {
     Str(Rc<str>),
     Func(Ast<ast::Function>, Rc<Env<'static>>),
     Native(Rc<Fn(Vec<Value>) -> ::std::result::Result<Value, Error>>),
+    Obj(HashMap<String, Value>),
 }
 
 mod dbg {
@@ -29,10 +31,24 @@ mod dbg {
                 Bool(b) => write!(f, "Bool({})", b),
                 Str(ref s) => write!(f, "Str({})", s),
                 Func(ref func, _) => match func.name {
-                    Some(ref name) => write!(f, "fn {} {{ .. }}", &***name),
-                    None => write!(f, "fn {{ .. }}"),
+                    Some(ref name) => write!(f, "fn {}() {{ .. }}", name as &str),
+                    None => write!(f, "fn() {{ .. }}"),
                 }
                 Native(_) => write!(f, "fn {{ native }}"),
+                Obj(ref table) => {
+                    let mut keys = table.keys()
+                        .map(|k| k.clone())
+                        .collect::<Vec<_>>();
+                    keys.sort();
+
+                    let mut f = f.debug_struct("Obj");
+
+                    for key in &keys {
+                        f.field(key, &table[key]);
+                    }
+
+                    f.finish()
+                }
             }
         }
     }
