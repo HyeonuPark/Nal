@@ -6,15 +6,11 @@ use super::common::Input;
 
 macro_rules! str_char {
     ($name:ident($quote:expr)) => (named!($name(Input) -> char, alt_complete!(
-        value!(
-            ' ',
-            tuple!(
-                alt_complete!(tag!("\\\n") | tag!("\\\r\n")),
-                fold_many0!(tag!(" "), (), |_, _| ())
-            )
-        ) |
-        map!(
-            preceded!(tag!("\\"), anychar),
+        tuple!(
+            alt_complete!(tag!("\\\n") | tag!("\\\r\n")),
+            fold_many0!(tag!(" "), (), |_, _| ())
+        ) => { |_| ' ' } |
+        preceded!(tag!("\\"), anychar) => {
             |ch| match ch {
                 'n' => '\n',
                 'r' => '\r',
@@ -25,7 +21,7 @@ macro_rules! str_char {
                 '\\' => '\\',
                 other => other,
             }
-        ) |
+        } |
         preceded!(not!(peek!(one_of!(concat!("\n", $quote)))), anychar)
     )););
 }

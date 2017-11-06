@@ -8,14 +8,10 @@ use super::ident::parse_ident;
 use super::pattern::parse_pattern;
 
 named!(parse_function_body(Input) -> FunctionBody, alt_complete!(
-    map!(
-        preceded!(sp, parse_stmt_block),
-        FunctionBody::Stmt
-    ) |
-    map!(
-        tuple!(sp, tag!("="), sp, parse_expr),
+    preceded!(sp, parse_stmt_block) => { FunctionBody::Stmt } |
+    tuple!(sp, tag!("="), sp, parse_expr) => {
         |(_, _, _, expr)| FunctionBody::Expr(expr)
-    )
+    }
 ));
 
 named!(pub parse_function(Input) -> Ast<Function>, ast!(map!(

@@ -7,24 +7,22 @@ use super::expr::parse_expr;
 use super::function::parse_function;
 
 named!(parse_if_stmt(Input) -> Stmt, alt_complete!(
-    map!(
-        tuple!(
-            word!("if"),
-            delimited!(sp, parse_expr, sp),
-            parse_stmt_block,
-            tuple!(nl, word!("else"), sp),
-            parse_stmt_block
-        ),
+    tuple!(
+        word!("if"),
+        delimited!(sp, parse_expr, sp),
+        parse_stmt_block,
+        tuple!(nl, word!("else"), sp),
+        parse_stmt_block
+    ) => {
         |(_, cond, pos, _, neg)| Stmt::If(cond, pos, Some(neg))
-    ) |
-    map!(
-        tuple!(
-            word!("if"),
-            delimited!(sp, parse_expr, sp),
-            parse_stmt_block
-        ),
+    } |
+    tuple!(
+        word!("if"),
+        delimited!(sp, parse_expr, sp),
+        parse_stmt_block
+    ) => {
         |(_, cond, pos)| Stmt::If(cond, pos, None)
-    )
+    }
 ));
 
 named!(parse_while_stmt(Input) -> Stmt, map!(
@@ -88,8 +86,8 @@ named!(pub parse_stmt(Input) -> Ast<Stmt>, ast!(alt_complete!(
 )));
 
 named!(pub parse_stmt_sep(Input) -> (), alt_complete!(
-    map!(tuple!(nl, tag!(";"), nl), noop) |
-    map!(nl_f, noop)
+    tuple!(nl, tag!(";"), nl) => { noop } |
+    nl_f => { noop }
 ));
 
 named!(pub parse_stmt_block(Input) -> Ast<StmtBlock>, ast!(delimited!(

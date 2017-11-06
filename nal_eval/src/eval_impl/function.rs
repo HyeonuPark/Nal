@@ -64,8 +64,7 @@ pub fn eval_call(callee: Value, args: Vec<Value>) -> Result<Value> {
         Value::Native(func) => func(args).map_err(|e| Control::Error(e)),
 
         _ => {
-            Err("You can only call functions")?;
-            unreachable!()
+            Err("You can only call functions")?
         }
     }
 }

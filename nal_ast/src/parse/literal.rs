@@ -26,18 +26,11 @@ named!(parse_bool(Input) -> Literal, map!(
 ));
 
 named!(parse_obj_prop(Input) -> ObjProp, alt_complete!(
-    map!(
-        parse_function,
-        ObjProp::Method
-    ) |
-    map!(
-        tuple!(parse_ident, sp, tag!("="), sp, parse_expr),
+    parse_function => { ObjProp::Method } |
+    tuple!(parse_ident, sp, tag!("="), sp, parse_expr) => {
         |(name, _, _, _, value)| ObjProp::Named(name, value)
-    ) |
-    map!(
-        parse_ident,
-        ObjProp::Short
-    )
+    } |
+    parse_ident => { ObjProp::Short }
 ));
 
 named!(parse_obj(Input) -> Literal, map!(

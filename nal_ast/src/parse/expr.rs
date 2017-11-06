@@ -9,19 +9,18 @@ use super::ident::parse_ident;
 use super::function::parse_function;
 
 named!(parse_atom_expr(Input) -> Ast<Expr>, ast!(alt_complete!(
-    map!(
-        preceded!(word!("return"), opt!(preceded!(sp, parse_expr))),
-        Expr::Return
-    ) |
-    value!(Expr::Break, word!("break")) |
-    value!(Expr::Continue, word!("continue")) |
-    map!(parse_literal, Expr::Literal) |
-    map!(parse_function, Expr::Function) |
-    map!(parse_ident, Expr::Ident) |
-    map!(
-        tuple!(tag!("("), nl, parse_expr, nl, tag!(")")),
-        |(_, _, expr, _, _)| expr.into_inner()
-    )
+    preceded!(
+        word!("return"),
+        opt!(preceded!(sp, parse_expr))
+    ) => { Expr::Return } |
+    word!("break") => { |_| Expr::Break } |
+    word!("continue") => { |_| Expr::Continue } |
+    parse_literal => { Expr::Literal } |
+    parse_function => { Expr::Function } |
+    parse_ident => { Expr::Ident } |
+    tuple!(tag!("("), nl, parse_expr, nl, tag!(")")) => {
+        |(_, _, expr, _, _)| (expr as Ast<Expr>).into_inner()
+    }
 )));
 
 #[derive(Debug)]
@@ -31,21 +30,15 @@ enum Attachment {
 }
 
 named!(parse_attachment(Input) -> Attachment, alt_complete!(
-    map!(
-        delimited!(
-            tuple!(sp, tag!("("), nl),
-            separated_list_complete!(parse_expr_sep, parse_expr),
-            tuple!(nl, tag!(")"))
-        ),
-        Attachment::Call
-    ) |
-    map!(
-        preceded!(
-            tuple!(sp, tag!("."), sp),
-            parse_ident
-        ),
-        Attachment::Prop
-    )
+    delimited!(
+        tuple!(sp, tag!("("), nl),
+        separated_list_complete!(parse_expr_sep, parse_expr),
+        tuple!(nl, tag!(")"))
+    ) => { Attachment::Call } |
+    preceded!(
+        tuple!(sp, tag!("."), sp),
+        parse_ident
+    ) => { Attachment::Prop }
 ));
 
 named!(parse_primary_expr(Input) -> Ast<Expr>, do_parse!(
@@ -155,6 +148,6 @@ named!(pub parse_expr(Input) -> Ast<Expr>, alt_complete!(
 ));
 
 named!(pub parse_expr_sep(Input) -> (), alt_complete!(
-    map!(tuple!(sp, tag!(","), sp), noop) |
+    tuple!(sp, tag!(","), sp) => { noop } |
     nl_f
 ));

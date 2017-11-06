@@ -59,28 +59,24 @@ fn eval_short_circuit(env: &mut Env, op: BinaryOp, expr: &Ast<Expr>) -> Result<V
             match eval!(Binary(_, _, ref t) => t)? {
                 Value::Bool(v) => Value::Bool(v),
                 _ => {
-                    Err("Invalid type - operands of And should be bool type")?;
-                    unreachable!()
+                    Err("Invalid type - operands of And should be bool type")?
                 }
             }
         }
         (BinaryOp::And, _) => {
-            Err("Invalid type - operand of And should be bool type")?;
-            unreachable!()
+            Err("Invalid type - operand of And should be bool type")?
         }
         (BinaryOp::Or, Value::Bool(true)) => Value::Bool(true),
         (BinaryOp::Or, Value::Bool(false)) => {
             match eval!(Binary(_, _, ref t) => t)? {
                 Value::Bool(v) => Value::Bool(v),
                 _ => {
-                    Err("Invalid type - operands of Or should be bool type")?;
-                    unreachable!()
+                    Err("Invalid type - operands of Or should be bool type")?
                 }
             }
         }
         (BinaryOp::Or, _) => {
-            Err("Invalid type - operands of Or should be bool type")?;
-            unreachable!()
+            Err("Invalid type - operands of Or should be bool type")?
         }
         _ => unreachable!()
     })
@@ -116,29 +112,24 @@ fn eval_binary(op: BinaryOp, left: Value, right: Value) -> Result<Value> {
 
         (Add, l, r) => {
             Err(format!("Invalid type - operands of Add op should be both num \
-            or both str, but found {:?} and {:?}", l, r))?;
-            unreachable!()
+            or both str, but found {:?} and {:?}", l, r))?
         }
 
         (Sub, l, r) | (Mul, l, r) | (Div, l, r) => {
             Err(format!("Invalid type - operands of arithmetic op should be \
-            num type, but found {:?} and {:?}", l, r))?;
-            unreachable!()
+            num type, but found {:?} and {:?}", l, r))?
         }
         (Eq, Func(_, _), Func(_, _)) | (Neq, Func(_, _), Func(_, _)) |
         (Eq, Native(_), Native(_)) | (Neq, Native(_), Native(_)) => {
-            Err(format!("Invalid type - function types cannot be compared"))?;
-            unreachable!()
+            Err(format!("Invalid type - function types cannot be compared"))?
         }
         (Eq, l, r) | (Neq, l, r) => {
             Err(format!("Invalid type - both operands of equality op should \
-            be equal type, but found {:?} and {:?}", l, r))?;
-            unreachable!()
+            be equal type, but found {:?} and {:?}", l, r))?
         }
         (Gt, l, r) | (Gte, l, r) | (Lt, l, r) | (Lte, l, r) => {
             Err(format!("Invalid type - operands of comparison op should be \
-            num type, but found {:?} and {:?}", l, r))?;
-            unreachable!()
+            num type, but found {:?} and {:?}", l, r))?
         }
     })
 }
@@ -153,13 +144,11 @@ fn eval_unary(op: UnaryOp, expr: Value) -> Result<Value> {
 
         (Neg, v) => {
             Err(format!("Invalid type - operand of Neg op should be num \
-            type, but found {:?}", v))?;
-            unreachable!()
+            type, but found {:?}", v))?
         }
         (Not, v) => {
             Err(format!("Invalid type - operand of Not op should be bool \
-            type, but found {:?}", v))?;
-            unreachable!()
+            type, but found {:?}", v))?
         }
     })
 }

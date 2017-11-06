@@ -30,8 +30,7 @@ impl Eval for Ast<Stmt> {
                 while match eval!(While(ref t, _) => t)? {
                     Value::Bool(b) => b,
                     _ => {
-                        Err("TypeError - While condition should be bool type")?;
-                        unreachable!()
+                        Err("TypeError - While condition should be bool type")?
                     }
                 } {
                     eval_block!(While(_, ref t) => t)?;

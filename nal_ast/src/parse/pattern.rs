@@ -1,4 +1,4 @@
-use ast::common::Ast;
+use ast::common::{Ast, Ident};
 use ast::stmt::Pattern;
 
 use super::common::{Input, sp, sp_f, nl};
@@ -19,28 +19,29 @@ named!(parse_obj_pattern(Input) -> Pattern, map!(
         separated_list!(
             parse_expr_sep,
             alt_complete!(
-                map!(
-                    tuple!(parse_ident, sp, word!("as"), sp, parse_pattern),
+                tuple!(parse_ident, sp, word!("as"), sp, parse_pattern) => {
                     |(name, _, _, _, pat)| (name, pat)
-                ) |
-                map!(
-                    tuple!(word!("mut"), sp, parse_ident),
+                } |
+                tuple!(word!("mut"), sp, parse_ident) => {
                     |(_, _, name)| {
+                        let name = name as Ast<Ident>;
                         let name2 = name.clone();
                         let pat = name.clone()
                             .map(|_| Pattern::Ident(name2, true));
+
                         (name, pat)
                     }
-                ) |
-                map!(
-                    parse_ident,
+                } |
+                parse_ident => {
                     |name| {
+                        let name = name as Ast<Ident>;
                         let name2 = name.clone();
                         let pat = name.clone()
                             .map(|_| Pattern::Ident(name2, false));
+
                         (name, pat)
                     }
-                )
+                }
             )
         ),
         tuple!(nl, tag!("}"))
