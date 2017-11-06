@@ -7,6 +7,7 @@ pub enum Expr {
     Binary(BinaryOp, Ast<Expr>, Ast<Expr>),
     Unary(UnaryOp, Ast<Expr>),
     Call(Ast<Expr>, Vec<Ast<Expr>>),
+    Prop(Ast<Expr>, Ast<Ident>),
     Return(Option<Ast<Expr>>),
     Break,
     Continue,

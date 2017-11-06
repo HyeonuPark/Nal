@@ -22,3 +22,8 @@ body:
                     Expr:
                       Literal:
                         Num: 4
+  - Stmt:
+      Expr:
+        Prop:
+          - Ident: obj
+          - foo

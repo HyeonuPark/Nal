@@ -26,6 +26,10 @@ impl Check for Ast<Expr> {
                     expr.check(ctx);
                 }
             }
+            Prop(ref parent, ref name) => {
+                parent.check(ctx);
+                name.check(ctx);
+            }
             Return(ref expr) => {
                 expr.check(ctx);
 

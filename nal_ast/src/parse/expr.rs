@@ -1,6 +1,6 @@
 use std::{iter, vec};
 
-use ast::common::{Ast, Span};
+use ast::common::{Ast, Span, Ident};
 use ast::expr::{Expr, BinaryOp, UnaryOp};
 
 use super::common::{Input, nl, nl_f, sp, noop};
@@ -27,6 +27,7 @@ named!(parse_atom_expr(Input) -> Ast<Expr>, ast!(alt_complete!(
 #[derive(Debug)]
 enum Attachment {
     Call(Vec<Ast<Expr>>),
+    Prop(Ast<Ident>),
 }
 
 named!(parse_attachment(Input) -> Attachment, alt_complete!(
@@ -37,6 +38,13 @@ named!(parse_attachment(Input) -> Attachment, alt_complete!(
             tuple!(nl, tag!(")"))
         ),
         Attachment::Call
+    ) |
+    map!(
+        preceded!(
+            tuple!(sp, tag!("."), sp),
+            parse_ident
+        ),
+        Attachment::Prop
     )
 ));
 
@@ -51,6 +59,7 @@ named!(parse_primary_expr(Input) -> Ast<Expr>, do_parse!(
 
             let expr = match next {
                 Call(args) => Expr::Call(prev, args),
+                Prop(name) => Expr::Prop(prev, name),
             };
 
             Ast::new(expr, Span(lspan.offset, (rspan as Input).offset))

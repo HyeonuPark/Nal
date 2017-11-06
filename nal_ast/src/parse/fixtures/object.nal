@@ -6,3 +6,5 @@ let obj = {
   bar
   fn baz() = 4
 }
+
+obj.foo

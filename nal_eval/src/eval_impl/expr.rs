@@ -30,6 +30,10 @@ impl Eval for Ast<Expr> {
                 eval!(Call(ref t, _) => t)?,
                 eval_tuple!(Call(_, ref t) => t)?,
             ),
+            Prop(_, ref name) => eval_prop(
+                eval!(Prop(ref t, _) => t)?,
+                name as &str
+            ),
             Return(ref ret_val) => Err(Control::Return(
                 if ret_val.is_some() {
                     eval!(Return(ref t) => t.as_ref().unwrap())?
@@ -158,4 +162,14 @@ fn eval_unary(op: UnaryOp, expr: Value) -> Result<Value> {
             unreachable!()
         }
     })
+}
+
+fn eval_prop(parent: Value, name: &str) -> Result<Value> {
+    match parent {
+        Value::Obj(table) => match table.get(name) {
+            Some(value) => Ok(value.clone()),
+            None => Err(format!("Prop {} not exist", name).into()),
+        }
+        _ => Err("Pritive type properties not implemented".into()),
+    }
 }
