@@ -17,6 +17,12 @@ impl Check for Ast<Pattern> {
 
                 ctx.exist_mut(ident);
             }
+            P::Obj(ref elems) => {
+                for &(ref name, ref child) in elems {
+                    name.check(ctx);
+                    child.check(ctx);
+                }
+            }
         }
     }
 }
@@ -33,6 +39,12 @@ impl<'a> Check for Decl<'a> {
                 ident.check(ctx);
 
                 ctx.insert(ident, DeclInfo::new(ident.span).set_mut(is_mut));
+            }
+            P::Obj(ref elems) => {
+                for &(ref name, ref child) in elems {
+                    name.check(ctx);
+                    Decl(child).check(ctx);
+                }
             }
         }
     }

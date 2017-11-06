@@ -18,4 +18,5 @@ pub type StmtBlock = Vec<Ast<Stmt>>;
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Pattern {
     Ident(Ast<Ident>, bool),
+    Obj(Vec<(Ast<Ident>, Ast<Pattern>)>),
 }
