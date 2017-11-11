@@ -1,27 +1,30 @@
-use nal_ast::ast::prelude::{Pattern};
+use nal_ast::ast::prelude::Pattern as P;
 
-use common::{Env, Value, Result};
+use common::prelude::*;
 
-use self::Pattern::*;
-
-pub fn decl_pattern(env: &mut Env, pat: &Pattern, init: Value) -> Result<()> {
+pub fn decl_pattern(env: &mut Env, pat: &P, init: Value) -> Result<()> {
     match *pat {
-        Ident(ref name, is_mut) => {
+        P::Ident(ref name, is_mut) => {
             if is_mut {
                 env.decl_mut(name, init);
             } else {
                 env.decl(name, init);
             }
         }
-        Obj(ref elems) => {
+        P::Obj(ref elems) => {
             match init {
                 Value::Obj(table) => {
                     for &(ref name, ref subpat) in elems {
-                        let prop = table[name as &str].clone();
+                        let prop = match table.get(name as &str) {
+                            Some(ref prop) => (*prop).clone(),
+                            None => Err(format!("Invalid structure - \
+                                prop {} not exist", name as &str))?,
+                        };
+
                         decl_pattern(env, subpat, prop)?;
                     }
                 }
-                _ => Err("Primitive type properties are not implemented")?,
+                _ => Err("Property of primitive values are not implemented")?,
             }
         }
     }
@@ -29,20 +32,25 @@ pub fn decl_pattern(env: &mut Env, pat: &Pattern, init: Value) -> Result<()> {
     Ok(())
 }
 
-pub fn assign_pattern(env: &mut Env, pat: &Pattern, init: Value) -> Result<()> {
+pub fn assign_pattern(env: &mut Env, pat: &P, init: Value) -> Result<()> {
     match *pat {
-        Ident(ref name, _) => {
-            env.assign(name, init)?;
+        P::Ident(ref name, _) => {
+            env.get_mut(name)?.set(init);
         }
-        Obj(ref elems) => {
+        P::Obj(ref elems) => {
             match init {
                 Value::Obj(table) => {
                     for &(ref name, ref subpat) in elems {
-                        let prop = table[name as &str].clone();
+                        let prop = match table.get(name as &str) {
+                            Some(ref prop) => (*prop).clone(),
+                            None => Err(format!("Invalid structure - \
+                                prop {} not exist", name as &str))?,
+                        };
+
                         assign_pattern(env, subpat, prop)?;
                     }
                 }
-                _ => Err("Primitive type properties are not implemented")?,
+                _ => Err("Property of primitive values are not implemented")?,
             }
         }
     }

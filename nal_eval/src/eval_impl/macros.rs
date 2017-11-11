@@ -2,12 +2,14 @@
 macro_rules! setup {
     ($name:ident, $orig:expr, $env:expr) => (
         macro_rules! $name {
-            ($pattern:pat => $target:expr) => (
-                $orig.clone().map(|orig| match **orig {
+            ($pattern:pat => $target:expr) => ({
+                #[allow(unreachable_patterns)]
+                let res = $orig.clone().map(|orig| match **orig {
                     $pattern => $target,
                     _ => unreachable!(),
-                }).eval($env)
-            );
+                }).eval($env);
+                res
+            });
         }
     );
 

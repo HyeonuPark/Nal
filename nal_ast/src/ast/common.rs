@@ -1,4 +1,5 @@
 use std::ops::{Deref, Add};
+use std::rc::Rc;
 
 use serde::{Serialize, Serializer, Deserialize, Deserializer};
 
@@ -86,12 +87,30 @@ impl Add for Span {
     }
 }
 
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
-pub struct Ident(pub Box<str>);
+#[derive(Debug, PartialEq, Clone)]
+pub struct Ident(pub Rc<str>);
+
+impl Ident {
+    pub fn name(&self) -> Rc<str> {
+        self.0.clone()
+    }
+}
 
 impl Deref for Ident {
     type Target = str;
     fn deref(&self) -> &Self::Target {
         &*self.0
+    }
+}
+
+impl Serialize for Ident {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        self.0.serialize(s)
+    }
+}
+
+impl<'d> Deserialize<'d> for Ident {
+    fn deserialize<D: Deserializer<'d>>(d: D) -> Result<Self, D::Error> {
+        String::deserialize(d).map(|s| Ident(s.into()))
     }
 }

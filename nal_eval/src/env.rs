@@ -2,11 +2,13 @@ use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use std::cell::RefCell;
 
-use common::{Value, Result};
+use nal_ast::ast::common::{Ast, Ident};
+
+use common::prelude::*;
 
 #[derive(Debug, Clone)]
 enum Bucket {
-    Imm(Value),
+    Imm(Rc<Value>),
     Mut(Rc<RefCell<Value>>),
 }
 
@@ -14,46 +16,43 @@ use self::Bucket::*;
 
 #[derive(Debug, Default)]
 pub struct Env<'a> {
-    map: HashMap<String, Bucket>,
+    map: HashMap<Rc<str>, Bucket>,
     parent: Option<&'a Env<'a>>,
 }
 
 impl<'a> Env<'a> {
     pub fn names(&self) -> HashSet<String> {
         let mut hset = self.parent.map(|env| env.names()).unwrap_or_default();
-        hset.extend(self.map.keys().map(|k| k.clone()));
+        hset.extend(self.map.keys().map(|k| k.to_string()));
         hset
     }
 
-    pub fn decl(&mut self, name: &str, value: Value) {
-        self.map.insert(name.into(), Imm(value));
+    pub fn decl(&mut self, ident: &Ast<Ident>, value: Value) {
+        self.map.insert(ident.name(), Imm(value.into()));
     }
 
-    pub fn decl_mut(&mut self, name: &str, value: Value) {
-        self.map.insert(name.into(), Mut(Rc::new(value.into())));
+    pub fn decl_mut(&mut self, ident: &Ast<Ident>, value: Value) {
+        self.map.insert(ident.name(), Mut(Rc::new(value.into())));
     }
 
-    pub fn assign(&self, name: &str, value: Value) -> Result<()> {
+    pub fn get(&self, name: &str) -> Result<ValueRef> {
         match self.map.get(name) {
-            Some(&Imm(_)) => Err(format!("Var {} is not mutable", name))?,
-            Some(&Mut(ref v)) => {
-                *(v.borrow_mut()) = value;
-                Ok(())
-            }
+            Some(&Imm(ref v)) => Ok(v.clone().into()),
+            Some(&Mut(ref v)) => Ok(v.clone().into()),
             None => match self.parent {
-                Some(ref p) => p.assign(name, value),
-                None => Err(format!("Var {} not declared", name))?,
+                Some(ref p) => p.get(name),
+                None => Err(format!("Var {} is not declared", name))?,
             }
         }
     }
 
-    pub fn get(&self, name: &str) -> Result<Value> {
+    pub fn get_mut(&self, name: &str) -> Result<ValueRefMut> {
         match self.map.get(name) {
-            Some(&Imm(ref v)) => Ok(v.clone()),
-            Some(&Mut(ref v)) => Ok(v.borrow().clone()),
+            Some(&Imm(_)) => Err(format!("Var {} is not mutable", name))?,
+            Some(&Mut(ref v)) => Ok(v.clone().into()),
             None => match self.parent {
-                Some(ref p) => p.get(name),
-                None => Err(format!("Var {} not declared", name))?,
+                Some(ref p) => p.get_mut(name),
+                None => Err(format!("Var {} is not declared", name))?,
             }
         }
     }
@@ -66,16 +65,17 @@ impl<'a> Env<'a> {
     }
 
     pub fn clone(&self) -> Env<'static> {
+
+        fn clone_env(from: &Env, to: &mut Env) {
+            if let Some(p) = from.parent {
+                clone_env(p, to);
+            }
+
+            to.map.extend(from.map.iter().map(|(k, v)| (k.clone(), v.clone())));
+        }
+
         let mut env = Env::default();
         clone_env(self, &mut env);
         env
     }
-}
-
-fn clone_env(from: &Env, to: &mut Env) {
-    if let Some(p) = from.parent {
-        clone_env(p, to);
-    }
-
-    to.map.extend(from.map.iter().map(|(k, v)| (k.clone(), v.clone())));
 }

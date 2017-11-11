@@ -3,14 +3,14 @@ use owning_ref::RcRef;
 use nal_ast::SourceBuffer;
 use nal_ast::ast::prelude::ModuleStmt;
 
-use common::{Eval, Env, Ast, Result};
+use common::prelude::*;
 
 impl Eval for RcRef<SourceBuffer> {
     type Output = ();
 
     fn eval(&self, env: &mut Env) -> Result<()> {
         for i in 0..self.body.len() {
-            self.clone().map(|srcbuf| &(*srcbuf).body[i]).eval(env)?
+            self.clone().map(|sb| &sb.body[i]).eval(env)?;
         }
 
         Ok(())
@@ -20,11 +20,15 @@ impl Eval for RcRef<SourceBuffer> {
 impl Eval for Ast<ModuleStmt> {
     type Output = ();
 
-    #[allow(unreachable_patterns)]
     fn eval(&self, env: &mut Env) -> Result<()> {
+        use self::ModuleStmt as M;
+
         setup!(eval, self, env);
+
         match ***self {
-            ModuleStmt::Stmt(_) => eval!(ModuleStmt::Stmt(ref t) => t),
+            M::Stmt(_) => eval!(M::Stmt(ref t) => t)?,
         }
+
+        Ok(())
     }
 }

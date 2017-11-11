@@ -1,60 +1,56 @@
 use nal_ast::ast::prelude::Stmt;
 
-use common::{Eval, Env, Ast, Value, Result};
+use common::prelude::*;
 use super::pattern::{decl_pattern, assign_pattern};
-
-use self::Stmt::*;
 
 impl Eval for Ast<Stmt> {
     type Output = ();
 
     fn eval(&self, env: &mut Env) -> Result<()> {
+        use self::Stmt as S;
+        use self::Value as V;
+
         setup!(eval, self, env);
-        setup!(eval_block[], self, &mut env.clone(), *);
+        setup!(eval_block[], self, &mut env.child(), *);
 
         match ***self {
-            If(_, _, ref else_case) => match eval!(If(ref t, _, _) => t)? {
-                Value::Bool(true) => {
-                    eval_block!(If(_, ref t, _) => t)?;
+            S::If(_, _, ref on_else) => match *eval!(S::If(ref t, _, _) => t)? {
+                V::Bool(true) => {
+                    eval_block!(S::If(_, ref t, _) => t)?;
                 }
-                Value::Bool(false) => {
-                    if else_case.is_some() {
-                        eval_block!(If(_, _, ref t) => t.as_ref().unwrap())?;
+                V::Bool(false) => {
+                    if on_else.is_some() {
+                        eval_block!(S::If(_, _, ref t) => t.as_ref().unwrap())?;
                     }
                 }
-                _ => {
-                    Err("TypeError - If condition should be bool type")?;
+                _ => Err("Invalid type - If condition should be bool type")?,
+            }
+            S::While(_, _) => match *eval!(S::While(ref t, _) => t)? {
+                V::Bool(true) => {
+                    eval_block!(S::While(_, ref t) => t)?;
                 }
+                V::Bool(false) => (),
+                _ => Err("Invalid type - While condition should be bool type")?,
             }
-            While(_, _) => {
-                while match eval!(While(ref t, _) => t)? {
-                    Value::Bool(b) => b,
-                    _ => {
-                        Err("TypeError - While condition should be bool type")?
-                    }
-                } {
-                    eval_block!(While(_, ref t) => t)?;
-                }
+            S::ForIn(_, _, _) => {
+                Err("ForIn stmt is not supported yet")?
             }
-            ForIn(_, _, _) => {
-                Err("ForIn stmt will not be supported until complex types are implemented")?;
-            }
-            Function(is_static, ref func) => {
+            S::Function(is_static, ref func) => {
                 if !is_static {
-                    let v = eval!(Function(_, ref t) => t)?;
-                    env.decl(func.name.as_ref().unwrap(), v);
+                    let v = eval!(S::Function(_, ref t) => t)?;
+                    env.decl(func.name.as_ref().unwrap(), v.clone());
                 }
             }
-            Let(ref pat, _) => {
-                let v = eval!(Let(_, ref t) => t)?;
-                decl_pattern(env, pat, v)?;
+            S::Let(ref pat, _) => {
+                let v = eval!(S::Let(_, ref t) => t)?;
+                decl_pattern(env, pat, v.clone())?;
             }
-            Assign(ref pat, _) => {
-                let v = eval!(Assign(_, ref t) => t)?;
-                assign_pattern(env, pat, v)?;
+            S::Assign(ref pat, _) => {
+                let v = eval!(S::Assign(_, ref t) => t)?;
+                assign_pattern(env, pat, v.clone())?;
             }
-            Expr(_) => {
-                eval!(Expr(ref t) => t).map(|_| ())?;
+            S::Expr(_) => {
+                eval!(S::Expr(ref t) => t)?;
             }
         }
 
