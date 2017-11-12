@@ -14,6 +14,7 @@ use std::cell::RefCell;
 
 use serde_yaml::from_str as yaml;
 
+use nal_ast::ast::common::{Ast, Ident};
 use nal_eval::{eval, Value, Env};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
@@ -47,7 +48,7 @@ fn eval_print(src: &str) -> Vec<SValue> {
         Ok(Value::Unit)
     }));
 
-    env.decl("print", print);
+    env.decl(&Ast::dummy(Ident(Rc::from("print"))), print);
 
     match eval(src, &mut env) {
         Err(e) => panic!("Failed to eval: {:?}", e),
