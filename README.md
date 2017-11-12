@@ -1,6 +1,9 @@
 Nal
 =====
 
+[![Build Status](https://travis-ci.org/HyeonuPark/Nal.svg?branch=master)](https://travis-ci.org/HyeonuPark/Nal)
+[![codecov](https://codecov.io/gh/HyeonuPark/Nal/branch/master/graph/badge.svg)](https://codecov.io/gh/HyeonuPark/Nal)
+
 Nal - Your daily programming language
 
 > Note: This repository is under heavy development.

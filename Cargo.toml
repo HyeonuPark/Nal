@@ -19,3 +19,11 @@ members = [
   "nal_ast",
   "nal_eval"
 ]
+
+[badges.travis-ci]
+repository = "HyeonuPark/Nal"
+branch = "master"
+
+[badges.codecov]
+repository = "HyeonuPark"
+branch = "master"
