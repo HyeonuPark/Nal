@@ -4,11 +4,11 @@ use common::prelude::*;
 
 pub fn decl_pattern(env: &mut Env, pat: &P, init: Value) -> Result<()> {
     match *pat {
-        P::Ident(ref name, is_mut) => {
+        P::Ident(ref ident, is_mut) => {
             if is_mut {
-                env.decl_mut(name, init);
+                env.decl_mut(ident.name(), init);
             } else {
-                env.decl(name, init);
+                env.decl(ident.name(), init);
             }
         }
         P::Obj(ref elems) => {

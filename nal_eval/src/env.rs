@@ -2,8 +2,6 @@ use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 use std::cell::RefCell;
 
-use nal_ast::ast::common::{Ast, Ident};
-
 use common::prelude::*;
 
 #[derive(Debug, Clone)]
@@ -27,12 +25,12 @@ impl<'a> Env<'a> {
         hset
     }
 
-    pub fn decl(&mut self, ident: &Ast<Ident>, value: Value) {
-        self.map.insert(ident.name(), Imm(value.into()));
+    pub fn decl(&mut self, name: Rc<str>, value: Value) {
+        self.map.insert(name, Imm(value.into()));
     }
 
-    pub fn decl_mut(&mut self, ident: &Ast<Ident>, value: Value) {
-        self.map.insert(ident.name(), Mut(Rc::new(value.into())));
+    pub fn decl_mut(&mut self, name: Rc<str>, value: Value) {
+        self.map.insert(name, Mut(Rc::new(value.into())));
     }
 
     pub fn get(&self, name: &str) -> Result<ValueRef> {

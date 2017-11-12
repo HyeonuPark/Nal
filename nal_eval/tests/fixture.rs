@@ -47,7 +47,7 @@ fn eval_print(src: &str) -> Vec<SValue> {
         Ok(Value::Unit)
     }));
 
-    env.decl("print", print);
+    env.decl("print".into(), print);
 
     match eval(src, &mut env) {
         Err(e) => panic!("Failed to eval: {:?}", e),

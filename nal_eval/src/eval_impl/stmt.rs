@@ -38,7 +38,7 @@ impl Eval for Ast<Stmt> {
             S::Function(is_static, ref func) => {
                 if !is_static {
                     let v = eval!(S::Function(_, ref t) => t)?;
-                    env.decl(func.name.as_ref().unwrap(), v.clone());
+                    env.decl(func.name.as_ref().unwrap().name(), v.clone());
                 }
             }
             S::Let(ref pat, _) => {
