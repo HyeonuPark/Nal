@@ -8,7 +8,7 @@ impl Eval for Ast<Function> {
     type Output = ValueRef;
 
     fn eval(&self, env: &mut Env) -> Result<ValueRef> {
-        Ok(Value::Func(self.clone(), env.clone().into()).into())
+        Ok(Value::Func(self.clone(), env.deep_clone().into()).into())
     }
 }
 

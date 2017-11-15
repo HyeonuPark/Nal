@@ -8,7 +8,6 @@ lazy_static! {
         "if", "else",
         "while", "for", "in",
         "static", "fn", "let", "mut",
-        "num", "bool",
         "return", "break", "continue",
     ].into_iter().map(|&e| e).collect();
 }

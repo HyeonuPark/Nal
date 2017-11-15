@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 use ast::common::Span;
 use ast::module::Module;
 use parse::parse;
@@ -10,7 +8,7 @@ use Report;
 pub struct SourceBuffer {
     src: String,
     line_pos: Vec<usize>,
-    module: Module,
+    pub module: Module,
 }
 
 fn parse_line_pos(src: &str) -> Vec<usize> {
@@ -29,14 +27,6 @@ fn parse_line_pos(src: &str) -> Vec<usize> {
     }
 
     line_pos
-}
-
-impl Deref for SourceBuffer {
-    type Target = Module;
-
-    fn deref(&self) -> &Self::Target {
-        &self.module
-    }
 }
 
 impl SourceBuffer {
@@ -114,8 +104,8 @@ mod test {
         ".trim();
         let srcbuf = SourceBuffer::create(src, z()).unwrap();
 
-        assert_eq!(srcbuf.span_content(srcbuf.body[0].span), "333");
-        assert_eq!(srcbuf.span_content(srcbuf.body[1].span), "true && -false");
-        assert_eq!(srcbuf.span_content(srcbuf.body[2].span), "5+ 6");
+        assert_eq!(srcbuf.span_content(srcbuf.module.body[0].span), "333");
+        assert_eq!(srcbuf.span_content(srcbuf.module.body[1].span), "true && -false");
+        assert_eq!(srcbuf.span_content(srcbuf.module.body[2].span), "5+ 6");
     }
 }

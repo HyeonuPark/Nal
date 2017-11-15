@@ -3,6 +3,13 @@ use std::rc::Rc;
 
 use serde::{Serialize, Serializer, Deserialize, Deserializer};
 
+/// Ast node with it's span information
+///
+/// Under the hood, Ast<T> is made with (Box<T>, Span).
+/// Box part makes it easy to construct recursive structure.
+/// And Span is (usize, usize) which contains start/end offset
+/// of this AST node, half inclusive so you can use it
+/// as simple range like (span.0..span.1).
 #[derive(Clone)]
 pub struct Ast<T> {
     inner_value: Box<T>,
@@ -21,6 +28,10 @@ impl<T> Ast<T> {
         *self.inner_value
     }
 
+    /// Create dummy AST node without span information.
+    /// This constructor makes testing parser simple,
+    /// because Ast<T> considered equal when their inner T is equal
+    /// regardless their span value.
     pub fn dummy(value: T) -> Self {
         Ast {
             inner_value: value.into(),
@@ -28,6 +39,8 @@ impl<T> Ast<T> {
         }
     }
 
+    /// Replace AST's inner value with mapper function.
+    /// This method doesn't change associated span info.
     pub fn map<U, F>(self, mapper: F) -> Ast<U> where F: FnOnce(T) -> U {
         let Ast{ inner_value, span } = self;
 

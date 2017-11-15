@@ -8,10 +8,14 @@ pub enum Expr {
     Unary(UnaryOp, Ast<Expr>),
     Call(Ast<Expr>, Vec<Ast<Expr>>),
     Prop(Ast<Expr>, Ast<Ident>),
+    /// Return expr should be located inside of some function
     Return(Option<Ast<Expr>>),
+    /// Break expr should be located inside of some loop
     Break,
+    /// Continue expr should be located inside of some loop
     Continue,
     Function(Ast<Function>),
+    /// Ident expr should reference existing variable
     Ident(Ast<Ident>),
 }
 
@@ -20,6 +24,7 @@ pub enum Literal {
     Num(f64),
     Bool(bool),
     Str(String),
+    /// Obj literal should not have duplicated keys
     Obj(Vec<Ast<ObjProp>>),
 }
 
@@ -27,6 +32,7 @@ pub enum Literal {
 pub enum ObjProp {
     Named(Ast<Ident>, Ast<Expr>),
     Short(Ast<Ident>),
+    /// Method function should have it's name
     Method(Ast<Function>),
 }
 

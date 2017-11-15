@@ -9,8 +9,8 @@ impl Eval for RcRef<SourceBuffer> {
     type Output = ();
 
     fn eval(&self, env: &mut Env) -> Result<()> {
-        for i in 0..self.body.len() {
-            self.clone().map(|sb| &sb.body[i]).eval(env)?;
+        for i in 0..self.module.body.len() {
+            self.clone().map(|sb| &sb.module.body[i]).eval(env)?;
         }
 
         Ok(())

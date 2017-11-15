@@ -1,3 +1,11 @@
+//! AST and parser for Nal language.
+//!
+//! `ast` module contains types of AST nodes itself.
+//!
+//! Some specifications of AST nodes are not enforced by Rust's type system
+//! to simplify parser implementation. But they're validated right after
+//! AST contruction so SourceBuffer will not contains invalid AST.
+
 #[macro_use]
 extern crate serde_derive;
 extern crate serde;
