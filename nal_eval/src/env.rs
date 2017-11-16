@@ -40,10 +40,10 @@ impl<'a> Env<'a> {
 
     pub fn get(&self, name: &str) -> Result<ValueRef> {
         match self.map.get(name) {
-            Some(&Imm(ref v)) => Ok(v.clone().into()),
-            Some(&Mut(ref v)) => ValueRef::try_from(v.clone()),
+            Some(&Imm(ref v)) => Ok(Rc::clone(v).into()),
+            Some(&Mut(ref v)) => ValueRef::try_from(Rc::clone(v)),
             None => match self.parent {
-                Some(ref p) => p.get(name),
+                Some(p) => p.get(name),
                 None => Err(format!("Var {} is not declared", name))?,
             }
         }
@@ -52,9 +52,9 @@ impl<'a> Env<'a> {
     pub fn get_mut(&self, name: &str) -> Result<ValueRefMut> {
         match self.map.get(name) {
             Some(&Imm(_)) => Err(format!("Var {} is not mutable", name))?,
-            Some(&Mut(ref v)) => ValueRefMut::try_from(v.clone()),
+            Some(&Mut(ref v)) => ValueRefMut::try_from(Rc::clone(v)),
             None => match self.parent {
-                Some(ref p) => p.get_mut(name),
+                Some(p) => p.get_mut(name),
                 None => Err(format!("Var {} is not declared", name))?,
             }
         }
@@ -79,7 +79,7 @@ impl<'a> Env<'a> {
                 clone_env(p, to);
             }
 
-            to.map.extend(from.map.iter().map(|(k, v)| (k.clone(), v.clone())));
+            to.map.extend(from.map.iter().map(|(k, v)| (Rc::clone(k), v.clone())));
         }
 
         let mut env = Env::default();

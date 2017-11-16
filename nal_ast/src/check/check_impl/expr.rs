@@ -59,9 +59,7 @@ impl Check for Ast<Literal> {
         use self::Literal as L;
 
         match **self {
-            L::Num(_) => {}
-            L::Bool(_) => {}
-            L::Str(_) => {}
+            L::Num(_) | L::Bool(_) | L::Str(_) => {}
 
             L::Obj(ref items) => check_obj(items, ctx),
         }

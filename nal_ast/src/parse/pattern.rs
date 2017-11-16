@@ -46,7 +46,7 @@ named!(parse_obj_pattern(Input) -> Pattern, map!(
         ),
         tuple!(nl, tag!("}"))
     ),
-    |elems| Pattern::Obj(elems)
+    Pattern::Obj
 ));
 
 named!(pub parse_pattern(Input) -> Ast<Pattern>, ast!(alt_complete!(

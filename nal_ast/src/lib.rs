@@ -4,7 +4,7 @@
 //!
 //! Some specifications of AST nodes are not enforced by Rust's type system
 //! to simplify parser implementation. But they're validated right after
-//! AST contruction so SourceBuffer will not contains invalid AST.
+//! AST contruction so `SourceBuffer` will not contains invalid AST.
 
 #[macro_use]
 extern crate serde_derive;

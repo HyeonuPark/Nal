@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use std::f64::EPSILON as EPS;
 
 use nal_ast::ast::prelude::{Expr, BinaryOp as Bop, UnaryOp as Uop};
 
@@ -40,7 +41,7 @@ impl Eval for Ast<Expr> {
                 if ret.is_some() {
                     eval!(X::Return(ref t) => t.as_ref().unwrap())?.clone()
                 } else {
-                    Value::Unit
+                    V::Unit
                 }
             ))?,
             X::Break => Err(Control::Break)?,
@@ -58,9 +59,9 @@ fn eval_short_circuit(env: &mut Env, op: Bop, expr: &Ast<Expr>) -> Result<Value>
 
     if let Bop::And = op {
         return Ok(match *eval!(Expr::Binary(_, ref t, _) => t)? {
-            Value::Bool(false) => Value::Bool(false),
-            Value::Bool(true) => match *eval!(Expr::Binary(_, _, ref t) => t)? {
-                Value::Bool(v) => Value::Bool(v),
+            V::Bool(false) => V::Bool(false),
+            V::Bool(true) => match *eval!(Expr::Binary(_, _, ref t) => t)? {
+                V::Bool(v) => V::Bool(v),
                 _ => Err(INV_AND)?,
             }
             _ => Err(INV_AND)?,
@@ -69,9 +70,9 @@ fn eval_short_circuit(env: &mut Env, op: Bop, expr: &Ast<Expr>) -> Result<Value>
 
     if let Bop::Or = op {
         return Ok(match *eval!(Expr::Binary(_, ref t, _) => t)? {
-            Value::Bool(true) => Value::Bool(true),
-            Value::Bool(false) => match *eval!(Expr::Binary(_, _, ref t) => t)? {
-                Value::Bool(v) => Value::Bool(v),
+            V::Bool(true) => V::Bool(true),
+            V::Bool(false) => match *eval!(Expr::Binary(_, _, ref t) => t)? {
+                V::Bool(v) => V::Bool(v),
                 _ => Err(INV_OR)?,
             }
             _ => Err(INV_OR)?,
@@ -92,10 +93,10 @@ fn eval_binary(op: Bop, left: ValueRef, right: ValueRef) -> Result<Value> {
         (Div, &Num(l),  &Num(r) ) => Num(l / r),
 
         (Eq,  &Unit,    &Unit   ) => Bool(true),
-        (Eq,  &Num(l),  &Num(r) ) => Bool(l == r),
+        (Eq,  &Num(l),  &Num(r) ) => Bool((l - r).abs() < EPS),
         (Eq,  &Bool(l), &Bool(r)) => Bool(l == r),
         (Neq, &Unit,    &Unit   ) => Bool(false),
-        (Neq, &Num(l),  &Num(r) ) => Bool(l != r),
+        (Neq, &Num(l),  &Num(r) ) => Bool((l - r).abs() >= EPS),
         (Neq, &Bool(l), &Bool(r)) => Bool(l != r),
 
         (Gt,  &Num(l),  &Num(r) ) => Bool(l > r),
@@ -103,7 +104,7 @@ fn eval_binary(op: Bop, left: ValueRef, right: ValueRef) -> Result<Value> {
         (Lt,  &Num(l),  &Num(r) ) => Bool(l < r),
         (Lte, &Num(l),  &Num(r) ) => Bool(l <= r),
 
-        (Add, &Str(ref l), &Str(ref r)) => Str(format!("{}{}", l, r).into()),
+        (Add, &Str(ref l), &Str(ref r)) => Str(format!("{}{}", l, r)),
 
         // these will handled in eval_short_circuit function above
         (And, _, _) | (Or, _, _) => unreachable!(),
@@ -119,7 +120,7 @@ fn eval_binary(op: Bop, left: ValueRef, right: ValueRef) -> Result<Value> {
         }
         (Eq, &Func(_, _), &Func(_, _)) | (Neq, &Func(_, _), &Func(_, _)) |
         (Eq, &Native(_), &Native(_)) | (Neq, &Native(_), &Native(_)) => {
-            Err(format!("Invalid type - function types cannot be compared"))?
+            Err("Invalid type - function types cannot be compared")?
         }
         (Eq, l, r) | (Neq, l, r) => {
             Err(format!("Invalid type - both operands of equality op should \
@@ -135,27 +136,27 @@ fn eval_binary(op: Bop, left: ValueRef, right: ValueRef) -> Result<Value> {
 fn eval_unary(op: Uop, expr: ValueRef) -> Result<Value> {
     Ok(match op {
         Uop::Neg => match *expr {
-            Value::Num(v) => Value::Num(-v),
+            V::Num(v) => V::Num(-v),
             ref other => Err(format!("Invalid type - operand of Neg op should be \
                         num type, but found {:?}", other))?,
         }
         Uop::Not => match *expr {
-            Value::Bool(v) => Value::Bool(!v),
+            V::Bool(v) => V::Bool(!v),
             ref other => Err(format!("Invalid type - operand of Not op should be \
                         bool type, but found {:?}", other))?,
         }
     })
 }
 
-fn eval_prop<'a>(parent: ValueRef, name: &Rc<str>) -> Result<ValueRef> {
-
-    fn inv_struct(name: &Rc<str>) -> Control {
-        format!("Invalid struct - object doesn't have property {}", name).into()
-    }
-    const PRIM_PROP: &str = "Primitive type's property is not implemented";
-
+fn eval_prop(parent: ValueRef, name: &Rc<str>) -> Result<ValueRef> {
     parent.try_map(|parent| match *parent {
-        Value::Obj(ref table) => table.get(name).ok_or(inv_struct(name)).map(|v| v.into()),
-        _ => Err(PRIM_PROP)?,
+        V::Obj(ref table) => table.get(name)
+            .ok_or_else(|| format!(
+                "Invlaid struct - object doesn't have property {}",
+                name,
+            ).into()),
+
+        V::Unit | V::Num(_) | V::Bool(_) | V::Str(_) | V::Func(_, _) | V::Native(_)
+            => Err("Primitive type's property is not implemented")?,
     })
 }

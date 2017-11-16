@@ -8,7 +8,6 @@ impl Eval for Ast<Stmt> {
 
     fn eval(&self, env: &mut Env) -> Result<()> {
         use self::Stmt as S;
-        use self::Value as V;
 
         setup!(eval, self, env);
         setup!(eval_block[], self, &mut env.child(), *);

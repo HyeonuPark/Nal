@@ -11,6 +11,7 @@ pub mod prelude {
     pub use env::Env;
     pub use value_ref::{ValueRef, ValueRefMut};
     pub use super::{Value, Control, Error, Result, Ast, Eval};
+    pub use super::Value as V;
 }
 
 pub trait Eval {
@@ -72,9 +73,7 @@ mod dbg {
                 }
                 Native(_) => write!(f, "fn {{ native }}"),
                 Obj(ref table) => {
-                    let mut keys = table.keys()
-                        .map(|k| k.clone())
-                        .collect::<Vec<_>>();
+                    let mut keys: Vec<_> = table.keys().cloned().collect();
                     keys.sort();
 
                     let mut f = f.debug_struct("Obj");

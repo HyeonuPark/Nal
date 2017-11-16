@@ -12,11 +12,11 @@ use common::prelude::*;
 /// borrowed from variable.
 /// Also, sometimes we need only part of existing value like a property of
 /// object stored in variable.
-/// ValueRef just provide this abstraction to avoid unnecessary copy.
+/// `ValueRef` just provide this abstraction to avoid unnecessary copy.
 ///
-/// Like using RefCell, ValueRef/Mut follows Rust's borrow rules at runtime.
-/// You can't use ValueRef and ValueRefMut from same variable at the same time.
-/// Also, only single ValueRefMut can exist for single variable at the same time.
+/// Like using `RefCell`, `ValueRef/Mut` follows Rust's borrow rules at runtime.
+/// You can't use `ValueRef` and `ValueRefMut` from same variable at the same time.
+/// Also, only single `ValueRefMut` can exist for single variable at the same time.
 #[derive(Debug)]
 pub struct ValueRef(ValueRefVar);
 
@@ -74,6 +74,17 @@ impl ::std::ops::Deref for ValueRef {
     }
 }
 
+impl Into<Value> for ValueRef {
+    fn into(self) -> Value {
+        match self.0 {
+            VR::Own(v) => v,
+            VR::Part(v) => V::clone(&v),
+            VR::Imm(v) => V::clone(&v),
+            VR::Mut(BorrowRef(_, ref v)) => V::clone(v),
+        }
+    }
+}
+
 impl From<Value> for ValueRef {
     fn from(value: Value) -> Self {
         ValueRef(VR::Own(value))
@@ -94,7 +105,7 @@ impl ValueRef {
                     .map_err(|_| "Can't borrow this variable immutably")?)
         };
         Ok(ValueRef(VR::Mut(BorrowRef(
-            ManuallyDrop::new(value.clone()),
+            ManuallyDrop::new(value),
             ManuallyDrop::new(borrowed.into()),
         ))))
     }
@@ -118,12 +129,12 @@ impl ::std::ops::Drop for BorrowRef {
 /// borrowed from variable.
 /// Also, sometimes we need only part of existing value like a property of
 /// object stored in variable.
-/// ValueRefMut provide this abstraction like ValueRef.
-/// Obviously, you can't create ValueRefMut from immutable variable.
+/// `ValueRefMut` provide this abstraction like `ValueRef`.
+/// Obviously, you can't create `ValueRefMut` from immutable variable.
 ///
-/// By using RefCell, ValueRef/Mut follows Rust's borrow rules. You can't use
-/// ValueRef and ValueRefMut from same variable at the same time. Also,
-/// only single ValueRefMut can exist for single variable at the same time.
+/// By using `RefCell`, `ValueRef/Mut` follows Rust's borrow rules. You can't use
+/// `ValueRef` and `ValueRefMut` from same variable at the same time. Also,
+/// only single `ValueRefMut` can exist for single variable at the same time.
 #[derive(Debug)]
 pub struct ValueRefMut(ValueRefMutVar);
 
@@ -208,7 +219,7 @@ impl ValueRefMut {
                     .map_err(|_| "Can't borrow this variable mutably")?)
         };
         Ok(ValueRefMut(VRM::Mut(BorrowMut(
-            ManuallyDrop::new(value.clone()),
+            ManuallyDrop::new(value),
             ManuallyDrop::new(borrowed.into()),
         ))))
     }

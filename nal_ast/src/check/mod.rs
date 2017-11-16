@@ -11,7 +11,7 @@ mod check_impl;
 #[cfg(test)]
 mod tests;
 
-pub fn check<'a, K, G>(module: &Module, globals: G) -> Result<(), Vec<Error>>
+pub fn check<K, G>(module: &Module, globals: G) -> Result<(), Vec<Error>>
     where K: AsRef<str>, G: IntoIterator<Item=K> {
         use ast::common::Span;
 

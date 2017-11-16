@@ -105,7 +105,7 @@ pub struct Ident(pub Rc<str>);
 
 impl Ident {
     pub fn name(&self) -> Rc<str> {
-        self.0.clone()
+        Rc::clone(&self.0)
     }
 }
 

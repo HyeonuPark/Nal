@@ -16,7 +16,7 @@ pub fn decl_pattern(env: &mut Env, pat: &P, init: Value) -> Result<()> {
                 Value::Obj(table) => {
                     for &(ref name, ref subpat) in elems {
                         let prop = match table.get(name as &str) {
-                            Some(ref prop) => (*prop).clone(),
+                            Some(prop) => prop.clone(),
                             None => Err(format!("Invalid structure - \
                                 prop {} not exist", name as &str))?,
                         };
@@ -39,10 +39,10 @@ pub fn assign_pattern(env: &mut Env, pat: &P, init: Value) -> Result<()> {
         }
         P::Obj(ref elems) => {
             match init {
-                Value::Obj(table) => {
+                Value::Obj(mut table) => {
                     for &(ref name, ref subpat) in elems {
-                        let prop = match table.get(name as &str) {
-                            Some(ref prop) => (*prop).clone(),
+                        let prop = match table.remove(name as &str) {
+                            Some(prop) => prop,
                             None => Err(format!("Invalid structure - \
                                 prop {} not exist", name as &str))?,
                         };

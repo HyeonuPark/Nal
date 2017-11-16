@@ -4,7 +4,6 @@ use std::rc::Rc;
 use nal_ast::ast::prelude::{Literal as L, ObjProp as P};
 
 use common::prelude::*;
-use self::Value as V;
 
 impl Eval for Ast<L> {
     type Output = ValueRef;

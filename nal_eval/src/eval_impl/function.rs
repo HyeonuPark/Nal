@@ -12,9 +12,9 @@ impl Eval for Ast<Function> {
     }
 }
 
-pub fn eval_call<'a>(callee: ValueRef, args: Vec<ValueRef>) -> Result<Value> {
+pub fn eval_call(callee: ValueRef, args: Vec<ValueRef>) -> Result<Value> {
     match *callee {
-        Value::Func(ref func, ref env) => {
+        V::Func(ref func, ref env) => {
             if func.params.len() != args.len() {
                 Err(format!("Param mismatch - this function requires {} \
                 parameters, but {} provided", func.params.len(), args.len()))?;
@@ -32,8 +32,8 @@ pub fn eval_call<'a>(callee: ValueRef, args: Vec<ValueRef>) -> Result<Value> {
                     setup!(eval[], func, &mut env.child(), *);
 
                     let res = eval!(Function {
-                        name: _, params: _,
                         body: FB::Stmt(ref t),
+                        ..
                     } => t);
 
                     match res {
@@ -47,8 +47,8 @@ pub fn eval_call<'a>(callee: ValueRef, args: Vec<ValueRef>) -> Result<Value> {
                     setup!(eval, func, &mut env.child());
 
                     let res = eval!(Function {
-                        name: _, params: _,
                         body: FB::Expr(ref t),
+                        ..
                     } => t);
 
                     match res {
@@ -60,8 +60,8 @@ pub fn eval_call<'a>(callee: ValueRef, args: Vec<ValueRef>) -> Result<Value> {
                 }
             }
         }
-        Value::Native(ref func) => {
-            func(args.into_iter().map(|v| v.clone()).collect())
+        V::Native(ref func) => {
+            func(args.into_iter().map(|v| v.into()).collect())
                 .map_err(Control::Error)
         }
         _ => {

@@ -30,7 +30,7 @@ fn parse_line_pos(src: &str) -> Vec<usize> {
 }
 
 impl SourceBuffer {
-    pub fn create<'a, S, K, G>(src: S, globals: G) -> Result<Self, Report>
+    pub fn create<S, K, G>(src: S, globals: G) -> Result<Self, Report>
         where S: Into<String>, K: AsRef<str>, G: IntoIterator<Item=K> {
             let src = src.into();
             let module = parse(&src)?;

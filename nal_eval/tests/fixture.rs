@@ -40,7 +40,7 @@ impl From<Value> for SValue {
 fn eval_print(src: &str) -> Vec<SValue> {
     let mut env = Env::default();
     let content = Rc::new(RefCell::new(Vec::new()));
-    let content2 = content.clone();
+    let content2 = Rc::clone(&content);
 
     let print = Value::Native(Rc::new(move|args| {
         content2.borrow_mut().extend(args);
@@ -49,7 +49,7 @@ fn eval_print(src: &str) -> Vec<SValue> {
 
     env.decl("print".into(), print);
 
-    match eval(src, &mut env) {
+    match eval(src, &env) {
         Err(e) => panic!("Failed to eval: {:?}", e),
         Ok(_) => {
             content.borrow().iter()
