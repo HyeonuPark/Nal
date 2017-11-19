@@ -75,4 +75,12 @@ macro_rules! fixtures {
 
 fixtures!(
     simple, "simple"
+    comment, "comment"
+    variable, "variable"
+    arithmetics, "arithmetics"
+    boolean, "boolean"
+    comparison, "comparison"
+    branch, "branch"
+    while_loop, "while_loop"
+    function, "function"
 );

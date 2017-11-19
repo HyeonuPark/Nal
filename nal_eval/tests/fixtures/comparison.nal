@@ -1,0 +1,23 @@
+print(10 == 1)
+print(20 == 20)
+print(30 == 300)
+
+print(10 != 1)
+print(20 != 20)
+print(30 != 300)
+
+print(10 < 1)
+print(20 < 20)
+print(30 < 300)
+
+print(10 > 1)
+print(20 > 20)
+print(30 > 300)
+
+print(10 <= 1)
+print(20 <= 20)
+print(30 <= 300)
+
+print(10 >= 1)
+print(20 >= 20)
+print(30 >= 300)
