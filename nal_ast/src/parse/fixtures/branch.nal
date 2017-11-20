@@ -10,6 +10,14 @@ else {
   let bar = -2
 }
 
+if 1 {
+  'one'
+} else if 2 {
+  'two'
+} else if 3 {
+  "three"
+}
+
 while foo {
   let mut foo = 0
 }

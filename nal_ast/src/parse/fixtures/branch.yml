@@ -2,28 +2,32 @@
 body:
   - Stmt:
       If:
-        - Binary:
-          - Gte:
-          - Ident: balance
-          - Ident: price
         -
-          - Let:
-            - Ident:
-              - foo
-              - false
-            - Literal:
-                Num: 1
+          -
+            - Binary:
+              - Gte:
+              - Ident: balance
+              - Ident: price
+            -
+              - Let:
+                - Ident:
+                  - foo
+                  - false
+                - Literal:
+                    Num: 1
         -
   - Stmt:
       If:
-        - Binary:
-          - And:
-          - Ident: this
-          - Ident: that
         -
-          - Expr:
-              Literal:
-                Num: 777
+          -
+            - Binary:
+              - And:
+              - Ident: this
+              - Ident: that
+            -
+              - Expr:
+                  Literal:
+                    Num: 777
         -
           - Let:
             - Ident:
@@ -33,6 +37,31 @@ body:
               - Neg:
               - Literal:
                   Num: 2
+  - Stmt:
+      If:
+        -
+          -
+            - Literal:
+                Num: 1
+            -
+              - Expr:
+                  Literal:
+                    Str: one
+          -
+            - Literal:
+                Num: 2
+            -
+              - Expr:
+                  Literal:
+                    Str: two
+          -
+            - Literal:
+                Num: 3
+            -
+              - Expr:
+                  Literal:
+                    Str: three
+        -
   - Stmt:
       While:
         - Ident: foo
@@ -64,20 +93,22 @@ body:
                     Num: 5
   - Stmt:
       If:
-        - Literal:
-            Bool: true
         -
-          - While:
+          -
             - Literal:
-                Bool: false
+                Bool: true
             -
-              - ForIn:
-                - Ident:
-                  - elem
-                  - false
-                - Ident: container
+              - While:
+                - Literal:
+                    Bool: false
                 -
-                  - Expr:
-                      Literal:
-                        Num: 42
+                  - ForIn:
+                    - Ident:
+                      - elem
+                      - false
+                    - Ident: container
+                    -
+                      - Expr:
+                          Literal:
+                            Num: 42
         -

@@ -5,7 +5,7 @@ use super::function::Function;
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Stmt {
     /// If(condition, positive case, negative case)
-    If(Ast<Expr>, Ast<StmtBlock>, Option<Ast<StmtBlock>>),
+    If(Vec<(Ast<Expr>, Ast<StmtBlock>)>, Option<Ast<StmtBlock>>),
     /// While(condition, body)
     While(Ast<Expr>, Ast<StmtBlock>),
     /// ForIn(each element, container, body)

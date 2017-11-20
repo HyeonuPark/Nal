@@ -9,10 +9,12 @@ impl Check for Ast<Stmt> {
         use ast::stmt::Stmt::*;
 
         match **self {
-            If(ref cond, ref pos, ref neg) => {
-                cond.check(ctx);
-                pos.check(ctx);
-                neg.check(ctx);
+            If(ref cases, ref otherwise) => {
+                for &(ref cond, ref pos) in cases {
+                    cond.check(ctx);
+                    pos.check(ctx);
+                }
+                otherwise.check(ctx);
             }
             While(ref cond, ref body) => {
                 cond.check(ctx);
