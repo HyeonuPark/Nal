@@ -1,7 +1,7 @@
 use ast::common::Ast;
 use ast::stmt::Pattern;
 
-use check::{Check, Ctx, DeclInfo, Error as E};
+use check::{Check, Ctx, Error as E};
 
 impl Check for Ast<Pattern> {
     fn check(&self, ctx: &mut Ctx) {
@@ -14,8 +14,6 @@ impl Check for Ast<Pattern> {
                 if is_mut {
                     ctx.report(E::AssignMutPattern(self.span));
                 }
-
-                ctx.exist_mut(ident);
             }
             P::Obj(ref elems) => {
                 for &(ref name, ref child) in elems {
@@ -35,10 +33,8 @@ impl<'a> Check for Decl<'a> {
         use self::Pattern as P;
 
         match **self.0 {
-            P::Ident(ref ident, is_mut) => {
+            P::Ident(ref ident, _) => {
                 ident.check(ctx);
-
-                ctx.insert(ident, DeclInfo::new(ident.span).set_mut(is_mut));
             }
             P::Obj(ref elems) => {
                 for &(ref name, ref child) in elems {

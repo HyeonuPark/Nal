@@ -1,7 +1,7 @@
 use ast::common::Ast;
 use ast::stmt::{Stmt, StmtBlock};
 
-use check::{Check, Ctx, DeclInfo, Error as E};
+use check::{Check, Ctx, Error as E};
 use super::pattern::Decl;
 
 impl Check for Ast<Stmt> {
@@ -26,12 +26,10 @@ impl Check for Ast<Stmt> {
             ForIn(ref each, ref seq, ref body) => {
                 seq.check(ctx);
 
-                ctx.subscope(|ctx| {
-                    Decl(each).check(ctx);
+                Decl(each).check(ctx);
 
-                    ctx.with_loop(|ctx| {
-                        body.check(ctx);
-                    });
+                ctx.with_loop(|ctx| {
+                    body.check(ctx);
                 });
             }
             Function(is_static, ref func) => {
@@ -60,32 +58,17 @@ impl Check for Ast<Stmt> {
 
 impl Check for Ast<StmtBlock> {
     fn check(&self, ctx: &mut Ctx) {
-        ctx.subscope(|ctx| {
-            for stmt in self.iter() {
-                match **stmt {
-                    Stmt::Function(is_static, ref func) if is_static => {
-                        if let Some(ref name) = func.name {
-                            ctx.insert(name, DeclInfo::new(name.span));
-                        }
-                    }
-                    _ => {}
+        for stmt in self.iter() {
+            match **stmt {
+                Stmt::Function(is_static, ref func) if is_static => {
+                    func.check(ctx);
                 }
+                _ => {}
             }
+        }
 
-            for stmt in self.iter() {
-                match **stmt {
-                    Stmt::Function(is_static, ref func) if is_static => {
-                        func.check(ctx);
-                    }
-                    _ => {}
-                }
-            }
-
-            ctx.subscope(|ctx| {
-                for stmt in self.iter() {
-                    stmt.check(ctx);
-                }
-            })
-        });
+        for stmt in self.iter() {
+            stmt.check(ctx);
+        }
     }
 }

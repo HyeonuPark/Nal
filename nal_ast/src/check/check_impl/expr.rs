@@ -47,8 +47,6 @@ impl Check for Ast<Expr> {
             }
             Ident(ref ident) => {
                 ident.check(ctx);
-
-                ctx.exist(ident);
             }
         }
     }
