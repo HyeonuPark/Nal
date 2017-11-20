@@ -1,0 +1,21 @@
+let foo = 3
+print(foo)
+let bar = true
+print(bar)
+
+let mut baz = 42
+print(baz)
+baz = baz - 10
+print(baz)
+baz = baz + 20
+print(baz)
+baz = 3735928559
+print(baz)
+baz = -142857
+print(baz)
+
+
+let mut quux = true
+print(quux)
+quux = false
+print(quux)
