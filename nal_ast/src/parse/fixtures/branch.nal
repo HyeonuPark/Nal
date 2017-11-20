@@ -18,6 +18,14 @@ if 1 {
   "three"
 }
 
+if 1 {
+  'hana'
+} else if 2 {
+  'dool'
+} else {
+  'hmm'
+}
+
 while foo {
   let mut foo = 0
 }

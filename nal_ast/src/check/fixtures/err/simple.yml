@@ -1,6 +1,0 @@
----
-- VarNotMut:
-  - [12, 15]
-  - [4, 7]
-- VarNotDecl: [21, 26]
-- VarNotDecl: [37, 40]

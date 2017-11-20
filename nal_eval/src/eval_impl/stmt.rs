@@ -1,56 +1,78 @@
-use nal_ast::ast::prelude::Stmt;
-
 use common::prelude::*;
 use super::pattern::{decl_pattern, assign_pattern};
 
-impl Eval for Ast<Stmt> {
+use self::ast::{Ast, Stmt};
+use self::Stmt as S;
+
+impl Eval for Stmt {
     type Output = ();
 
     fn eval(&self, env: &mut Env) -> Result<()> {
-        use self::Stmt as S;
-
-        setup!(eval, self, env);
-        setup!(eval_block[], self, &mut env.child(), *);
-
-        match ***self {
-            S::If(_, _, ref on_else) => match *eval!(S::If(ref t, _, _) => t)? {
-                V::Bool(true) => {
-                    eval_block!(S::If(_, ref t, _) => t)?;
-                }
-                V::Bool(false) => {
-                    if on_else.is_some() {
-                        eval_block!(S::If(_, _, ref t) => t.as_ref().unwrap())?;
+        match *self {
+            S::If(ref cases, ref otherwise) => {
+                for &(ref cond, ref body) in cases {
+                    match *cond.eval(env)? {
+                        V::Bool(true) => {
+                            body.eval(env)?;
+                            return Ok(());
+                        }
+                        V::Bool(false) => {}
+                        _ => Err("Invalie type - Condition should be Bool type")?,
                     }
                 }
-                _ => Err("Invalid type - If condition should be bool type")?,
-            }
-            S::While(_, _) => match *eval!(S::While(ref t, _) => t)? {
-                V::Bool(true) => {
-                    eval_block!(S::While(_, ref t) => t)?;
+
+                if let Some(ref body) = *otherwise {
+                    body.eval(env)?;
                 }
-                V::Bool(false) => (),
-                _ => Err("Invalid type - While condition should be bool type")?,
             }
-            S::ForIn(_, _, _) => {
-                Err("ForIn stmt is not supported yet")?
+            S::While(ref cond, ref body) => loop {
+                match *cond.eval(env)? {
+                    V::Bool(true) => body.eval(env)?,
+                    V::Bool(false) => break,
+                    _ => Err("Invalid type - Condition should be Bool type")?,
+                }
             }
+            S::ForIn(_, _, _) => Err("ForIn stmt is not supported yet")?,
             S::Function(is_static, ref func) => {
                 if !is_static {
-                    let v = eval!(S::Function(_, ref t) => t)?;
-                    env.decl(func.name.as_ref().unwrap().name(), v.clone());
+                    let v = func.eval(env)?;
+                    env.decl(func.name.as_ref().unwrap().name(), v);
                 }
             }
-            S::Let(ref pat, _) => {
-                let v = eval!(S::Let(_, ref t) => t)?;
-                decl_pattern(env, pat, v.clone())?;
+            S::Let(ref pat, ref expr) => {
+                let v = expr.eval(env)?;
+                decl_pattern(env, pat, v.into())?;
             }
-            S::Assign(ref pat, _) => {
-                let v = eval!(S::Assign(_, ref t) => t)?;
-                assign_pattern(env, pat, v.clone())?;
+            S::Assign(ref pat, ref expr) => {
+                let v= expr.eval(env)?;
+                assign_pattern(env, pat, v.into())?;
             }
-            S::Expr(_) => {
-                eval!(S::Expr(ref t) => t)?;
+            S::Expr(ref expr) => {
+                expr.eval(env)?;
             }
+        }
+
+        Ok(())
+    }
+}
+
+impl Eval for [Ast<Stmt>] {
+    type Output = ();
+
+    fn eval(&self, env: &mut Env) -> Result<()> {
+        for stmt in self {
+            match **stmt {
+                S::Function(is_static, ref func) if is_static => {
+                    let name = func.name.as_ref().unwrap().name();
+                    let v = func.eval(&mut env.child())?;
+                    env.decl(name, v);
+                }
+                _ => {}
+            }
+        }
+
+        for stmt in self {
+            stmt.eval(env)?;
         }
 
         Ok(())

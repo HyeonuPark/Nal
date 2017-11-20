@@ -1,32 +1,27 @@
-use owning_ref::RcRef;
-
-use nal_ast::SourceBuffer;
-use nal_ast::ast::prelude::ModuleStmt;
+use nal_ast::ast::prelude::{Module, ModuleStmt};
 
 use common::prelude::*;
 
-impl Eval for RcRef<SourceBuffer> {
+impl Eval for Module {
     type Output = ();
 
     fn eval(&self, env: &mut Env) -> Result<()> {
-        for i in 0..self.module.body.len() {
-            self.clone().map(|sb| &sb.module.body[i]).eval(env)?;
+        for stmt in &self.body {
+            stmt.eval(env)?;
         }
 
         Ok(())
     }
 }
 
-impl Eval for Ast<ModuleStmt> {
+impl Eval for ModuleStmt {
     type Output = ();
 
     fn eval(&self, env: &mut Env) -> Result<()> {
         use self::ModuleStmt as M;
 
-        setup!(eval, self, env);
-
-        match ***self {
-            M::Stmt(_) => eval!(M::Stmt(ref t) => t)?,
+        match *self {
+            M::Stmt(ref stmt) => stmt.eval(env)?,
         }
 
         Ok(())

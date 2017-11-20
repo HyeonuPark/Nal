@@ -1,7 +1,0 @@
-foo + 3
-let foo = 2
-
-if true {
-  let baz = false
-}
-baz

@@ -4,11 +4,11 @@ use nal_ast::ast::prelude::{Function, FunctionBody as FB};
 use common::prelude::*;
 use super::pattern::decl_pattern;
 
-impl Eval for Ast<Function> {
-    type Output = ValueRef;
+impl Eval for Function {
+    type Output = Value;
 
-    fn eval(&self, env: &mut Env) -> Result<ValueRef> {
-        Ok(Value::Func(self.clone(), env.deep_clone().into()).into())
+    fn eval(&self, env: &mut Env) -> Result<Value> {
+        Ok(env.get_fn(self))
     }
 }
 
@@ -28,30 +28,16 @@ pub fn eval_call(callee: ValueRef, args: Vec<ValueRef>) -> Result<Value> {
                 .collect::<Result<Vec<_>>>()?;
 
             match func.body {
-                FB::Stmt(_) => {
-                    setup!(eval[], func, &mut env.child(), *);
-
-                    let res = eval!(Function {
-                        body: FB::Stmt(ref t),
-                        ..
-                    } => t);
-
-                    match res {
+                FB::Stmt(ref stmt) => {
+                    match stmt.eval(env) {
                         Ok(_) => Ok(Value::Unit),
                         Err(Control::Return(v)) => Ok(v),
                         Err(Control::Error(e)) => Err(Control::Error(e)),
                         _ => unreachable!(),
                     }
                 }
-                FB::Expr(_) => {
-                    setup!(eval, func, &mut env.child());
-
-                    let res = eval!(Function {
-                        body: FB::Expr(ref t),
-                        ..
-                    } => t);
-
-                    match res {
+                FB::Expr(ref expr) => {
+                    match expr.eval(env) {
                         Ok(v) => Ok(v.clone()),
                         Err(Control::Return(v)) => Ok(v),
                         Err(Control::Error(e)) => Err(Control::Error(e)),

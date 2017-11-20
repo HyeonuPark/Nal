@@ -1,66 +1,64 @@
 use std::rc::Rc;
 use std::f64::EPSILON as EPS;
 
-use nal_ast::ast::prelude::{Expr, BinaryOp as Bop, UnaryOp as Uop};
-
 use common::prelude::*;
 use super::function::eval_call;
 
-impl Eval for Ast<Expr> {
+use self::ast::{Expr, BinaryOp as Bop, UnaryOp as Uop};
+
+impl Eval for Expr {
     type Output = ValueRef;
 
     fn eval(&self, env: &mut Env) -> Result<ValueRef> {
         use self::Expr as X;
 
-        setup!(eval, self, env);
-        setup!(eval_tuple[], self, env, *);
-
-        Ok(match ***self {
-            X::Literal(_) => eval!(X::Literal(ref t) => t)?,
-            X::Binary(op, _, _) if op == Bop::And || op == Bop::Or => {
-                eval_short_circuit(env, op, self)?.into()
+        Ok(match *self {
+            X::Literal(ref lit) => lit.eval(env)?.into(),
+            X::Binary(op, ref left, ref right)
+                if op == Bop::And || op == Bop::Or => {
+                    eval_short_circuit(env, op, left, right)?.into()
+                }
+            X::Binary(op, ref left, ref right) => {
+                eval_binary(op, left.eval(env)?, right.eval(env)?)?.into()
             }
-            X::Binary(op, _, _) => eval_binary(
-                op,
-                eval!(X::Binary(_, ref t, _) => t)?,
-                eval!(X::Binary(_, _, ref t) => t)?,
-            )?.into(),
-            X::Unary(op, _) => eval_unary(
-                op,
-                eval!(X::Unary(_, ref t) => t)?,
-            )?.into(),
-            X::Call(_, _) => eval_call(
-                eval!(X::Call(ref t, _) => t)?,
-                eval_tuple!(X::Call(_, ref t) => t)?,
-            )?.into(),
-            X::Prop(_, ref name) => eval_prop(
-                eval!(X::Prop(ref t, _) => t)?,
-                &name.0,
-            )?,
-            X::Return(ref ret) => Err(Control::Return(
-                if ret.is_some() {
-                    eval!(X::Return(ref t) => t.as_ref().unwrap())?.clone()
-                } else {
-                    V::Unit
+            X::Unary(op, ref operand) => {
+                eval_unary(op, operand.eval(env)?)?.into()
+            }
+            X::Call(ref callee, ref args) => {
+                let args = args.iter()
+                    .map(|a| a.eval(env))
+                    .collect::<Result<Vec<_>>>()?;
+
+                eval_call(callee.eval(env)?, args)?.into()
+            }
+            X::Prop(ref parent, ref ident) => {
+                eval_prop(parent.eval(env)?, ident.name())?
+            }
+            X::Return(ref retval) => Err(Control::Return(
+                match *retval {
+                    Some(ref retval) => retval.eval(env)?.into(),
+                    None => V::Unit,
                 }
             ))?,
             X::Break => Err(Control::Break)?,
             X::Continue => Err(Control::Continue)?,
-            X::Function(_) => eval!(X::Function(ref t) => t)?,
+            X::Function(ref func) => func.eval(env)?.into(),
             X::Ident(ref name) => env.get(name)?,
         })
     }
 }
 
-fn eval_short_circuit(env: &mut Env, op: Bop, expr: &Ast<Expr>) -> Result<Value> {
-    setup!(eval, expr, env);
+fn eval_short_circuit(
+    env: &mut Env, op: Bop,
+    left: &Expr, right: &Expr,
+) -> Result<Value> {
     const INV_AND: &str = "Invalid type - operands of And op should be bool type";
     const INV_OR: &str = "Invalid type - operands of Or op should be bool type";
 
     if let Bop::And = op {
-        return Ok(match *eval!(Expr::Binary(_, ref t, _) => t)? {
+        return Ok(match *left.eval(env)? {
             V::Bool(false) => V::Bool(false),
-            V::Bool(true) => match *eval!(Expr::Binary(_, _, ref t) => t)? {
+            V::Bool(true) => match *right.eval(env)? {
                 V::Bool(v) => V::Bool(v),
                 _ => Err(INV_AND)?,
             }
@@ -69,9 +67,9 @@ fn eval_short_circuit(env: &mut Env, op: Bop, expr: &Ast<Expr>) -> Result<Value>
     }
 
     if let Bop::Or = op {
-        return Ok(match *eval!(Expr::Binary(_, ref t, _) => t)? {
+        return Ok(match *left.eval(env)? {
             V::Bool(true) => V::Bool(true),
-            V::Bool(false) => match *eval!(Expr::Binary(_, _, ref t) => t)? {
+            V::Bool(false) => match *right.eval(env)? {
                 V::Bool(v) => V::Bool(v),
                 _ => Err(INV_OR)?,
             }
@@ -148,9 +146,9 @@ fn eval_unary(op: Uop, expr: ValueRef) -> Result<Value> {
     })
 }
 
-fn eval_prop(parent: ValueRef, name: &Rc<str>) -> Result<ValueRef> {
+fn eval_prop(parent: ValueRef, name: Rc<str>) -> Result<ValueRef> {
     parent.try_map(|parent| match *parent {
-        V::Obj(ref table) => table.get(name)
+        V::Obj(ref table) => table.get(&name)
             .ok_or_else(|| format!(
                 "Invlaid struct - object doesn't have property {}",
                 name,

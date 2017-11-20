@@ -2,6 +2,7 @@ use std::rc::Rc;
 use std::collections::HashMap;
 
 use owning_ref::RcRef;
+
 use nal_ast::ast::prelude as ast;
 use nal_ast::SourceBuffer;
 
@@ -10,8 +11,10 @@ use env::Env;
 pub mod prelude {
     pub use env::Env;
     pub use value_ref::{ValueRef, ValueRefMut};
-    pub use super::{Value, Control, Error, Result, Ast, Eval};
+    pub use super::{Value, Control, Error, Result, Eval};
     pub use super::Value as V;
+
+    pub use nal_ast::ast::prelude as ast;
 }
 
 pub trait Eval {
@@ -30,7 +33,6 @@ pub enum Control {
 
 pub type Error = String;
 pub type Result<T> = ::std::result::Result<T, Control>;
-pub type Ast<T> = RcRef<SourceBuffer, ast::Ast<T>>;
 
 impl<T: Into<Error>> From<T> for Control {
     fn from(err: T) -> Self {
@@ -44,7 +46,7 @@ pub enum Value {
     Num(f64),
     Bool(bool),
     Str(String),
-    Func(Ast<ast::Function>, Rc<Env<'static>>),
+    Func(RcRef<SourceBuffer, ast::Function>, Rc<Env<'static>>),
     Native(Rc<Fn(Vec<Value>) -> ::std::result::Result<Value, Error>>),
     Obj(HashMap<Rc<str>, Value>),
 }

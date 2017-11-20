@@ -63,6 +63,27 @@ body:
                     Str: three
         -
   - Stmt:
+      If:
+        -
+          -
+            - Literal:
+                Num: 1
+            -
+              - Expr:
+                  Literal:
+                    Str: hana
+          -
+            - Literal:
+                Num: 2
+            -
+              - Expr:
+                  Literal:
+                    Str: dool
+        -
+          - Expr:
+              Literal:
+                Str: hmm
+  - Stmt:
       While:
         - Ident: foo
         -

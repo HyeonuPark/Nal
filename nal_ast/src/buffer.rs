@@ -42,6 +42,11 @@ impl SourceBuffer {
                 module,
             })
     }
+
+    pub fn as_module(&self) -> &Module {
+        &self.module
+    }
+
     pub fn span_content(&self, span: Span) -> &str {
         let Span(start, end) = span;
         &self.src[start..end]
@@ -68,11 +73,6 @@ impl SourceBuffer {
 #[cfg(test)]
 mod test {
     use super::*;
-    use std::iter::{empty, Empty};
-
-    fn z() -> Empty<&'static str> {
-        empty()
-    }
 
     #[test]
     fn test_srcbuf_offset() {
@@ -83,7 +83,7 @@ mod test {
         ".trim();
         assert_eq!(src.len(), 15);
 
-        let srcbuf = SourceBuffer::create(src, z()).unwrap();
+        let srcbuf = SourceBuffer::create(src).unwrap();
         assert_eq!(srcbuf.line_pos, vec![4, 9, 14]);
 
         assert_eq!(srcbuf.offset_byte_pos(0), (0, 0));
@@ -101,7 +101,7 @@ mod test {
             true && -false
             5+ 6
         ".trim();
-        let srcbuf = SourceBuffer::create(src, z()).unwrap();
+        let srcbuf = SourceBuffer::create(src).unwrap();
 
         assert_eq!(srcbuf.span_content(srcbuf.module.body[0].span), "333");
         assert_eq!(srcbuf.span_content(srcbuf.module.body[1].span), "true && -false");
