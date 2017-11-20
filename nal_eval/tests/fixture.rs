@@ -38,7 +38,6 @@ impl From<Value> for SValue {
 }
 
 fn eval_print(src: &str) -> Vec<SValue> {
-    let mut env = Env::default();
     let content = Rc::new(RefCell::new(Vec::new()));
     let content2 = Rc::clone(&content);
 
@@ -47,9 +46,7 @@ fn eval_print(src: &str) -> Vec<SValue> {
         Ok(Value::Unit)
     }));
 
-    env.decl("print".into(), print);
-
-    match eval(src, &env) {
+    match eval(src, vec![(Rc::from("print"), print)]) {
         Err(e) => panic!("Failed to eval: {:?}", e),
         Ok(_) => {
             content.borrow().iter()
