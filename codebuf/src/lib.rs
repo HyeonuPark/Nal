@@ -1,7 +1,6 @@
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
+
+mod codebuf;
+mod span;
+
+pub use codebuf::CodeBuf;
+pub use span::{Span, Spanned};
