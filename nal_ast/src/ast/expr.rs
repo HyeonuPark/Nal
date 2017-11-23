@@ -15,7 +15,6 @@ pub enum Expr {
     /// Continue expr should be located inside of some loop
     Continue,
     Function(Ast<Function>),
-    /// Ident expr should reference existing variable
     Ident(Ast<Ident>),
 }
 

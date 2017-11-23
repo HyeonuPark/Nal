@@ -11,16 +11,19 @@ extern crate nal_eval;
 
 use std::rc::Rc;
 use std::cell::RefCell;
+use std::collections::HashMap;
 
 use serde_yaml::from_str as yaml;
 
-use nal_eval::{eval, Value, Env};
+use nal_eval::{eval, Value};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 enum SValue {
     Unit,
     Num(f64),
     Bool(bool),
+    Str(String),
+    Obj(HashMap<String, SValue>)
 }
 
 use self::Value as V;
@@ -32,6 +35,13 @@ impl From<Value> for SValue {
             V::Unit => S::Unit,
             V::Num(v) => S::Num(v),
             V::Bool(v) => S::Bool(v),
+            V::Str(v) => S::Str(v),
+            V::Obj(table) => S::Obj(
+                table.into_iter()
+                    .map(|(k, v)| (k.to_string(), SValue::from(v)))
+                    .collect()
+            ),
+
             _ => panic!("Can't serialize function values"),
         }
     }

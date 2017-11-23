@@ -5,10 +5,16 @@ use check::{Check, Ctx, Error as E};
 
 lazy_static! {
     static ref RESERVED: HashSet<&'static str> = [
-        "if", "else",
-        "while", "for", "in",
-        "static", "fn", "let", "mut",
-        "return", "break", "continue",
+        "let", "mut", "as",
+        "if", "else", "while", "for",
+        "in", "break", "continue",
+        "static", "fn", "return",
+        "import", "export",
+        "type", "enum", "const",
+        "trait", "private",
+        "try", "do", "yield",
+        "match", "and", "or",
+        "true", "false",
     ].into_iter().map(|&e| e).collect();
 }
 

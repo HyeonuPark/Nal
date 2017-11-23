@@ -40,6 +40,12 @@ impl<T: Into<Error>> From<T> for Control {
     }
 }
 
+impl From<Value> for Control {
+    fn from(v: Value) -> Self {
+        Control::Return(v)
+    }
+}
+
 #[derive(Clone)]
 pub enum Value {
     Unit,

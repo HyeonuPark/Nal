@@ -15,7 +15,6 @@ pub enum Stmt {
     Function(bool, Ast<Function>),
     /// Let(variables, target value)
     Let(Ast<Pattern>, Ast<Expr>),
-    /// Assignment should operate to existing mutable variables
     /// Assign(variables, target value)
     Assign(Ast<Pattern>, Ast<Expr>),
     Expr(Ast<Expr>),
