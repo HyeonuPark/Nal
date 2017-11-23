@@ -17,7 +17,10 @@ license = "MIT/Apache-2.0"
 [workspace]
 members = [
   "nal_ast",
-  "nal_eval"
+  "nal_eval",
+  "codebuf",
+  "nal_front_ast",
+  "nal_core_ast",
 ]
 
 [badges.travis-ci]
