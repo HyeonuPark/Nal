@@ -1,2 +1,3 @@
+#![deny(warnings)]
 
 fn main() {}
