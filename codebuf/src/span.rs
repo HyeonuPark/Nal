@@ -38,7 +38,7 @@ impl ::std::ops::Add for Span {
     type Output = Self;
 
     fn add(self, right: Span) -> Span {
-        Span::new(self.0, right.1)
+        Span::new(self.0.min(right.0), self.1.max(right.1))
     }
 }
 
@@ -85,11 +85,5 @@ mod tests {
         assert_eq!(s(1, 2) + s(3, 4), s(1, 4));
         assert_eq!(s(1, 3) + s(2, 4), s(1, 4));
         assert_eq!(s(1, 4) + s(2, 3), s(1, 4));
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_fail_add_span() {
-        s(3, 4) + s(1, 2);
     }
 }
