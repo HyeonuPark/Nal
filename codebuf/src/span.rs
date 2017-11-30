@@ -4,12 +4,14 @@ pub trait Spanned {
     fn span(&self) -> Span;
 }
 
+/// This struct is identical to `(start_offset, end_offset)`
+/// but guaranteed to be `start_offset < end_offset`
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Span(usize, usize);
 
 impl Span {
     pub fn new(start: usize, end: usize) -> Self {
-        assert!(start < end);
+        assert!(start < end, "Span end MUST be greater then span start");
         Span(start, end)
     }
 
@@ -82,6 +84,7 @@ mod tests {
     fn test_add_span() {
         assert_eq!(s(1, 2) + s(3, 4), s(1, 4));
         assert_eq!(s(1, 3) + s(2, 4), s(1, 4));
+        assert_eq!(s(1, 4) + s(2, 3), s(1, 4));
     }
 
     #[test]

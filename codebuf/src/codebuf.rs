@@ -1,5 +1,6 @@
 use span::Spanned;
 
+/// Codebuf contains source code and its line information
 #[derive(Debug)]
 pub struct CodeBuf {
     code: Box<str>,
@@ -36,28 +37,43 @@ impl CodeBuf {
         &self.code[span.start()..span.end()]
     }
 
-    /// Line informatin of this byte offset
+    /// Line information of this byte offset
     ///
-    /// Returns (line number, line offset)
-    /// both starts from 0
-    pub fn line_of(&self, offset: usize) -> (usize, usize) {
+    /// Both line count and offset are starts from 0
+    pub fn line_of(&self, offset: usize) -> Line {
         assert!(offset < self.code.len());
 
-        let line_num = match self.line_table.binary_search(&offset) {
+        let line_count = match self.line_table.binary_search(&offset) {
             Ok(n) | Err(n) => n,
         };
-        let line_offset = match line_num {
+        let line_offset = match line_count {
             0 => 0,
-            _ => self.line_table[line_num - 1] + 1,
+            _ => self.line_table[line_count - 1] + 1,
         };
 
-        (line_num, line_offset)
+        Line {
+            count: line_count,
+            offset: line_offset,
+        }
     }
+}
+
+/// Line information
+///
+/// Both line count and offset are starts from 0
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Line {
+    count: usize,
+    offset: usize,
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn line(count: usize, offset: usize) -> Line {
+        Line { count, offset }
+    }
 
     #[test]
     fn test_line_of() {
@@ -70,8 +86,23 @@ mod tests {
 
         assert_eq!(buf.line_table, vec![2, 6, 12].into());
 
-        assert_eq!(buf.line_of(1), (0, 0));
-        assert_eq!(buf.line_of(6), (1, 3));
+        assert_eq!(buf.line_of(1), line(0, 0));
+        assert_eq!(buf.line_of(6), line(1, 3));
+    }
+
+    #[test]
+    fn test_crlf_line_of() {
+        let code = "\
+            a\r\n\
+            cd\r\n\
+            fghij\
+        ";
+        let buf = CodeBuf::new(code);
+
+        assert_eq!(buf.line_table, vec![2, 6, 12].into());
+
+        assert_eq!(buf.line_of(1), line(0, 0));
+        assert_eq!(buf.line_of(6), line(1, 3));
     }
 
     #[test]
