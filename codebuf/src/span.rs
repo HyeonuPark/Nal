@@ -5,14 +5,19 @@ pub trait Spanned {
 }
 
 /// This struct is identical to `(start_offset, end_offset)`
-/// but guaranteed to be `start_offset < end_offset`
+/// but guaranteed to be `start_offset <= end_offset`
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Span(usize, usize);
 
 impl Span {
     pub fn new(start: usize, end: usize) -> Self {
-        assert!(start < end, "Span end MUST be greater then span start");
+        assert!(start <= end,
+                "Span end MUST be greater or equal then span start");
         Span(start, end)
+    }
+
+    pub fn dummy() -> Self {
+        Span(0, 0)
     }
 
     pub fn pair(&self) -> (usize, usize) {

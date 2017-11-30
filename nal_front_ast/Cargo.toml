@@ -4,3 +4,11 @@ version = "0.1.0"
 authors = ["Hyeonu Park <nemo1275@gmail.com>"]
 
 [dependencies]
+serde = "1.0"
+serde_derive = "1.0"
+nom = "3.2"
+nom_locate = "0.1"
+
+[dependencies.codebuf]
+path = "../codebuf"
+version = "0.1"
