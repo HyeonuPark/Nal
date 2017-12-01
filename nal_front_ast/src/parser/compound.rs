@@ -6,7 +6,7 @@ use super::expr::parse_expr;
 named!(parse_tuple(Input) -> Literal, map!(
     block!(
         "(", ",", ")",
-        ast!(parse_expr)
+        parse_expr
     ),
     Literal::Tuple
 ));

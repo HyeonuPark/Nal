@@ -28,6 +28,13 @@ impl<T> Ast<T> {
     pub fn into_inner(ast: Self) -> T {
         *ast.inner
     }
+
+    pub fn map<U, F: FnOnce(T) -> U>(ast: Self, f: F) -> Ast<U> {
+        Ast {
+            inner: f(*ast.inner).into(),
+            span: ast.span,
+        }
+    }
 }
 
 impl<T> Spanned for Ast<T> {
@@ -79,9 +86,9 @@ mod dbg {
 /// This type implies sequence of subtypes
 /// where parser fails are isolated to its containing line.
 ///
-/// `Some(Ast<T>)` represents parsed line and
-/// `None` represents parse failed
-pub type Block<T> = Vec<Option<Ast<T>>>;
+/// `Ok(Ast<T>)` represents parsed line and
+/// `Err(Ast<()>)` represents parse failed
+pub type Block<T> = Vec<Result<Ast<T>, Ast<()>>>;
 
 #[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
 pub struct Ident;

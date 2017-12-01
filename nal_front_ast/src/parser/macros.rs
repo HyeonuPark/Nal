@@ -40,12 +40,15 @@ macro_rules! ast {
 macro_rules! line {
     ($i:expr, $submac:ident!( $($args:tt)* )) => (
         do_parse!($i,
-            content: opt_complete!($submac!($($args)*)) >>
-            cond!(
+            content: opt_complete!(ast!($submac!($($args)*))) >>
+            failed: cond!(
                 content.is_none(),
-                take_until_and_consume_s!("\n")
+                ast!(map!(
+                    take_until_and_consume_s!("\n"),
+                    |_| ()
+                ))
             ) >>
-            (content)
+            (content.ok_or_else(|| failed.unwrap()))
         )
     );
     ($i:expr, $f:expr) => (line!($i, call!($f)));
