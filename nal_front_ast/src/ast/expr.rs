@@ -1,4 +1,4 @@
-use super::{Ast, Ident, Function};
+use super::{Ast, Block, Ident, Function};
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Expr {
@@ -8,7 +8,7 @@ pub enum Expr {
     Unary(UnaryOp, Ast<Expr>),
     Call {
         callee: Ast<Expr>,
-        args: Vec<Ast<Expr>>,
+        args: Block<Expr>,
     },
     Prop {
         parent: Ast<Expr>,
@@ -24,8 +24,8 @@ pub enum Literal {
     Bool,
     Num,
     Str,
-    Tuple(Vec<Ast<Expr>>),
-    Obj(Vec<ObjProp>),
+    Tuple(Block<Expr>),
+    Obj(Block<ObjProp>),
     Function(Ast<Function>),
 }
 

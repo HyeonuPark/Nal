@@ -1,14 +1,14 @@
-use super::{Ast, Ident, Pattern, Stmt, Expr};
+use super::{Ast, Block, Ident, Pattern, Stmt, Expr};
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Function {
-    name: Option<Ast<Ident>>,
-    params: Option<Vec<Ast<Pattern>>>,
-    body: FunctionBody,
+    pub name: Option<Ast<Ident>>,
+    pub params: Option<Block<Pattern>>,
+    pub body: FunctionBody,
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum FunctionBody {
-    Stmt(Vec<Ast<Stmt>>),
+    Stmt(Block<Stmt>),
     Expr(Ast<Expr>),
 }

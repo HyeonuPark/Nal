@@ -1,8 +1,8 @@
-use super::{Ast, Stmt};
+use super::{Ast, Block, Stmt};
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Module {
-    body: Vec<Ast<ModuleStmt>>,
+    pub body: Block<ModuleStmt>,
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]

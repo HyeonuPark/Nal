@@ -1,15 +1,15 @@
-use super::{Ast, Ident, Expr, Function};
+use super::{Ast, Block, Ident, Expr, Function};
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Stmt {
     Expr(Ast<Expr>),
     If {
-        conditional: Vec<(Ast<Expr>, Vec<Ast<Stmt>>)>,
-        otherwise: Vec<Ast<Stmt>>,
+        conditional: Vec<(Ast<Expr>, Block<Stmt>)>,
+        otherwise: Block<Stmt>,
     },
     While {
         condition: Ast<Expr>,
-        body: Vec<Ast<Stmt>>,
+        body: Block<Stmt>,
     },
     Function(Ast<Function>),
     Let(Ast<Pattern>, Ast<Expr>),
@@ -20,8 +20,8 @@ pub enum Stmt {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Pattern {
     Ident(Ast<Ident>),
-    Tuple(Vec<Ast<Pattern>>),
-    Obj(Vec<ObjPatternProp>),
+    Tuple(Block<Pattern>),
+    Obj(Block<ObjPatternProp>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]

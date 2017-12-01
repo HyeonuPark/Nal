@@ -76,5 +76,12 @@ mod dbg {
     }
 }
 
+/// This type implies sequence of subtypes
+/// where parser fails are isolated to its containing line.
+///
+/// `Some(Ast<T>)` represents parsed line and
+/// `None` represents parse failed
+pub type Block<T> = Vec<Option<Ast<T>>>;
+
 #[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
 pub struct Ident;
