@@ -1,4 +1,3 @@
-#![deny(warnings)]
 
 extern crate owning_ref;
 extern crate nal_ast;

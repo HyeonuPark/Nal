@@ -15,7 +15,7 @@ script:
 
 env:
   global:
-    - RUSTFLAGS="-C link-dead-code"
+    - RUSTFLAGS="-C link-dead-code -D warnings"
 
 addons:
   apt:

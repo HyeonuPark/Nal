@@ -1,4 +1,3 @@
-#![deny(warnings)]
 
 extern crate serde;
 #[macro_use]
