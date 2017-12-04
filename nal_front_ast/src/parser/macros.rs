@@ -37,7 +37,7 @@ macro_rules! ast {
     ($i:expr, $f:expr) => (ast!($i, call!($f)));
 }
 
-macro_rules! line {
+macro_rules! opt_line {
     ($i:expr, $submac:ident!( $($args:tt)* )) => (
         do_parse!($i,
             content: opt_complete!(ast!($submac!($($args)*))) >>
@@ -45,13 +45,13 @@ macro_rules! line {
                 content.is_none(),
                 ast!(map!(
                     take_until_and_consume_s!("\n"),
-                    |_| ()
+                    noop
                 ))
             ) >>
             (content.ok_or_else(|| failed.unwrap()))
         )
     );
-    ($i:expr, $f:expr) => (line!($i, call!($f)));
+    ($i:expr, $f:expr) => (opt_line!($i, call!($f)));
 }
 
 macro_rules! block {
@@ -66,7 +66,7 @@ macro_rules! block {
                     tuple!(sp, tag!($sep), sp) => {noop}
                     | nl
                 ),
-                line!($submac!($($args)*))
+                opt_line!($submac!($($args)*))
             ),
             tuple!(nl, tag!($right))
         )
