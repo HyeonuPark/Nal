@@ -23,7 +23,7 @@ macro_rules! word {
     );
 }
 
-macro_rules! ast {
+macro_rules! span {
     ($i:expr, $submac:ident!( $($args:tt)* )) => (
         map!($i,
             tuple!(
@@ -32,14 +32,11 @@ macro_rules! ast {
                 position!()
             ),
             |(left, res, right)| {
-                use codebuf::Span;
-                use $crate::parse_tree::Ast;
-
-                Ast::new(Span::new(left.offset, right.offset), res)
+                Span::new(SpanInfo::new(left.offset, right.offset), res)
             }
         )
     );
-    ($i:expr, $f:expr) => (ast!($i, call!($f)));
+    ($i:expr, $f:expr) => (span!($i, call!($f)));
 }
 
 macro_rules! opt_line {
@@ -48,7 +45,7 @@ macro_rules! opt_line {
             content: optional!($submac!($($args)*)) >>
             failed: cond!(
                 content.is_none(),
-                ast!(map!(
+                span!(map!(
                     take_until_and_consume_s!("\n"),
                     noop
                 ))
@@ -64,7 +61,7 @@ macro_rules! block {
         $left:expr, $sep:expr, $right:expr,
         $submac:ident!( $($args:tt)* )
     ) => (
-        ast!($i,
+        span!($i,
             delimited!(
                 tuple!(tag!($left), nl),
                 separated_list_complete!(

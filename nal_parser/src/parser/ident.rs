@@ -19,7 +19,7 @@ named!(pub ident_char(Input) -> (), fold_many0!(
     (), noop2
 ));
 
-named!(pub parse_ident(Input) -> Ast<Ident>, ast!(value!(
+named!(pub parse_ident(Input) -> Span<Ident>, span!(value!(
     Ident,
     tuple!(nondigit, ident_char)
 )));

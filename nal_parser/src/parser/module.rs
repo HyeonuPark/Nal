@@ -13,6 +13,6 @@ named!(pub parse_module(Input) -> Module, map!(
     }
 ));
 
-named!(pub parse_module_stmt(Input) -> Ast<ModuleStmt>, ast!(alt_complete!(
+named!(pub parse_module_stmt(Input) -> Span<ModuleStmt>, span!(alt_complete!(
     parse_stmt => {ModuleStmt::Stmt}
 )));

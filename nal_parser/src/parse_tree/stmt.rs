@@ -1,29 +1,29 @@
-use super::{Ast, Block, Ident, Expr, Function};
+use super::{Span, Block, Ident, Expr, Function};
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Stmt {
-    Expr(Ast<Expr>),
+    Expr(Span<Expr>),
     If {
-        conditional: Vec<(Ast<Expr>, Block<Stmt>)>,
+        conditional: Vec<(Span<Expr>, Block<Stmt>)>,
         otherwise: Option<Block<Stmt>>,
     },
     While {
-        condition: Ast<Expr>,
+        condition: Span<Expr>,
         body: Block<Stmt>,
     },
     Function {
         is_static: bool,
-        func: Ast<Function>,
+        func: Span<Function>,
     },
-    Let(Ast<Pattern>, Ast<Expr>),
-    Assign(Ast<Pattern>, Ast<Expr>),
+    Let(Span<Pattern>, Span<Expr>),
+    Assign(Span<Pattern>, Span<Expr>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Pattern {
     Ident {
         is_mut: bool,
-        ident: Ast<Ident>,
+        ident: Span<Ident>,
     },
     Tuple(Block<TupleElemPattern>),
     Obj(Block<ObjPropPattern>),
@@ -31,12 +31,12 @@ pub enum Pattern {
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum TupleElemPattern {
-    Atom(Ast<Pattern>),
-    Spread(Ast<Ident>),
+    Atom(Span<Pattern>),
+    Spread(Span<Ident>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum ObjPropPattern {
-    Named(Ast<Ident>, Ast<Pattern>),
-    Short(Ast<Ident>),
+    Named(Span<Ident>, Span<Pattern>),
+    Short(Span<Ident>),
 }
