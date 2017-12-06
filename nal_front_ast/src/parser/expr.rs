@@ -2,11 +2,11 @@ use ast::*;
 use super::common::*;
 
 use super::literal::parse_literal;
-use super::compound::parse_tuple;
+use super::compound::parse_tuple_literal;
 use super::ident::parse_ident;
 
 named!(parse_atom_expr(Input) -> Ast<Expr>, ast!(alt_complete!(
-    map!(parse_literal, Expr::Literal)
+      map!(parse_literal, Expr::Literal)
     | value!(Expr::Break, word!("break"))
     | value!(Expr::Continue, word!("continue"))
     | map!(parse_ident, Expr::Ident)
@@ -22,7 +22,7 @@ named!(parse_primary_attachment(Input) -> Attachment, alt_complete!(
     map!(
         preceded!(
             sp,
-            parse_tuple
+            parse_tuple_literal
         ),
         Attachment::Call
     )

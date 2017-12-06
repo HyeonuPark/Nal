@@ -10,6 +10,8 @@ mod literal;
 mod compound;
 mod expr;
 mod stmt;
+mod pattern;
+mod function;
 mod module;
 
 pub fn parse<S: AsRef<str>>(src: S) -> Result<Module, Err> {

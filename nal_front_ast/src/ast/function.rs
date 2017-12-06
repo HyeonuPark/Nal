@@ -3,7 +3,7 @@ use super::{Ast, Block, Ident, Pattern, Stmt, Expr};
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Function {
     pub name: Option<Ast<Ident>>,
-    pub params: Option<Block<Pattern>>,
+    pub params: Option<Ast<Pattern>>,
     pub body: FunctionBody,
 }
 
