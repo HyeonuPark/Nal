@@ -13,12 +13,3 @@ license = "MIT/Apache-2.0"
 [dependencies.nal_ast]
 path = "../nal_ast"
 version = "0.1"
-
-[dependencies]
-owning_ref = "0.3"
-
-[dev-dependencies]
-serde = "1.0"
-serde_derive = "1.0"
-serde_yaml = "0.7"
-pretty_assertions = "0.3"

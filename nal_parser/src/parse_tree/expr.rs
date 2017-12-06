@@ -4,14 +4,11 @@ use super::{Span, Block, Ident, Function};
 pub enum Expr {
     Ident(Span<Ident>),
     Literal(Span<Literal>),
-    Tagged(Span<Ident>, Option<Span<Expr>>),
-    Binary(BinaryOp, Span<Expr>, Span<Expr>),
-    Unary(UnaryOp, Span<Expr>),
-    Call {
-        callee: Span<Expr>,
-        args: Block<TupleElem>,
-    },
+    Call(Span<Expr>, Block<TupleElem>),
     Prop(Span<Expr>, Span<Ident>),
+    Unary(UnaryOp, Span<Expr>),
+    Binary(BinaryOp, Span<Expr>, Span<Expr>),
+    Tagged(Span<Ident>, Option<Span<Expr>>),
     Return(Option<Span<Expr>>),
     Break,
     Continue,

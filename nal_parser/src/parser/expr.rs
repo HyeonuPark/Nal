@@ -47,7 +47,7 @@ named!(parse_primary_expr(Input) -> Span<Expr>, do_parse!(
             let (rspan, expr) = match attachment {
                 A::Call(args) => (
                     args.span,
-                    Expr::Call{ callee: head, args }
+                    Expr::Call(head, args)
                 ),
                 A::Prop(field) => (
                     field.span,
