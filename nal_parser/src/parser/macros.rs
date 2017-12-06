@@ -33,7 +33,7 @@ macro_rules! ast {
             ),
             |(left, res, right)| {
                 use codebuf::Span;
-                use $crate::ast::Ast;
+                use $crate::parse_tree::Ast;
 
                 Ast::new(Span::new(left.offset, right.offset), res)
             }

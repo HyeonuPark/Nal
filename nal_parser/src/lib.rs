@@ -7,5 +7,5 @@ extern crate nom;
 extern crate nom_locate;
 extern crate codebuf;
 
-pub mod ast;
+pub mod parse_tree;
 pub mod parser;

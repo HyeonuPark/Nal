@@ -1,6 +1,6 @@
 use nom::{alpha, digit};
 
-use ast::*;
+use parse_tree::*;
 use super::common::*;
 
 named!(nondigit(Input) -> (), fold_many0!(

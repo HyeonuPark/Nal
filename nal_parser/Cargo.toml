@@ -1,5 +1,5 @@
 [package]
-name = "nal_front_ast"
+name = "nal_parser"
 version = "0.1.0"
 authors = ["Hyeonu Park <nemo1275@gmail.com>"]
 

@@ -1,5 +1,5 @@
 use nom::Err;
-use super::ast::Module;
+use super::parse_tree::Module;
 
 #[macro_use]
 mod macros;

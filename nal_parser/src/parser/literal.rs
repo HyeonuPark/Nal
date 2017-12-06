@@ -1,6 +1,6 @@
 use nom::{digit, anychar};
 
-use ast::*;
+use parse_tree::*;
 use super::common::*;
 
 use super::compound::parse_compound;

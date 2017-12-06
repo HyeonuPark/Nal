@@ -1,4 +1,4 @@
-use ast::*;
+use parse_tree::*;
 use super::common::*;
 
 use super::literal::parse_literal;
