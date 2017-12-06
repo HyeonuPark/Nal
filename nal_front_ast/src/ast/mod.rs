@@ -5,8 +5,8 @@ mod stmt;
 mod function;
 mod module;
 
-pub use self::common::{Ast, Block, Ident};
-pub use self::expr::{Expr, Literal, ObjProp, BinaryOp, UnaryOp};
-pub use self::stmt::{Stmt, Pattern, ObjPatternProp};
-pub use self::function::{Function, FunctionBody};
-pub use self::module::{Module, ModuleStmt};
+pub use self::common::*;
+pub use self::expr::*;
+pub use self::stmt::*;
+pub use self::function::*;
+pub use self::module::*;

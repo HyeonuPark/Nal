@@ -5,6 +5,7 @@ use super::ast::Module;
 mod macros;
 
 mod common;
+mod ident;
 mod literal;
 mod compound;
 mod expr;

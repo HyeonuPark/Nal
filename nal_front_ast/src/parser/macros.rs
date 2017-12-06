@@ -1,21 +1,26 @@
-macro_rules! opt_complete {
+macro_rules! optional {
     ($i:expr, $submac:ident!( $($args:tt)* )) => (
-        opt!($i, complete!($submac!($($args)*)))
+        alt_complete!($i,
+            map!($submac!($($args)*), Some)
+            | value!(None, tag!(""))
+        )
     );
-    ($i:expr, $f:expr) => (opt_complete!($i, call!($f)));
+    ($i:expr, $f:expr) => (optional!($i, call!($f)));
 }
 
 macro_rules! word {
-    ($i:expr, $word:expr) => (map!($i,
-        tuple!(
-            tag!($word),
-            peek!(alt_complete!(
-                not!(alphanumeric)
-                | eof!()
-            ))
-        ),
-        noop
-    ));
+    ($i:expr, $word:expr) => (
+        map!($i,
+            tuple!(
+                tag!($word),
+                peek!(alt_complete!(
+                    not!($crate::parser::ident::ident_char)
+                    | eof!()
+                ))
+            ),
+            noop
+        )
+    );
 }
 
 macro_rules! ast {
@@ -30,7 +35,7 @@ macro_rules! ast {
                 use codebuf::Span;
                 use $crate::ast::Ast;
 
-                Ast::new(res, Span::new(left.offset, right.offset))
+                Ast::new(Span::new(left.offset, right.offset), res)
             }
         )
     );
@@ -40,7 +45,7 @@ macro_rules! ast {
 macro_rules! opt_line {
     ($i:expr, $submac:ident!( $($args:tt)* )) => (
         do_parse!($i,
-            content: opt_complete!(ast!($submac!($($args)*))) >>
+            content: optional!($submac!($($args)*)) >>
             failed: cond!(
                 content.is_none(),
                 ast!(map!(
@@ -59,16 +64,18 @@ macro_rules! block {
         $left:expr, $sep:expr, $right:expr,
         $submac:ident!( $($args:tt)* )
     ) => (
-        delimited!($i,
-            tuple!(tag!($left), nl),
-            separated_list_complete!(
-                alt_complete!(
-                    tuple!(sp, tag!($sep), sp) => {noop}
-                    | nl
+        ast!($i,
+            delimited!(
+                tuple!(tag!($left), nl),
+                separated_list_complete!(
+                    alt_complete!(
+                        tuple!(sp, tag!($sep), sp) => {noop}
+                        | nl
+                    ),
+                    opt_line!($submac!($($args)*))
                 ),
-                opt_line!($submac!($($args)*))
-            ),
-            tuple!(nl, tag!($right))
+                tuple!(nl, tag!($right))
+            )
         )
     );
     ($i:expr, $left:expr, $sep:expr, $right:expr, $f:expr) => (

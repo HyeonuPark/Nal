@@ -11,7 +11,7 @@ pub struct Ast<T> {
 }
 
 impl<T> Ast<T> {
-    pub fn new(inner: T, span: Span) -> Self {
+    pub fn new(span: Span, inner: T) -> Self {
         Ast {
             inner: inner.into(),
             span,
@@ -83,12 +83,12 @@ mod dbg {
     }
 }
 
-/// This type implies sequence of subtypes
+/// This type represent sequence of elements
 /// where parser fails are isolated to its containing line.
 ///
 /// `Ok(Ast<T>)` represents parsed line and
 /// `Err(Ast<()>)` represents parse failed
-pub type Block<T> = Vec<Result<Ast<T>, Ast<()>>>;
+pub type Block<T> = Ast<Vec<Result<Ast<T>, Ast<()>>>>;
 
 #[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
 pub struct Ident;

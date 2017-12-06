@@ -4,16 +4,14 @@ use super::{Ast, Block, Ident, Function};
 pub enum Expr {
     Ident(Ast<Ident>),
     Literal(Ast<Literal>),
+    Tagged(Ast<Ident>, Option<Ast<Expr>>),
     Binary(BinaryOp, Ast<Expr>, Ast<Expr>),
     Unary(UnaryOp, Ast<Expr>),
     Call {
         callee: Ast<Expr>,
-        args: Block<Expr>,
+        args: Block<TupleElem>,
     },
-    Prop {
-        parent: Ast<Expr>,
-        field: Ast<Ident>,
-    },
+    Prop(Ast<Expr>, Ast<Ident>),
     Return(Option<Ast<Expr>>),
     Break,
     Continue,
@@ -24,15 +22,22 @@ pub enum Literal {
     Bool,
     Num,
     Str,
-    Tuple(Block<Expr>),
+    Tuple(Block<TupleElem>),
     Obj(Block<ObjProp>),
     Function(Ast<Function>),
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum TupleElem {
+    Atom(Ast<Expr>),
+    Spread(Ast<Expr>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum ObjProp {
     Named(Ast<Ident>, Ast<Expr>),
     Short(Ast<Ident>),
+    Method(Ast<Function>),
 }
 
 #[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]

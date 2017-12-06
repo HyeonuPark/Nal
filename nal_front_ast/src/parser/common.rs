@@ -1,5 +1,7 @@
 use nom_locate::LocatedSpan;
 
+pub use codebuf::{Span, Spanned};
+
 pub fn noop<T>(_: T) {}
 pub fn noop2<T, U>(_: T, _: U) {}
 

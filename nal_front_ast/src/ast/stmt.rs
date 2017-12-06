@@ -5,27 +5,38 @@ pub enum Stmt {
     Expr(Ast<Expr>),
     If {
         conditional: Vec<(Ast<Expr>, Block<Stmt>)>,
-        otherwise: Block<Stmt>,
+        otherwise: Option<Block<Stmt>>,
     },
     While {
         condition: Ast<Expr>,
         body: Block<Stmt>,
     },
-    Function(Ast<Function>),
+    Function {
+        is_static: bool,
+        func: Ast<Function>,
+    },
     Let(Ast<Pattern>, Ast<Expr>),
     Assign(Ast<Pattern>, Ast<Expr>),
-    AssignLval(Ast<Expr>, Ast<Expr>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Pattern {
-    Ident(Ast<Ident>),
-    Tuple(Block<Pattern>),
-    Obj(Block<ObjPatternProp>),
+    Ident {
+        is_mut: bool,
+        ident: Ast<Ident>,
+    },
+    Tuple(Block<TupleElemPattern>),
+    Obj(Block<ObjPropPattern>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
-pub enum ObjPatternProp {
+pub enum TupleElemPattern {
+    Atom(Ast<Pattern>),
+    Spread(Ast<Ident>),
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum ObjPropPattern {
     Named(Ast<Ident>, Ast<Pattern>),
     Short(Ast<Ident>),
 }
