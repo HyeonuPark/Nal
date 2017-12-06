@@ -1,7 +1,0 @@
-'abc'
-"abc"
-
-'abc\n\r\t\0\
- def'
-"abc\n\r\t\0\
- def"

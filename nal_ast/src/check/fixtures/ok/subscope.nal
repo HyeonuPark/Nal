@@ -1,6 +1,0 @@
-
-let foo = 0
-
-if true {
-  foo
-}
