@@ -7,8 +7,14 @@ use super::stmt::parse_stmt_block;
 use super::expr::parse_expr;
 
 named!(parse_function_body(Input) -> FunctionBody, alt_complete!(
-    map!(parse_stmt_block, FunctionBody::Stmt)
-    | map!(parse_expr, FunctionBody::Expr)
+    map!(
+        preceded!(sp, parse_stmt_block),
+        FunctionBody::Stmt
+    )
+    | map!(
+        tuple!(nl, tag!("="), sp, parse_expr),
+        |(_, _, _, expr)| FunctionBody::Expr(expr)
+    )
 ));
 
 named!(pub parse_function(Input) -> Ast<Function>, ast!(map!(
