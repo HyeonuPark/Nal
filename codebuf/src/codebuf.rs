@@ -67,6 +67,18 @@ pub struct Line {
     offset: usize,
 }
 
+impl Line {
+    /// Line number, starting at 0.
+    pub fn count(&self) -> usize {
+        self.count
+    }
+    
+    /// Offset from the left-most character in this line, starting at 0.
+    pub fn offset(&self) -> usize {
+        self.offset
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
