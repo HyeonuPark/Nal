@@ -20,6 +20,10 @@ named!(pub parse_tuple_literal(Input) -> Block<TupleElem>, block!(
 
 named!(parse_obj_prop(Input) -> Span<ObjProp>, span!(alt_complete!(
     map!(
+        parse_function,
+        ObjProp::Method
+    )
+    | map!(
         tuple!(parse_ident, tuple!(nl, tag!("="), sp), parse_expr),
         |(name, _, expr)| ObjProp::Named(name, expr)
     )
