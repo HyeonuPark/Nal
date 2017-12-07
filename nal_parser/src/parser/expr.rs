@@ -2,11 +2,13 @@ use parse_tree::*;
 use super::common::*;
 
 use super::literal::parse_literal;
+use super::compound::parse_compound;
 use super::compound::parse_tuple_literal;
 use super::ident::parse_ident;
 
 named!(parse_atom_expr(Input) -> Node<Expr>, node!(alt_complete!(
       map!(parse_literal, Expr::Literal)
+    | parse_compound
     | value!(Expr::Break, word!("break"))
     | value!(Expr::Continue, word!("continue"))
     | map!(parse_ident, Expr::Ident)

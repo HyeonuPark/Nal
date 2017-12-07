@@ -3,8 +3,6 @@ use nom::{digit, anychar};
 use parse_tree::*;
 use super::common::*;
 
-use super::compound::parse_compound;
-
 named!(parse_bool(Input) -> Literal, value!(
     Literal::Bool,
     alt_complete!(word!("true") | word!("false"))
@@ -40,5 +38,4 @@ named!(pub parse_literal(Input) -> Node<Literal>, alt_complete!(
       node!(parse_bool)
     | node!(parse_num)
     | node!(parse_str)
-    | parse_compound
 ));

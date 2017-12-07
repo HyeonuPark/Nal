@@ -38,8 +38,8 @@ named!(parse_obj_literal(Input) -> Block<ObjProp>, block!(
     parse_obj_prop
 ));
 
-named!(pub parse_compound(Input) -> Node<Literal>, node!(alt_complete!(
-    map!(parse_tuple_literal, Literal::Tuple)
-    | map!(parse_obj_literal, Literal::Obj)
-    | map!(parse_function, Literal::Function)
-)));
+named!(pub parse_compound(Input) -> Expr, alt_complete!(
+    map!(parse_tuple_literal, Expr::Tuple)
+    | map!(parse_obj_literal, Expr::Obj)
+    | map!(parse_function, Expr::Function)
+));

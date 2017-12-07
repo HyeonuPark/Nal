@@ -1,9 +1,12 @@
-use super::{Node, Block, Ident, Function};
+use super::{Node, Block, Ident, Literal, Function};
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Expr {
     Ident(Node<Ident>),
     Literal(Node<Literal>),
+    Tuple(Block<TupleElem>),
+    Obj(Block<ObjProp>),
+    Function(Node<Function>),
     Call(Node<Expr>, Block<TupleElem>),
     Prop(Node<Expr>, Node<Ident>),
     Unary(UnaryOp, Node<Expr>),
@@ -12,16 +15,6 @@ pub enum Expr {
     Return(Option<Node<Expr>>),
     Break,
     Continue,
-}
-
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
-pub enum Literal {
-    Bool,
-    Num,
-    Str,
-    Tuple(Block<TupleElem>),
-    Obj(Block<ObjProp>),
-    Function(Node<Function>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
