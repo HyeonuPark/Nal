@@ -17,7 +17,7 @@ named!(parse_function_body(Input) -> FunctionBody, alt_complete!(
     )
 ));
 
-named!(pub parse_function(Input) -> Span<Function>, span!(map!(
+named!(pub parse_function(Input) -> Node<Function>, node!(map!(
     tuple!(
         word!("fn"),
         optional!(preceded!(sp, parse_ident)),

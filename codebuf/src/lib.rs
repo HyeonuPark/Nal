@@ -4,4 +4,4 @@ mod codebuf;
 mod span;
 
 pub use codebuf::CodeBuf;
-pub use span::{Span, SpanInfo};
+pub use span::{Node, Span};

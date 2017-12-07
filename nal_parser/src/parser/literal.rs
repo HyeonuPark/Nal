@@ -36,9 +36,9 @@ named!(parse_str(Input) -> Literal, value!(
     )
 ));
 
-named!(pub parse_literal(Input) -> Span<Literal>, alt_complete!(
-      span!(parse_bool)
-    | span!(parse_num)
-    | span!(parse_str)
+named!(pub parse_literal(Input) -> Node<Literal>, alt_complete!(
+      node!(parse_bool)
+    | node!(parse_num)
+    | node!(parse_str)
     | parse_compound
 ));

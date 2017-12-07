@@ -23,7 +23,7 @@ macro_rules! word {
     );
 }
 
-macro_rules! span {
+macro_rules! node {
     ($i:expr, $submac:ident!( $($args:tt)* )) => (
         map!($i,
             tuple!(
@@ -32,11 +32,11 @@ macro_rules! span {
                 position!()
             ),
             |(left, res, right)| {
-                Span::new(SpanInfo::new(left.offset, right.offset), res)
+                Node::new(Span::new(left.offset, right.offset), res)
             }
         )
     );
-    ($i:expr, $f:expr) => (span!($i, call!($f)));
+    ($i:expr, $f:expr) => (node!($i, call!($f)));
 }
 
 macro_rules! opt_line {
@@ -45,7 +45,7 @@ macro_rules! opt_line {
             content: optional!($submac!($($args)*)) >>
             failed: cond!(
                 content.is_none(),
-                span!(map!(
+                node!(map!(
                     take_until_and_consume_s!("\n"),
                     noop
                 ))
@@ -61,7 +61,7 @@ macro_rules! block {
         $left:expr, $sep:expr, $right:expr,
         $submac:ident!( $($args:tt)* )
     ) => (
-        span!($i,
+        node!($i,
             delimited!(
                 tuple!(tag!($left), nl),
                 separated_list_complete!(

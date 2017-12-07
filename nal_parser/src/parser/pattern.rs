@@ -3,7 +3,7 @@ use super::common::*;
 
 use super::ident::parse_ident;
 
-named!(parse_ident_pattern(Input) -> Span<Pattern>, span!(map!(
+named!(parse_ident_pattern(Input) -> Node<Pattern>, node!(map!(
     tuple!(
         optional!(tuple!(word!("mut"), sp)),
         parse_ident
@@ -11,7 +11,7 @@ named!(parse_ident_pattern(Input) -> Span<Pattern>, span!(map!(
     |(is_mut, ident)| Pattern::Ident { is_mut: is_mut.is_some(), ident }
 )));
 
-named!(parse_tuple_elem_pattern(Input) -> Span<TupleElemPattern>, span!(
+named!(parse_tuple_elem_pattern(Input) -> Node<TupleElemPattern>, node!(
     alt_complete!(
         map!(
             parse_pattern,
@@ -24,7 +24,7 @@ named!(parse_tuple_elem_pattern(Input) -> Span<TupleElemPattern>, span!(
     )
 ));
 
-named!(pub parse_tuple_pattern(Input) -> Span<Pattern>, span!(map!(
+named!(pub parse_tuple_pattern(Input) -> Node<Pattern>, node!(map!(
     block!(
         "(", ",", ")",
         parse_tuple_elem_pattern
@@ -32,7 +32,7 @@ named!(pub parse_tuple_pattern(Input) -> Span<Pattern>, span!(map!(
     Pattern::Tuple
 )));
 
-named!(parse_obj_prop_pattern(Input) -> Span<ObjPropPattern>, span!(
+named!(parse_obj_prop_pattern(Input) -> Node<ObjPropPattern>, node!(
     alt_complete!(
         map!(
             tuple!(parse_ident, sp, word!("as"), sp, parse_pattern),
@@ -45,7 +45,7 @@ named!(parse_obj_prop_pattern(Input) -> Span<ObjPropPattern>, span!(
     )
 ));
 
-named!(parse_obj_pattern(Input) -> Span<Pattern>, span!(map!(
+named!(parse_obj_pattern(Input) -> Node<Pattern>, node!(map!(
     block!(
         "{", ",", "}",
         parse_obj_prop_pattern
@@ -53,7 +53,7 @@ named!(parse_obj_pattern(Input) -> Span<Pattern>, span!(map!(
     Pattern::Obj
 )));
 
-named!(pub parse_pattern(Input) -> Span<Pattern>, alt_complete!(
+named!(pub parse_pattern(Input) -> Node<Pattern>, alt_complete!(
     parse_tuple_pattern
     | parse_obj_pattern
     | parse_ident_pattern

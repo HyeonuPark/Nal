@@ -1,39 +1,39 @@
 use serde::{Serialize, Serializer, Deserialize, Deserializer};
 
 #[derive(Clone)]
-pub struct Span<T> {
+pub struct Node<T> {
     inner: Box<T>,
-    pub span: SpanInfo,
+    pub span: Span,
 }
 
-impl<T> Span<T> {
-    pub fn new(span: SpanInfo, inner: T) -> Self {
-        Span {
+impl<T> Node<T> {
+    pub fn new(span: Span, inner: T) -> Self {
+        Node {
             inner: inner.into(),
             span,
         }
     }
 
     pub fn dummy(inner: T) -> Self {
-        Span {
+        Node {
             inner: inner.into(),
-            span: SpanInfo::dummy(),
+            span: Span::dummy(),
         }
     }
 
-    pub fn into_inner(spanned: Self) -> T {
-        *spanned.inner
+    pub fn into_inner(node: Self) -> T {
+        *node.inner
     }
 
-    pub fn map<U, F: FnOnce(T) -> U>(spanned: Self, f: F) -> Span<U> {
-        Span {
-            inner: f(*spanned.inner).into(),
-            span: spanned.span,
+    pub fn map<U, F: FnOnce(T) -> U>(node: Self, f: F) -> Node<U> {
+        Node {
+            inner: f(*node.inner).into(),
+            span: node.span,
         }
     }
 }
 
-impl<T> ::std::ops::Deref for Span<T> {
+impl<T> ::std::ops::Deref for Node<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -41,52 +41,52 @@ impl<T> ::std::ops::Deref for Span<T> {
     }
 }
 
-impl<T: PartialEq> PartialEq for Span<T> {
+impl<T: PartialEq> PartialEq for Node<T> {
     fn eq(&self, other: &Self) -> bool {
         self.inner.eq(&other.inner)
     }
 }
 
-impl<T: Serialize> Serialize for Span<T> {
+impl<T: Serialize> Serialize for Node<T> {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
         self.inner.serialize(s)
     }
 }
 
-impl<'d, T: Deserialize<'d>> Deserialize<'d> for Span<T> {
+impl<'d, T: Deserialize<'d>> Deserialize<'d> for Node<T> {
     fn deserialize<D: Deserializer<'d>>(d: D) -> Result<Self, D::Error> {
-        Ok(Span {
+        Ok(Node {
             inner: T::deserialize(d)?.into(),
-            span: SpanInfo::dummy(),
+            span: Span::dummy(),
         })
     }
 }
 
 mod dbg {
-    use super::Span;
+    use super::Node;
     use std::fmt::{Debug, Formatter, Error};
 
-    impl<T: Debug> Debug for Span<T> {
+    impl<T: Debug> Debug for Node<T> {
         fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
             self.inner.fmt(f)
         }
     }
 }
 
-/// This struct is identical to `(start_offset, end_offset)`
+/// Span is identical to `(start_offset, end_offset)`
 /// but guaranteed to be `start_offset <= end_offset`
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct SpanInfo(usize, usize);
+pub struct Span(usize, usize);
 
-impl SpanInfo {
+impl Span {
     pub fn new(start: usize, end: usize) -> Self {
         assert!(start <= end,
                 "Span end MUST be greater or equal then span start");
-        SpanInfo(start, end)
+        Span(start, end)
     }
 
     pub fn dummy() -> Self {
-        SpanInfo(0, 0)
+        Span(0, 0)
     }
 
     pub fn pair(&self) -> (usize, usize) {
@@ -102,16 +102,16 @@ impl SpanInfo {
     }
 }
 
-impl From<(usize, usize)> for SpanInfo {
+impl From<(usize, usize)> for Span {
     fn from(s: (usize, usize)) -> Self {
         Self::new(s.0, s.1)
     }
 }
 
-impl ::std::ops::Add for SpanInfo {
+impl ::std::ops::Add for Span {
     type Output = Self;
 
-    fn add(self, right: SpanInfo) -> Self {
+    fn add(self, right: Span) -> Self {
         Self::new(self.0.min(right.0), self.1.max(right.1))
     }
 }
@@ -120,8 +120,8 @@ impl ::std::ops::Add for SpanInfo {
 mod tests {
     use super::*;
 
-    fn s(left: usize, right: usize) -> SpanInfo {
-        SpanInfo::new(left, right)
+    fn s(left: usize, right: usize) -> Span {
+        Span::new(left, right)
     }
 
     #[test]
@@ -151,7 +151,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_fail_from_tuple() {
-        SpanInfo::from((2, 1));
+        Span::from((2, 1));
     }
 
     #[test]

@@ -1,15 +1,15 @@
-use super::{Span, Block, Ident, Function};
+use super::{Node, Block, Ident, Function};
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Expr {
-    Ident(Span<Ident>),
-    Literal(Span<Literal>),
-    Call(Span<Expr>, Block<TupleElem>),
-    Prop(Span<Expr>, Span<Ident>),
-    Unary(UnaryOp, Span<Expr>),
-    Binary(BinaryOp, Span<Expr>, Span<Expr>),
-    Tagged(Span<Ident>, Option<Span<Expr>>),
-    Return(Option<Span<Expr>>),
+    Ident(Node<Ident>),
+    Literal(Node<Literal>),
+    Call(Node<Expr>, Block<TupleElem>),
+    Prop(Node<Expr>, Node<Ident>),
+    Unary(UnaryOp, Node<Expr>),
+    Binary(BinaryOp, Node<Expr>, Node<Expr>),
+    Tagged(Node<Ident>, Option<Node<Expr>>),
+    Return(Option<Node<Expr>>),
     Break,
     Continue,
 }
@@ -21,20 +21,20 @@ pub enum Literal {
     Str,
     Tuple(Block<TupleElem>),
     Obj(Block<ObjProp>),
-    Function(Span<Function>),
+    Function(Node<Function>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum TupleElem {
-    Atom(Span<Expr>),
-    Spread(Span<Expr>),
+    Atom(Node<Expr>),
+    Spread(Node<Expr>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum ObjProp {
-    Named(Span<Ident>, Span<Expr>),
-    Short(Span<Ident>),
-    Method(Span<Function>),
+    Named(Node<Ident>, Node<Expr>),
+    Short(Node<Ident>),
+    Method(Node<Function>),
 }
 
 #[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]

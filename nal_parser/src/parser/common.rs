@@ -1,6 +1,6 @@
 use nom_locate::LocatedSpan;
 
-pub use codebuf::{Span, SpanInfo};
+pub use codebuf::{Node, Span};
 
 pub fn noop<T>(_: T) {}
 pub fn noop2<T, U>(_: T, _: U) {}

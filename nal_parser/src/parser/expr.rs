@@ -5,7 +5,7 @@ use super::literal::parse_literal;
 use super::compound::parse_tuple_literal;
 use super::ident::parse_ident;
 
-named!(parse_atom_expr(Input) -> Span<Expr>, span!(alt_complete!(
+named!(parse_atom_expr(Input) -> Node<Expr>, node!(alt_complete!(
       map!(parse_literal, Expr::Literal)
     | value!(Expr::Break, word!("break"))
     | value!(Expr::Continue, word!("continue"))
@@ -15,7 +15,7 @@ named!(parse_atom_expr(Input) -> Span<Expr>, span!(alt_complete!(
 #[derive(Debug)]
 enum Attachment {
     Call(Block<TupleElem>),
-    Prop(Span<Ident>),
+    Prop(Node<Ident>),
 }
 
 named!(parse_primary_attachment(Input) -> Attachment, alt_complete!(
@@ -35,12 +35,12 @@ named!(parse_primary_attachment(Input) -> Attachment, alt_complete!(
     )
 ));
 
-named!(parse_primary_expr(Input) -> Span<Expr>, do_parse!(
+named!(parse_primary_expr(Input) -> Node<Expr>, do_parse!(
     head: parse_atom_expr >>
     res: fold_many0!(
         parse_primary_attachment,
         head,
-        |head: Span<Expr>, attachment| {
+        |head: Node<Expr>, attachment| {
             use self::Attachment as A;
 
             let lspan = head.span;
@@ -55,7 +55,7 @@ named!(parse_primary_expr(Input) -> Span<Expr>, do_parse!(
                 ),
             };
 
-            Span::new(lspan + rspan, expr)
+            Node::new(lspan + rspan, expr)
         }
     ) >>
     (res)
@@ -66,7 +66,7 @@ named!(parse_unary_op(Input) -> UnaryOp, alt_complete!(
     | value!(UnaryOp::Not, tag!("!"))
 ));
 
-named!(parse_unary_expr(Input) -> Span<Expr>, span!(map!(
+named!(parse_unary_expr(Input) -> Node<Expr>, node!(map!(
     tuple!(parse_unary_op, sp, parse_primary_expr),
     |(op, _, expr)| Expr::Unary(op, expr)
 )));
@@ -86,7 +86,7 @@ named!(parse_binary_op(Input) -> BinaryOp, alt_complete!(
     | value!(BinaryOp::Or,  tag!("||"))
 ));
 
-named!(parse_binary_expr(Input) -> Span<Expr>, map!(
+named!(parse_binary_expr(Input) -> Node<Expr>, map!(
     tuple!(
         parse_unary_expr,
         many0!(map!(
@@ -110,12 +110,12 @@ fn prec(op: BinaryOp) -> usize {
     }
 }
 
-type AttachIter = ::std::vec::IntoIter<(BinaryOp, Span<Expr>)>;
+type AttachIter = ::std::vec::IntoIter<(BinaryOp, Node<Expr>)>;
 type Remain = ::std::iter::Peekable<AttachIter>;
 
 fn precedence_parser(
-    head: Span<Expr>, remain: &mut Remain, min_prec: usize
-) -> Span<Expr> {
+    head: Node<Expr>, remain: &mut Remain, min_prec: usize
+) -> Node<Expr> {
     let mut head = head;
 
     while let Some(&(op, _)) = remain.peek() {
@@ -133,7 +133,7 @@ fn precedence_parser(
             next = precedence_parser(next, remain, prec(next_op));
         }
 
-        head = Span::new(
+        head = Node::new(
             head.span + next.span,
             Expr::Binary(op, head, next),
         );
@@ -143,7 +143,7 @@ fn precedence_parser(
 }
 
 enum TagLike {
-    Tag(Span<Ident>),
+    Tag(Node<Ident>),
     Return,
 }
 
@@ -152,16 +152,16 @@ named!(parse_taglike(Input) -> TagLike, alt_complete!(
     | value!(TagLike::Return, tuple!(word!("return"), sp))
 ));
 
-named!(parse_tagged_expr(Input) -> Span<Expr>, alt_complete!(
+named!(parse_tagged_expr(Input) -> Node<Expr>, alt_complete!(
     map!(
         tuple!(
-            many1!(tuple!(span!(tag!("")), parse_taglike)),
+            many1!(tuple!(node!(tag!("")), parse_taglike)),
             optional!(parse_binary_expr),
-            span!(tag!(""))
+            node!(tag!(""))
         ),
         |(tags, expr, end)| tags.into_iter().rev().fold(
             expr,
-            |prev, (marker, tag)| Some(Span::new(
+            |prev, (marker, tag)| Some(Node::new(
                 marker.span + end.span,
                 match tag {
                     TagLike::Tag(ident) => Expr::Tagged(ident, prev),
@@ -173,6 +173,6 @@ named!(parse_tagged_expr(Input) -> Span<Expr>, alt_complete!(
     | parse_binary_expr
 ));
 
-named!(pub parse_expr(Input) -> Span<Expr>, alt_complete!(
+named!(pub parse_expr(Input) -> Node<Expr>, alt_complete!(
     parse_tagged_expr
 ));
