@@ -22,21 +22,21 @@ macro_rules! convert {
         }
     );
     ($target:ident, $($rest:tt)*) => (
-        convert!(=collect $target ctx () $($rest)*);
+        convert!(= $target ctx () $($rest)*);
     );
 
-    (=collect $target:ident $ctx:ident ($($prev:tt)*)
+    (= $target:ident $ctx:ident ($($prev:tt)*)
         $each:ident,
     $($rest:tt)*) => (
-        convert!(=collect $target $ctx ($($prev)*
+        convert!(= $target $ctx ($($prev)*
             pt::$target::$each => ast::$target::$each,
         ) $($rest)*);
     );
 
-    (=collect $target:ident $ctx:ident ($($prev:tt)*)
+    (= $target:ident $ctx:ident ($($prev:tt)*)
         $each:ident($($arg:ident),*),
     $($rest:tt)*) => (
-        convert!(=collect $target $ctx ($($prev)*
+        convert!(= $target $ctx ($($prev)*
             pt::$target::$each($(ref $arg),*) => {
                 $(let $arg = $arg.convert($ctx);)*
                 ast::$target::$each($($arg?),*)
@@ -44,10 +44,10 @@ macro_rules! convert {
         ) $($rest)*);
     );
 
-    (=collect $target:ident $ctx:ident ($($prev:tt)*)
+    (= $target:ident $ctx:ident ($($prev:tt)*)
         $each:ident{$($arg:ident),*},
     $($rest:tt)*) => (
-        convert!(=collect $target $ctx ($($prev)*
+        convert!(= $target $ctx ($($prev)*
             pt::$target::$each{$(ref $arg),*} => {
                 $(let $arg = $arg.convert($ctx);)*
                 ast::$target::$each{$($arg: $arg?),*}
@@ -55,7 +55,7 @@ macro_rules! convert {
         ) $($rest)*);
     );
 
-    (=collect $target:ident $ctx:ident ($($elem:tt)*)) => (
+    (= $target:ident $ctx:ident ($($elem:tt)*)) => (
         impl Convert<ast::$target> for pt::$target {
             #[allow(unused_variables)]
             fn convert(&self, $ctx: &mut Ctx) -> Result<ast::$target, ()> {
