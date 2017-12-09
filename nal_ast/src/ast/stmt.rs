@@ -3,20 +3,24 @@ use super::{Node, Block, Ident, Expr, Function};
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Stmt {
     Expr(Node<Expr>),
-    If {
-        conditional: Vec<(Node<Expr>, Block<Stmt>)>,
-        otherwise: Option<Block<Stmt>>,
-    },
-    While {
-        condition: Node<Expr>,
-        body: Block<Stmt>,
-    },
+    If(IfStmt),
+    While(Node<Expr>, Block<Stmt>),
     Function {
         is_static: bool,
         func: Node<Function>,
     },
     Let(Node<Pattern>, Node<Expr>),
     Assign(Node<Pattern>, Node<Expr>),
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct IfStmt(pub Node<Expr>, pub Block<Stmt>, pub IfFalse);
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum IfFalse {
+    None,
+    Base(Block<Stmt>),
+    Chain(Box<IfStmt>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]

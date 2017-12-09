@@ -11,7 +11,7 @@ named!(nondigit(Input) -> (), fold_many0!(
     (), noop2
 ));
 
-named!(pub ident_char(Input) -> (), fold_many0!(
+named!(pub ident_chars(Input) -> (), fold_many0!(
     alt_complete!(
         digit => {noop}
         | nondigit => {noop}
@@ -21,5 +21,5 @@ named!(pub ident_char(Input) -> (), fold_many0!(
 
 named!(pub parse_ident(Input) -> Node<Ident>, node!(value!(
     Ident,
-    tuple!(nondigit, ident_char)
+    tuple!(nondigit, ident_chars)
 )));

@@ -7,6 +7,10 @@ use super::function::parse_function;
 
 named!(parse_if_stmt(Input) -> Node<Stmt>, node!(map!(
     tuple!(
+        peek!(tuple!(
+            word!("if"), sp, parse_expr,
+            sp, parse_stmt_block
+        )),
         separated_list!(
             tuple!(nl, word!("else"), sp),
             map!(
@@ -22,7 +26,22 @@ named!(parse_if_stmt(Input) -> Node<Stmt>, node!(map!(
             parse_stmt_block
         ))
     ),
-    |(conditional, otherwise)| Stmt::If { conditional, otherwise }
+    |(_, conds, base)| {
+        let base = match base {
+            Some(block) => IfFalse::Base(block),
+            None => IfFalse::None,
+        };
+
+        let res = conds.into_iter().rev()
+            .fold(base, |base, (cond, body)| {
+                IfFalse::Chain(IfStmt(cond, body, base).into())
+            });
+
+        match res {
+            IfFalse::None | IfFalse::Base(_) => unreachable!(),
+            IfFalse::Chain(stmt) => Stmt::If(*stmt)
+        }
+    }
 )));
 
 named!(parse_while_stmt(Input) -> Node<Stmt>, node!(map!(
@@ -30,7 +49,7 @@ named!(parse_while_stmt(Input) -> Node<Stmt>, node!(map!(
         word!("while"), sp, parse_expr,
         sp, parse_stmt_block
     ),
-    |(_, _, condition, _, body)| Stmt::While { condition, body }
+    |(_, _, cond, _, body)| Stmt::While(cond, body)
 )));
 
 named!(parse_function_stmt(Input) -> Node<Stmt>, node!(map!(

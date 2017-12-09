@@ -14,7 +14,7 @@ mod pattern;
 mod function;
 mod module;
 
-pub fn parse<S: AsRef<str>>(src: S) -> Result<Module, Err> {
-    let src = common::Input::new(src.as_ref());
+pub fn parse(src: &str) -> Result<Module, Err> {
+    let src = common::Input::new(src);
     module::parse_module(src).to_result()
 }

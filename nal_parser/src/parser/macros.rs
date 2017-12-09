@@ -14,7 +14,7 @@ macro_rules! word {
             tuple!(
                 tag!($word),
                 peek!(alt_complete!(
-                    not!($crate::parser::ident::ident_char)
+                    not!(ident_chars)
                     | eof!()
                 ))
             ),
