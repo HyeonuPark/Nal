@@ -17,11 +17,15 @@ pub enum Literal {
     Str,
 }
 
-// This is what monorepo is for!
-mod expr { include!("../../nal_ast/src/ast/expr.rs"); }
-mod stmt { include!("../../nal_ast/src/ast/stmt.rs"); }
-mod function { include!("../../nal_ast/src/ast/function.rs"); }
-mod module { include!("../../nal_ast/src/ast/module.rs"); }
+// This is the Rusty way to implement Higher-Kinded-Type, right?
+// Modules below are copy-pasted from nal_ast::ast
+// These code use types like `super::Block` which is vary from here to nal_ast::ast
+// So underlying types are different even though they have exactly same code.
+// See `build.rs` for how they're copied.
+mod expr { include!(concat!(env!("OUT_DIR"), "/ast_expr.rs")); }
+mod stmt { include!(concat!(env!("OUT_DIR"), "/ast_stmt.rs")); }
+mod function { include!(concat!(env!("OUT_DIR"), "/ast_function.rs")); }
+mod module { include!(concat!(env!("OUT_DIR"), "/ast_module.rs")); }
 
 pub use self::expr::*;
 pub use self::stmt::*;
