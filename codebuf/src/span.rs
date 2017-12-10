@@ -1,97 +1,3 @@
-use serde::{Serialize, Serializer, Deserialize, Deserializer};
-
-#[derive(Clone, Default)]
-pub struct Node<T: ?Sized> {
-    inner: Box<T>,
-    pub span: Span,
-}
-
-impl<T: ?Sized> Node<T> {
-    pub fn new<U: Into<Box<T>>>(span: Span, inner: U) -> Self {
-        Node {
-            inner: inner.into(),
-            span,
-        }
-    }
-
-    pub fn dummy<U: Into<Box<T>>>(inner: U) -> Self {
-        Node {
-            inner: inner.into(),
-            span: Span::dummy(),
-        }
-    }
-}
-
-impl<T> Node<T> {
-    pub fn into_inner(node: Self) -> T {
-        *node.inner
-    }
-
-    pub fn map<U, F: FnOnce(T) -> U>(node: Self, f: F) -> Node<U> {
-        Node {
-            inner: f(*node.inner).into(),
-            span: node.span,
-        }
-    }
-}
-
-impl<T: ?Sized> ::std::ops::Deref for Node<T> {
-    type Target = T;
-
-    fn deref(&self) -> &T {
-        &self.inner
-    }
-}
-
-impl<T: PartialEq + ?Sized> PartialEq for Node<T> {
-    fn eq(&self, other: &Self) -> bool {
-        self.inner.eq(&other.inner)
-    }
-}
-
-impl<T: Clone + ?Sized> Clone for Node<[T]> {
-    fn clone(&self) -> Self {
-        Node {
-            inner: self.inner.clone(),
-            span: self.span.clone(),
-        }
-    }
-}
-
-impl<T: Serialize + ?Sized> Serialize for Node<T> {
-    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        self.inner.serialize(s)
-    }
-}
-
-impl<'d, T: Deserialize<'d>> Deserialize<'d> for Node<T> {
-    fn deserialize<D: Deserializer<'d>>(d: D) -> Result<Self, D::Error> {
-        Ok(Node {
-            inner: T::deserialize(d)?.into(),
-            span: Span::dummy(),
-        })
-    }
-}
-
-impl<'d, T: Deserialize<'d>> Deserialize<'d> for Node<[T]> {
-    fn deserialize<D: Deserializer<'d>>(d: D) -> Result<Self, D::Error> {
-        Ok(Node {
-            inner: Vec::<T>::deserialize(d)?.into(),
-            span: Span::dummy(),
-        })
-    }
-}
-
-mod dbg {
-    use super::Node;
-    use std::fmt::{Debug, Formatter, Error};
-
-    impl<T: Debug + ?Sized> Debug for Node<T> {
-        fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-            self.inner.fmt(f)
-        }
-    }
-}
 
 /// Span is identical to `(start_offset, end_offset)`
 /// but guaranteed to be `start_offset <= end_offset`
@@ -129,6 +35,12 @@ impl Span {
 impl From<(usize, usize)> for Span {
     fn from(s: (usize, usize)) -> Self {
         Self::new(s.0, s.1)
+    }
+}
+
+impl AsRef<Span> for Span {
+    fn as_ref(&self) -> &Span {
+        self
     }
 }
 

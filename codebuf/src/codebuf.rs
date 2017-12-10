@@ -1,4 +1,4 @@
-use span::Node;
+use span::Span;
 
 /// Codebuf contains source code and its line information
 #[derive(Debug)]
@@ -31,8 +31,8 @@ impl CodeBuf {
     }
 
     /// Corresponding source code of given node
-    pub fn span<T>(&self, node: &Node<T>) -> &str {
-        let span = node.span;
+    pub fn span<S: AsRef<Span>>(&self, span: S) -> &str {
+        let span = span.as_ref();
 
         &self.code[span.start()..span.end()]
     }
