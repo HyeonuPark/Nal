@@ -10,8 +10,6 @@ repository = "https://github.com/HyeonuPark/Nal.git"
 keywords = ["language", "parser"]
 license = "MIT/Apache-2.0"
 
-build = "build.rs"
-
 [dependencies]
 serde = "1.0"
 serde_derive = "1.0"
