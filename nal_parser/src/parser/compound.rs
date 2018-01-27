@@ -4,13 +4,10 @@ use super::common::*;
 use super::expr::parse_expr;
 use super::ident::parse_ident;
 use super::function::parse_function;
+use super::function::parse_named_function;
 
 named!(parse_tuple_elem(Input) -> Node<TupleElem>, node!(alt_complete!(
     map!(parse_expr, TupleElem::Atom)
-    | map!(
-        tuple!(tag!("..."), sp, parse_expr),
-        |(_, _, expr)| TupleElem::Spread(expr)
-    )
 )));
 
 named!(pub parse_tuple_literal(Input) -> Block<TupleElem>, block!(
@@ -20,7 +17,7 @@ named!(pub parse_tuple_literal(Input) -> Block<TupleElem>, block!(
 
 named!(parse_obj_prop(Input) -> Node<ObjProp>, node!(alt_complete!(
     map!(
-        parse_function,
+        parse_named_function,
         ObjProp::Method
     )
     | map!(

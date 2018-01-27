@@ -12,10 +12,3 @@ impl ::std::ops::Deref for Ident {
         &self.0
     }
 }
-
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
-pub enum Literal {
-    Bool(bool),
-    Num(f64),
-    Str(String),
-}

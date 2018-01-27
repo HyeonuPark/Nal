@@ -7,10 +7,10 @@ pub use codebuf::Node;
 /// `Err(Node<()>)` represents parse failed
 pub type Block<T> = Node<[Result<Node<T>, Node<()>>]>;
 
-#[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Ident;
 
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Literal {
     Bool,
     Num,

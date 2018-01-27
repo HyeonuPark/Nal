@@ -11,8 +11,6 @@ keywords = ["language", "parser"]
 license = "MIT/Apache-2.0"
 
 [dependencies]
-serde = "1.0"
-serde_derive = "1.0"
 nom = "3.2"
 nom_locate = "0.1"
 lazy_static = "1.0"

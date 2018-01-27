@@ -1,4 +1,4 @@
-use super::{Node, Block, Ident, Literal, Function};
+use super::{Node, Block, Ident, Function, NamedFunction};
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Expr {
@@ -20,14 +20,13 @@ pub enum Expr {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum TupleElem {
     Atom(Node<Expr>),
-    Spread(Node<Expr>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum ObjProp {
     Named(Node<Ident>, Node<Expr>),
     Short(Node<Ident>),
-    Method(Node<Function>),
+    Method(Node<NamedFunction>),
 }
 
 #[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
@@ -40,4 +39,11 @@ pub enum BinaryOp {
 #[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
 pub enum UnaryOp {
     Not, Neg,
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum Literal {
+    Bool(bool),
+    Num(f64),
+    Str(String),
 }

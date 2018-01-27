@@ -83,7 +83,6 @@ convert!(Expr,
 
 convert!(TupleElem,
     Atom(e),
-    Spread(e),
 );
 
 convert!(ObjProp,
@@ -119,15 +118,29 @@ convert!(IfFalse,
     Chain(i),
 );
 
-convert!(Pattern,
+convert!(Decl,
     Ident{is_mut, ident},
+    Tuple(t),
+    Obj(o),
+);
+
+convert!(TupleElemDecl,
+    Atom(p),
+);
+
+convert!(ObjPropDecl,
+    Named(i, p),
+    Short(i),
+);
+
+convert!(Pattern,
+    Ident(i),
     Tuple(t),
     Obj(o),
 );
 
 convert!(TupleElemPattern,
     Atom(p),
-    Spread(p),
 );
 
 convert!(ObjPropPattern,
@@ -136,6 +149,8 @@ convert!(ObjPropPattern,
 );
 
 convert!(Function{name, params, body});
+
+convert!(NamedFunction{name, params, body});
 
 convert!(FunctionBody,
     Stmt(s),

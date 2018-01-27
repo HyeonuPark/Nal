@@ -1,4 +1,4 @@
-use super::{Node, Block, Ident, Expr, Function};
+use super::{Node, Block, Ident, Expr, NamedFunction};
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Stmt {
@@ -7,9 +7,9 @@ pub enum Stmt {
     While(Node<Expr>, Block<Stmt>),
     Function {
         is_static: bool,
-        func: Node<Function>,
+        func: Node<NamedFunction>,
     },
-    Let(Node<Pattern>, Node<Expr>),
+    Let(Node<Decl>, Node<Expr>),
     Assign(Node<Pattern>, Node<Expr>),
 }
 
@@ -20,15 +20,33 @@ pub struct IfStmt(pub Node<Expr>, pub Block<Stmt>, pub IfFalse);
 pub enum IfFalse {
     None,
     Base(Block<Stmt>),
-    Chain(Box<IfStmt>),
+    Chain(Node<IfStmt>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
-pub enum Pattern {
+pub enum Decl {
     Ident {
         is_mut: bool,
         ident: Node<Ident>,
     },
+    Tuple(Block<TupleElemDecl>),
+    Obj(Block<ObjPropDecl>),
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum TupleElemDecl {
+    Atom(Node<Decl>),
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum ObjPropDecl {
+    Named(Node<Ident>, Node<Decl>),
+    Short(Node<Ident>),
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub enum Pattern {
+    Ident(Node<Ident>),
     Tuple(Block<TupleElemPattern>),
     Obj(Block<ObjPropPattern>),
 }
@@ -36,7 +54,6 @@ pub enum Pattern {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum TupleElemPattern {
     Atom(Node<Pattern>),
-    Spread(Node<Ident>),
 }
 
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
