@@ -40,6 +40,10 @@ impl CodeBuf {
     /// Line information of this byte offset
     ///
     /// Both line count and offset are starts from 0
+    ///
+    /// # Panics
+    ///
+    /// Panics if `offset` is out of bound
     pub fn line_of(&self, offset: usize) -> Line {
         assert!(offset < self.code.len());
 

@@ -1,3 +1,4 @@
+use std::usize;
 
 /// Span is identical to `(start_offset, end_offset)`
 /// but guaranteed to be `start_offset <= end_offset`
@@ -5,6 +6,11 @@
 pub struct Span(usize, usize);
 
 impl Span {
+    /// Create new `Span` from start/end offset
+    ///
+    /// # Panics
+    ///
+    /// Panics if `start` is greater then `end`
     pub fn new(start: usize, end: usize) -> Self {
         assert!(start <= end,
                 "Span end MUST be greater or equal then span start");
@@ -12,11 +18,11 @@ impl Span {
     }
 
     pub fn dummy() -> Self {
-        Span(0, 0)
+        Span(usize::MAX, usize::MAX)
     }
 
     pub fn is_dummy(&self) -> bool {
-        self.0 == 0 && self.1 == 0
+        self.0 == usize::MAX && self.1 == usize::MAX
     }
 
     pub fn pair(&self) -> (usize, usize) {
@@ -33,6 +39,9 @@ impl Span {
 }
 
 impl From<(usize, usize)> for Span {
+    /// # Panics
+    ///
+    /// Panics if `start` is greater then `end`
     fn from(s: (usize, usize)) -> Self {
         Self::new(s.0, s.1)
     }
@@ -53,6 +62,7 @@ impl Default for Span {
 impl ::std::ops::Add for Span {
     type Output = Self;
 
+    /// Create union of given spans
     fn add(self, right: Span) -> Self {
         Self::new(self.0.min(right.0), self.1.max(right.1))
     }
