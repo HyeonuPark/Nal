@@ -1,0 +1,12 @@
+[package]
+name = "nal_ir"
+version = "0.1.0"
+authors = ["Hyeonu Park <nemo1275@gmail.com>"]
+
+[dependencies]
+serde = "1.0"
+serde_derive = "1.0"
+
+[dependencies.codebuf]
+path = "../codebuf"
+version = "0.1"

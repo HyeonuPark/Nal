@@ -19,6 +19,7 @@ members = [
   "codebuf",
   "nal_parser",
   "nal_ast",
+  "nal_ir",
   "nal_eval",
 ]
 
