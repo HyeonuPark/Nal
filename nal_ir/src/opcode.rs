@@ -1,5 +1,6 @@
-use common::{Ident, Index, VarName, Value, Constant, Ty};
+use common::{Ident, Index, VarName, Value, ConstToken, Ty};
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Opcode {
     Variable(Variable),
     Record(Record),
@@ -7,13 +8,15 @@ pub enum Opcode {
     Function(Function),
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Variable {
-    Localize(Constant, Value),
+    Localize(ConstToken, Value),
     Declare(VarName, Ty),
     Get(VarName, Value),
     Set(VarName, Value),
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Record {
     Open,
     Push(Ident, Value),
@@ -31,6 +34,7 @@ pub enum Record {
     },
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Tuple {
     Open,
     Push(Value),
@@ -53,10 +57,8 @@ pub enum Tuple {
     },
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Function {
-    Open(Value),
-    Push(Ident, Value),
-    Close(Value),
     Call {
         callee: Value,
         argument: Value,
