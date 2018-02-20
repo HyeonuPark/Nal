@@ -6,3 +6,4 @@ extern crate codebuf;
 pub mod common;
 pub mod opcode;
 pub mod block;
+pub mod module;
