@@ -63,12 +63,16 @@ tokens!{
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Serialize, Deserialize)]
-pub struct Value(usize);
+pub struct Value {
+    id: usize,
+    pub ty: Ty,
+}
 
 impl Value {
     pub fn new(ctx: &mut usize) -> Self {
         let id = *ctx;
         *ctx += 1;
-        Value(id)
+
+        Value { id, ty: Ty::default() }
     }
 }
