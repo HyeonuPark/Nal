@@ -1,4 +1,4 @@
-use common::{Ident, Index, VarName, Value, ConstToken, Ty};
+use common::{Ident, VarName, Value, Ty};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Opcode {
@@ -10,7 +10,6 @@ pub enum Opcode {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Variable {
-    Localize(ConstToken, Value),
     Declare(VarName, Ty),
     Get(VarName, Value),
     Set(VarName, Value),
@@ -42,17 +41,18 @@ pub enum Tuple {
     Close(Value),
     Get {
         parent: Value,
-        index: Index,
+        index: usize,
         value: Value,
     },
     Set {
         parent: Value,
-        index: Index,
+        index: usize,
         value: Value,
     },
-    Rest {
+    Slice {
         parent: Value,
-        since: Index,
+        skip: usize,
+        left: usize,
         value: Value,
     },
 }

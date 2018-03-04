@@ -4,37 +4,76 @@
 
 use std::collections::HashMap;
 
-use common::{Constant, VarName, Ident, ConstToken};
+// use internship::InternStr;
+
+use common::{Constant, ConstToken};
 use block::Function;
 
-/// `Script` represents executable code.
-/// Source file is compiled as `Script` when it is used as an entry point of compilation.
-/// It's top level scope is treated as `main` function in other languages.
-///
-/// `Script` should not have any `export` statements.
-pub struct Script {
-    constants: Vec<Constant>,
-    imports: Vec<ImportClause>,
+#[derive(Debug)]
+pub struct EntryModule {
+    module: Module,
     main: Function,
 }
 
-/// `Module` represents linkable code.
-/// Source file is compiled as `Module` when it is `import`ed from other code,
-/// which is either `Script` or `Module`.
-///
-/// `Script` and `Module` has same syntax in source code,
-/// but any variables in top level scope of `Module` should be a constant.
-///
-/// With this limitation, `Module`s don't need to be initialized before imported
-/// so cyclic dependency problems become trivial.
+#[derive(Debug)]
 pub struct Module {
-    constants: Vec<Constant>,
-    imports: Vec<ImportClause>,
-    scope: HashMap<VarName, ConstToken>,
-    exports: HashMap<Ident, ConstToken>,
+    constants: HashMap<ConstToken, Constant>,
 }
 
-pub struct ImportClause {
-    from: String,
-    names: HashMap<Ident, ConstToken>,
+pub struct ModuleBuilder {
+    count: usize,
+    constants: HashMap<ConstToken, Constant>,
+    token_true: ConstToken,
+    token_false: ConstToken,
+}
+
+impl ModuleBuilder {
+    pub fn new() -> Self {
+        let mut count = 0;
+        let mut constants = HashMap::new();
+
+        let token_true = ConstToken::new(&mut count);
+        let token_false = ConstToken::new(&mut count);
+        constants.insert(token_true, Constant::Bool(true));
+        constants.insert(token_false, Constant::Bool(false));
+
+        ModuleBuilder {
+            count,
+            constants,
+            token_true,
+            token_false,
+        }
+    }
+
+    pub fn get_bool(&self, value: bool) -> ConstToken {
+        if value {
+            self.token_true
+        } else {
+            self.token_false
+        }
+    }
+
+    fn add_const(&mut self, value: Constant) -> ConstToken {
+        let token = ConstToken::new(&mut self.count);
+        self.constants.insert(token, value);
+        token
+    }
+
+    pub fn add_num(&mut self, value: f64) -> ConstToken {
+        self.add_const(Constant::Num(value))
+    }
+
+    pub fn add_str(&mut self, value: String) -> ConstToken {
+        self.add_const(Constant::Str(value))
+    }
+
+    pub fn add_func(&mut self, value: Function) -> ConstToken {
+        self.add_const(Constant::Func(value))
+    }
+
+    pub fn finish(self) -> Module {
+        Module {
+            constants: self.constants,
+        }
+    }
 }
