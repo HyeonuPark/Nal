@@ -1,7 +1,6 @@
 use serde::{Serialize, Serializer, Deserialize, Deserializer};
 use span::Span;
 
-#[derive(Clone, Default)]
 pub struct Node<T: ?Sized> {
     inner: Box<T>,
     pub span: Span,
@@ -56,7 +55,7 @@ impl<T: PartialEq + ?Sized> PartialEq for Node<T> {
     }
 }
 
-impl<T: Clone + ?Sized> Clone for Node<[T]> {
+impl<T: ?Sized> Clone for Node<T> where Box<T>: Clone {
     fn clone(&self) -> Self {
         Node {
             inner: self.inner.clone(),
