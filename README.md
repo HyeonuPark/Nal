@@ -15,18 +15,40 @@ Do not use this in any serious project.
 - Type safe without verbosity
 - Structural typing FTW
 
-## Milestones
+## // TODO:
 
-- [x] Parser that define AST
-- [x] Simple tree-walk interpreter
-- [ ] [Algebraic data types][adt]
-- [ ] Type notation and static type checker with inference
-- [ ] Compile to binary with LLVM
-- [ ] Coroutine/Generator
-- [ ] Fiber based goroutine-like runtime
-- [ ] Async, lock-free IO with future API
-- [ ] Safe [Rust][rust] FFI
-- [ ] Runtime code replacement
+### Nal v0.2 should have:
+
+  - Simple function that accepts source code and execute it
+  - Web playground that can execute `Nal` and show its output
+
+### Nal v0.2 should not have:
+
+  - Api stability
+  - Any syntactic sugar
+  - Compound types
+  - Static type checker
+  - User-friendly documentations
+
+### Components in Nal v0.2
+
+  - `nal_ast`: Abstract Syntax Tree structure for source code.
+  - `nal_ir`: Intermediate Representation as a desugared control flow semantics.
+  - `nalc_parser`: Parser that produces AST from source code.
+  - `nalc_atoi`: Convert `a`st `to` `i`r.
+  - `nali`: IR interpreter with dynamic type check.
+
+## Planned features
+
+- [Algebraic data types][adt]
+- Type notation and static type checker with inference
+- Compile to binary with LLVM
+- Coroutine/Generator
+- Turing-complete metaprogramming
+- Fiber based goroutine-like runtime
+- Async, lock-free IO with future API
+- Safe [Rust][rust] FFI
+- Runtime code replacement
 
 ## License
 
