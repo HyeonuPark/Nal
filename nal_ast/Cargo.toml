@@ -11,3 +11,4 @@ keywords = ["language", "ast"]
 license = "MIT/Apache-2.0"
 
 [dependencies]
+internship = "0.3"
