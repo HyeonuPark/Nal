@@ -17,20 +17,19 @@ Do not use this in any serious project.
 
 ## // TODO:
 
-### Nal v0.2 should have:
+### Nal v0.4 should have:
 
   - Simple function that accepts source code and execute it
   - Web playground that can execute `Nal` and show its output
 
-### Nal v0.2 should not have:
+### Nal v0.4 should not have:
 
   - Api stability
   - Any syntactic sugar
-  - Compound types
   - Static type checker
   - User-friendly documentations
 
-### Components in Nal v0.2
+### Components in Nal v0.4
 
   - `nal_ast`: Abstract Syntax Tree structure for source code.
   - `nal_ir`: Intermediate Representation as a desugared control flow semantics.
