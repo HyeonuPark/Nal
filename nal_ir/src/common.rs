@@ -1,22 +1,17 @@
 use internship::InternStr;
 
-use block::Function;
+use func::Function;
 
-// TODO: implement type structure
 pub type Ty = ();
 
-/// Identifier represents any names in code, includes variables and properties.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
-pub struct Ident(InternStr);
+pub struct Ident(pub InternStr);
 
-/// Unique name for every variables.
-///
-/// In source code, multiple variables with same name can be declared,
-/// and only innermost and last visible one is used when referenced.
-///
-/// In IR structure, each variables have unique `VarName` which has name and counter.
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct VarName(Ident, usize);
+pub struct VarName {
+    pub name: Ident,
+    pub idx: usize,
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Constant {
@@ -24,10 +19,6 @@ pub enum Constant {
     Num(f64),
     Str(String),
     Func(Function),
-    // Import {
-    //     from: InternStr,
-    //     name: Ident,
-    // }
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Serialize, Deserialize)]

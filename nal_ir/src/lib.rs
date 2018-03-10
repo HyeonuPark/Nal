@@ -3,7 +3,14 @@ extern crate serde;
 extern crate serde_derive;
 extern crate internship;
 
-pub mod common;
-pub mod opcode;
-pub mod block;
-pub mod module;
+mod common;
+mod opcode;
+mod func;
+mod module;
+
+pub mod prelude {
+    pub use super::common::*;
+    pub use super::opcode::*;
+    pub use super::func::*;
+    pub use super::module::*;
+}

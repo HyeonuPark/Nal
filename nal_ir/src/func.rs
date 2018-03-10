@@ -1,12 +1,3 @@
-//! Sequence of instructions.
-//!
-//! Functions in IR consist of basic blocks with SSA-like form.
-//!
-//! Unlike traditional SSA, blocks in this IR are called `ParamBlock` as they have a parameter
-//! and each jump-like instructions should contains parameter of its destination block.
-//! It's like phi-node but located at tail of basic block.
-//! This decision is made for type inference, mainly failable subtype casting.
-
 use std::collections::HashMap;
 
 use common::{Value, BlockToken};
@@ -14,8 +5,8 @@ use opcode::Opcode;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Function {
-    entry: ParamBlock,
-    blocks: HashMap<BlockToken, ParamBlock>,
+    pub entry: ParamBlock,
+    pub blocks: HashMap<BlockToken, ParamBlock>,
 }
 
 impl Function {
@@ -26,9 +17,9 @@ impl Function {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ParamBlock {
-    param: Value,
-    body: Vec<Opcode>,
-    exit: ExitCode,
+    pub param: Value,
+    pub body: Vec<Opcode>,
+    pub exit: ExitCode,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -40,47 +31,43 @@ pub enum ExitCode {
         then: Goto,
         or: Goto,
     },
-    // Cast {
-    //     when: Value,
-    //     cast_to: Ty,
-    //     then: Goto,
-    //     or: Goto,
-    // },
     Panic,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Goto {
-    block: BlockToken,
-    param: Value,
+    pub block: BlockToken,
+    pub param: Value,
 }
 
 pub struct FunctionBuilder {
     count: usize,
     param: Value,
-    current: Vec<Opcode>,
+    current_block: BlockToken,
+    current_ops: Vec<Opcode>,
     blocks: HashMap<BlockToken, ParamBlock>,
-    entry: BlockToken,
+    entry_token: BlockToken,
 }
 
 impl FunctionBuilder {
     pub fn new() -> Self {
         let mut count = 0;
 
-        let entry = BlockToken::new(&mut count);
+        let entry_token = BlockToken::new(&mut count);
         let param = Value::new(&mut count);
 
         FunctionBuilder {
             count,
             param,
-            current: vec![],
+            current_block: entry_token,
+            current_ops: vec![],
             blocks: HashMap::new(),
-            entry,
+            entry_token,
         }
     }
 
     pub fn entry(&self) -> BlockToken {
-        self.entry
+        self.entry_token
     }
 
     pub fn value(&mut self) -> Value {
@@ -92,25 +79,26 @@ impl FunctionBuilder {
     }
 
     pub fn push(&mut self, op: Opcode) {
-        self.current.push(op);
+        self.current_ops.push(op);
     }
 
-    pub fn wrap(&mut self, block: BlockToken, exit: ExitCode) {
+    pub fn wrap(&mut self, next_block: BlockToken, exit: ExitCode) {
         use std::mem::replace;
 
-        let body = replace(&mut self.current, vec![]);
+        let body = replace(&mut self.current_ops, vec![]);
 
-        self.blocks.insert(block, ParamBlock {
+        self.blocks.insert(self.current_block, ParamBlock {
             param: self.param,
             body,
             exit,
         });
 
+        self.current_block = next_block;
         self.param = self.value();
     }
 
     pub fn finish(mut self) -> Function {
-        let entry = self.blocks.remove(&self.entry).unwrap();
+        let entry = self.blocks.remove(&self.entry_token).unwrap();
 
         Function {
             entry,

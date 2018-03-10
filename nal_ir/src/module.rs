@@ -1,23 +1,17 @@
-//! Top level structures of Nal code.
-//!
-//! Each Nal source files are compiled to either `Script` or `Module`.
-
 use std::collections::HashMap;
 
-// use internship::InternStr;
-
 use common::{Constant, ConstToken};
-use block::Function;
+use func::Function;
 
 #[derive(Debug)]
 pub struct EntryModule {
-    module: Module,
-    main: Function,
+    pub module: Module,
+    pub main: Function,
 }
 
 #[derive(Debug)]
 pub struct Module {
-    constants: HashMap<ConstToken, Constant>,
+    pub constants: HashMap<ConstToken, Constant>,
 }
 
 pub struct ModuleBuilder {

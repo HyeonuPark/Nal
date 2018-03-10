@@ -3,7 +3,7 @@ use common::{Ident, VarName, Value, Ty};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Opcode {
     Variable(Variable),
-    Record(Record),
+    Obj(Obj),
     Tuple(Tuple),
     Function(Function),
 }
@@ -16,7 +16,7 @@ pub enum Variable {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum Record {
+pub enum Obj {
     Open,
     Push(Ident, Value),
     Spread(Value),
