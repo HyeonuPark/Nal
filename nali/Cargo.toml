@@ -1,6 +1,6 @@
 [package]
 name = "nali"
-version = "0.1.0"
+version = "0.4.0"
 authors = ["Hyeonu Park <nemo1275@gmail.com>"]
 
 [dependencies]

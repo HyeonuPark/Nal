@@ -6,13 +6,21 @@ pub enum Expr {
     Literal(Node<Literal>),
     Tuple(Block<TupleElem>),
     Obj(Block<ObjElem>),
-    Function(Function),
+    Function(Node<Function>),
 
     Unary(UnaryOp, Node<Expr>),
     Binary(BinaryOp, Node<Expr>, Node<Expr>),
     Call {
-        caller: Node<Expr>,
+        callee: Node<Expr>,
         argument: Node<Expr>,
+    },
+    ObjField {
+        parent: Node<Expr>,
+        field: Node<Ident>,
+    },
+    TupleField {
+        parent: Node<Expr>,
+        field: Node<usize>,
     },
 
     Return(Option<Node<Expr>>),
