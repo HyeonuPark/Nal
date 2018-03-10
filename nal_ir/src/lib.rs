@@ -8,9 +8,7 @@ mod opcode;
 mod func;
 mod module;
 
-pub mod prelude {
-    pub use super::common::*;
-    pub use super::opcode::*;
-    pub use super::func::*;
-    pub use super::module::*;
-}
+pub use self::common::*;
+pub use self::opcode::*;
+pub use self::func::*;
+pub use self::module::*;

@@ -1,5 +1,7 @@
 use internship::InternStr;
 
+pub use super::{Node, Block};
+
 mod expr;
 pub use self::expr::*;
 

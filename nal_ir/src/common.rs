@@ -10,11 +10,12 @@ pub struct Ident(pub InternStr);
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct VarName {
     pub name: Ident,
-    pub idx: usize,
+    pub count: usize,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Constant {
+    Unit,
     Bool(bool),
     Num(f64),
     Str(String),

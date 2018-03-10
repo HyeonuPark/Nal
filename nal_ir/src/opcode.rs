@@ -5,7 +5,31 @@ pub enum Opcode {
     Variable(Variable),
     Obj(Obj),
     Tuple(Tuple),
-    Function(Function),
+    Call(Call),
+}
+
+impl From<Variable> for Opcode {
+    fn from(value: Variable) -> Self {
+        Opcode::Variable(value)
+    }
+}
+
+impl From<Obj> for Opcode {
+    fn from(value: Obj) -> Self {
+        Opcode::Obj(value)
+    }
+}
+
+impl From<Tuple> for Opcode {
+    fn from(value: Tuple) -> Self {
+        Opcode::Tuple(value)
+    }
+}
+
+impl From<Call> for Opcode {
+    fn from(value: Call) -> Self {
+        Opcode::Call(value)
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -19,7 +43,6 @@ pub enum Variable {
 pub enum Obj {
     Open,
     Push(Ident, Value),
-    Spread(Value),
     Close(Value),
     Get {
         parent: Value,
@@ -37,7 +60,6 @@ pub enum Obj {
 pub enum Tuple {
     Open,
     Push(Value),
-    Spread(Value),
     Close(Value),
     Get {
         parent: Value,
@@ -58,10 +80,8 @@ pub enum Tuple {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum Function {
-    Call {
-        callee: Value,
-        argument: Value,
-        result: Value,
-    },
+pub struct Call {
+    pub callee: Value,
+    pub argument: Value,
+    pub result: Value,
 }

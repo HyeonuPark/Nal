@@ -14,9 +14,11 @@ pub struct Module {
     pub constants: HashMap<ConstToken, Constant>,
 }
 
+#[derive(Debug)]
 pub struct ModuleBuilder {
     count: usize,
     constants: HashMap<ConstToken, Constant>,
+    token_unit: ConstToken,
     token_true: ConstToken,
     token_false: ConstToken,
 }
@@ -26,17 +28,24 @@ impl ModuleBuilder {
         let mut count = 0;
         let mut constants = HashMap::new();
 
+        let token_unit = ConstToken::new(&mut count);
         let token_true = ConstToken::new(&mut count);
         let token_false = ConstToken::new(&mut count);
+        constants.insert(token_unit, Constant::Unit);
         constants.insert(token_true, Constant::Bool(true));
         constants.insert(token_false, Constant::Bool(false));
 
         ModuleBuilder {
             count,
             constants,
+            token_unit,
             token_true,
             token_false,
         }
+    }
+
+    pub fn get_unit(&self) -> ConstToken {
+        self.token_unit
     }
 
     pub fn get_bool(&self, value: bool) -> ConstToken {

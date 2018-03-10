@@ -1,4 +1,4 @@
-use prelude::*;
+use super::*;
 
 #[derive(Debug)]
 pub enum Stmt {

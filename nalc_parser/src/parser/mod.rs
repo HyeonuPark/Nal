@@ -12,7 +12,7 @@ mod module;
 
 mod prelude {
     pub use nom::types::CompleteStr as Src;
-    pub use nal_ast::prelude::*;
+    pub use nal_ast::*;
     pub use super::common::*;
 
     pub fn noop<T>(_: T) {}
@@ -20,7 +20,7 @@ mod prelude {
 
 use nom;
 use nom::types::CompleteStr;
-use nal_ast::prelude::Module;
+use nal_ast::Module;
 
 pub type ParseError<'a> = nom::Err<CompleteStr<'a>>;
 

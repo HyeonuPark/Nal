@@ -1,18 +1,15 @@
 use std::collections::HashMap;
+use std::rc::Rc;
+use std::cell::{RefCell, Ref, RefMut};
 
 use common::{Value, BlockToken};
 use opcode::Opcode;
+use module::ModuleBuilder;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Function {
     pub entry: ParamBlock,
     pub blocks: HashMap<BlockToken, ParamBlock>,
-}
-
-impl Function {
-    pub fn builder() -> FunctionBuilder {
-        FunctionBuilder::new()
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -40,34 +37,60 @@ pub struct Goto {
     pub param: Value,
 }
 
+#[derive(Debug)]
 pub struct FunctionBuilder {
+    module_builder: Rc<RefCell<ModuleBuilder>>,
     count: usize,
     param: Value,
     current_block: BlockToken,
     current_ops: Vec<Opcode>,
     blocks: HashMap<BlockToken, ParamBlock>,
-    entry_token: BlockToken,
+    entry: BlockToken,
+    dead: BlockToken,
 }
 
 impl FunctionBuilder {
-    pub fn new() -> Self {
+    pub fn new(module_builder: Rc<RefCell<ModuleBuilder>>) -> Self {
         let mut count = 0;
 
-        let entry_token = BlockToken::new(&mut count);
+        let entry = BlockToken::new(&mut count);
+        let dead = BlockToken::new(&mut count);
         let param = Value::new(&mut count);
 
         FunctionBuilder {
+            module_builder,
             count,
             param,
-            current_block: entry_token,
+            current_block: entry,
             current_ops: vec![],
             blocks: HashMap::new(),
-            entry_token,
+            entry,
+            dead,
         }
     }
 
-    pub fn entry(&self) -> BlockToken {
-        self.entry_token
+    pub fn module(&self) -> Ref<ModuleBuilder> {
+        self.module_builder.borrow()
+    }
+
+    pub fn module_mut(&mut self) -> RefMut<ModuleBuilder> {
+        self.module_builder.borrow_mut()
+    }
+
+    pub fn spawn(&self) -> Self {
+        FunctionBuilder::new(self.module_builder.clone())
+    }
+
+    pub fn unit(&self) -> Value {
+        self.module().get_unit().to_value()
+    }
+
+    pub fn dead(&self) -> BlockToken {
+        self.dead
+    }
+
+    pub fn param(&self) -> Value {
+        self.param
     }
 
     pub fn value(&mut self) -> Value {
@@ -75,11 +98,15 @@ impl FunctionBuilder {
     }
 
     pub fn block(&mut self) -> BlockToken {
-        BlockToken::new(&mut self.count)
+        if self.current_block == self.dead {
+            self.dead
+        } else {
+            BlockToken::new(&mut self.count)
+        }
     }
 
-    pub fn push(&mut self, op: Opcode) {
-        self.current_ops.push(op);
+    pub fn push<O: Into<Opcode>>(&mut self, op: O) {
+        self.current_ops.push(op.into());
     }
 
     pub fn wrap(&mut self, next_block: BlockToken, exit: ExitCode) {
@@ -98,7 +125,14 @@ impl FunctionBuilder {
     }
 
     pub fn finish(mut self) -> Function {
-        let entry = self.blocks.remove(&self.entry_token).unwrap();
+        assert!(
+            self.current_ops.is_empty(),
+            "FunctionBuilder failed to finish: this builder is incomplete\n{:#?}",
+            self,
+        );
+
+        let entry = self.blocks.remove(&self.entry).unwrap();
+        self.blocks.remove(&self.dead);
 
         Function {
             entry,

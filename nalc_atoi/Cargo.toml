@@ -4,3 +4,12 @@ version = "0.4.0"
 authors = ["Hyeonu Park <nemo1275@gmail.com>"]
 
 [dependencies]
+internship = "0.3"
+
+[dependencies.nal_ast]
+version = "0.4"
+path = "../nal_ast"
+
+[dependencies.nal_ir]
+version = "0.4"
+path = "../nal_ir"
