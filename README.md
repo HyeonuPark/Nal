@@ -20,7 +20,7 @@ Do not use this in any serious project.
 ### Nal v0.4 should have:
 
   - Simple function that accepts source code and execute it
-  - Web playground that can execute `Nal` and show its output
+  - Web playground that can execute `Nal` code and show its output
 
 ### Nal v0.4 should not have:
 
@@ -42,8 +42,9 @@ Do not use this in any serious project.
 - [Algebraic data types][adt]
 - Type notation and static type checker with inference
 - Compile to binary with LLVM
+- Compile-time reflection
+- Isomorphic metaprogramming
 - Coroutine/Generator
-- Turing-complete metaprogramming
 - Fiber based goroutine-like runtime
 - Async, lock-free IO with future API
 - Safe [Rust][rust] FFI
