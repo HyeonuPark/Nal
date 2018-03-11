@@ -56,6 +56,14 @@ impl ModuleBuilder {
         }
     }
 
+    pub fn get_const(&mut self) -> ConstToken {
+        ConstToken::new(&mut self.count)
+    }
+
+    pub fn insert_func(&mut self, token: ConstToken, func: Function) {
+        self.constants.insert(token, Constant::Func(func));
+    }
+
     fn add_const(&mut self, value: Constant) -> ConstToken {
         let token = ConstToken::new(&mut self.count);
         self.constants.insert(token, value);
@@ -68,10 +76,6 @@ impl ModuleBuilder {
 
     pub fn add_str(&mut self, value: String) -> ConstToken {
         self.add_const(Constant::Str(value))
-    }
-
-    pub fn add_func(&mut self, value: Function) -> ConstToken {
-        self.add_const(Constant::Func(value))
     }
 
     pub fn finish(self) -> Module {

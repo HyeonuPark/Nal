@@ -9,9 +9,9 @@ named!{pub parse_func(Src) -> Node<Function>, node!(map!(
         parse_tuple_pattern, sp,
         parse_stmt_block
     ),
-    |(_, name, _, params, _, body)| Function {
+    |(_, name, _, param, _, body)| Function {
         name,
-        params,
+        param,
         body,
     }
 ))}

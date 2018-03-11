@@ -5,7 +5,7 @@ pub enum Opcode {
     Variable(Variable),
     Obj(Obj),
     Tuple(Tuple),
-    Call(Call),
+    Exec(Exec),
 }
 
 impl From<Variable> for Opcode {
@@ -26,9 +26,9 @@ impl From<Tuple> for Opcode {
     }
 }
 
-impl From<Call> for Opcode {
-    fn from(value: Call) -> Self {
-        Opcode::Call(value)
+impl From<Exec> for Opcode {
+    fn from(value: Exec) -> Self {
+        Opcode::Exec(value)
     }
 }
 
@@ -80,8 +80,14 @@ pub enum Tuple {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Call {
-    pub callee: Value,
-    pub argument: Value,
-    pub result: Value,
+pub enum Exec {
+    Call {
+        callee: Value,
+        argument: Value,
+        result: Value,
+    },
+    LogicNot {
+        operand: Value,
+        result: Value,
+    },
 }

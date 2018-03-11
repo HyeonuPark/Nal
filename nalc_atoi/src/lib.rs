@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 extern crate internship;
 
 pub extern crate nal_ast as ast;
@@ -16,30 +14,46 @@ pub struct ConvertError;
 
 pub type Result<T> = ::std::result::Result<T, ConvertError>;
 
-pub fn convert(input: ast::Module) -> Result<ir::Module> {
-    let builder = ir::ModuleBuilder::new();
-    let builder = Rc::new(RefCell::new(builder));
+pub trait Convert {
+    type Output;
 
-    {
+    fn convert(&self) -> Result<Self::Output>;
+}
+
+impl Convert for ast::Module {
+    type Output = ir::Module;
+
+    fn convert(&self) -> Result<ir::Module> {
+        let builder = ir::ModuleBuilder::new();
+        let builder = Rc::new(RefCell::new(builder));
+
         convert_func(
             builder.clone(),
             &mut Scope::new(),
             &ast::Pattern::Void,
-            input.body.val().iter().map(|m_stmt| {
+            self.body.val().iter().map(|m_stmt| {
                 match *m_stmt.val() {
                     ast::ModuleStmt::Stmt(ref stmt) => stmt,
                 }
             }),
         )?;
-    }
 
-    let builder = Rc::try_unwrap(builder)
-        .expect("Some FunctionBuilder are not terminated yet")
+        let builder = Rc::try_unwrap(builder)
+        .expect("Some FunctionBuilders are not terminated yet")
         .into_inner();
-    Ok(builder.finish())
+        Ok(builder.finish())
+    }
 }
 
-fn convert_func<'a, I: IntoIterator<Item = &'a ast::Node<ast::Stmt>>>(
+impl Convert for ast::Ident {
+    type Output = ir::Ident;
+
+    fn convert(&self) -> Result<ir::Ident> {
+        Ok(ir::Ident(self.0.clone()))
+    }
+}
+
+fn convert_func<'a, I: Iterator<Item = &'a ast::Node<ast::Stmt>>>(
     module: Rc<RefCell<ir::ModuleBuilder>>,
     scope: &mut scope::Scope,
     arg: &ast::Pattern,
@@ -92,7 +106,7 @@ fn declare(
                 let elem = builder.value();
                 builder.push(ir::Obj::Get {
                     parent: value,
-                    name: ir::Ident(ident.val().0.clone()),
+                    name: ident.val().convert()?,
                     value: elem,
                 });
                 declare(scope, builder, pat.val(), elem)?;
@@ -140,10 +154,9 @@ fn convert_stmt(
                 }
                 X::ObjField { ref parent, ref field } => {
                     let parent = convert_expr(scope, builder, parent.val())?;
-                    let name = ir::Ident(field.val().0.clone());
                     builder.push(ir::Obj::Set {
                         parent,
-                        name,
+                        name: field.val().convert()?,
                         value,
                     });
                 }
@@ -169,11 +182,11 @@ fn convert_stmt(
                     when: cond,
                     then: ir::Goto {
                         block: on_true,
-                        param: unit_val,
+                        argument: unit_val,
                     },
                     or: ir::Goto {
                         block: on_true,
-                        param: unit_val,
+                        argument: unit_val,
                     },
                 });
 
@@ -188,7 +201,7 @@ fn convert_stmt(
 
                 builder.wrap(on_false, ir::ExitCode::Jump(ir::Goto {
                     block: on_false,
-                    param: unit_val,
+                    argument: unit_val,
                 }));
 
                 // condition is false
@@ -209,13 +222,13 @@ fn convert_stmt(
 
                         builder.wrap(at_last, ir::ExitCode::Jump(ir::Goto {
                             block: at_last,
-                            param: unit_val,
+                            argument: unit_val,
                         }));
                     }
                     EC::Omit => {
                         builder.wrap(at_last, ir::ExitCode::Jump(ir::Goto {
                             block: at_last,
-                            param: unit_val,
+                            argument: unit_val,
                         }));
                     }
                 }
@@ -230,7 +243,7 @@ fn convert_stmt(
 
             builder.wrap(check, ir::ExitCode::Jump(ir::Goto {
                 block: check,
-                param: unit_val,
+                argument: unit_val,
             }));
 
             // check condition
@@ -240,15 +253,18 @@ fn convert_stmt(
                 when: cond,
                 then: ir::Goto {
                     block: loop_body,
-                    param: unit_val,
+                    argument: unit_val,
                 },
                 or: ir::Goto {
                     block: at_last,
-                    param: unit_val,
+                    argument: unit_val,
                 },
             });
 
             // while loop body
+
+            builder.loop_push(check, at_last);
+
             scope.child(|scope| {
                 for stmt in body.val() {
                     convert_stmt(scope, builder, stmt.val())?;
@@ -258,9 +274,11 @@ fn convert_stmt(
             })?;
 
             builder.wrap(at_last, ir::ExitCode::Jump(ir::Goto {
-                block: at_last,
-                param: unit_val,
+                block: check,
+                argument: unit_val,
             }));
+
+            builder.loop_pop(check, at_last);
         }
     }
 
@@ -268,9 +286,273 @@ fn convert_stmt(
 }
 
 fn convert_expr(
-    _scope: &mut scope::Scope,
-    _builder: &mut ir::FunctionBuilder,
-    _expr: &ast::Expr,
+    scope: &mut scope::Scope,
+    builder: &mut ir::FunctionBuilder,
+    expr: &ast::Expr,
 ) -> Result<ir::Value> {
-    unimplemented!()
+    use ast::{Expr as X, Literal as Lit};
+
+    let unit_val = builder.unit();
+
+    Ok(match *expr {
+        X::Variable(ref ident) => {
+            let name = scope.get(ident.val())?;
+            let value = builder.value();
+            builder.push(ir::Variable::Get(name, value));
+            value
+        }
+        X::Literal(ref lit) => {
+            match *lit.val() {
+                Lit::Bool(value) => builder.module().get_bool(value),
+                Lit::Num(value) => builder.module_mut().add_num(value),
+                Lit::Str(ref value) => builder.module_mut().add_str(value.to_string()),
+            }.to_value()
+        }
+        X::Tuple(ref elems) => {
+            builder.push(ir::Tuple::Open);
+
+            for elem in elems.val() {
+                match *elem.val() {
+                    ast::TupleElem::Atom(ref expr) => {
+                        let value = convert_expr(scope, builder, expr.val())?;
+                        builder.push(ir::Tuple::Push(value));
+                    }
+                }
+            }
+
+            let value = builder.value();
+            builder.push(ir::Tuple::Close(value));
+            value
+        }
+        X::Obj(ref elems) => {
+            builder.push(ir::Obj::Open);
+
+            for elem in elems.val() {
+                match *elem.val() {
+                    ast::ObjElem::Named(ref ident, ref expr) => {
+                        let value = convert_expr(scope, builder, expr.val())?;
+                        builder.push(ir::Obj::Push(ident.val().convert()?, value));
+                    }
+                }
+            }
+
+            let value = builder.value();
+            builder.push(ir::Obj::Close(value));
+            value
+        }
+        X::Function(ref func) => {
+            let func = func.val();
+            let func_const = builder.module_mut().get_const();
+
+            scope.child(|scope| {
+                if let Some(ref ident) = func.name {
+                    let name = scope.declare(ident.val());
+                    builder.push(ir::Variable::Declare(name.clone(), ir::Ty::default()));
+                    builder.push(ir::Variable::Set(name, func_const.to_value()));
+                }
+
+                let module_raw = builder.module_raw();
+                builder.module_mut().insert_func(func_const, convert_func(
+                    module_raw,
+                    scope, func.param.val(),
+                    func.body.val().iter(),
+                )?);
+
+                Ok(())
+            })?;
+
+            func_const.to_value()
+        }
+        X::Unary(op, ref expr) => {
+            use ast::UnaryOp as O;
+
+            let inner = convert_expr(scope, builder, expr.val())?;
+
+            match op {
+                O::Not => {
+                    let value = builder.value();
+                    builder.push(ir::Exec::LogicNot {
+                        operand: inner,
+                        result: value,
+                    });
+
+                    value
+                }
+                O::Neg => method_call(builder, inner, "negate", unit_val),
+            }
+        }
+        X::Binary(op, ref left, ref right) => {
+            use ast::BinaryOp as O;
+
+            let bool_true = builder.module().get_bool(true).to_value();
+
+            macro_rules! method {
+                ($name:expr) => (
+                    {
+                        let left = convert_expr(scope, builder, left.val())?;
+                        let right = convert_expr(scope, builder, right.val())?;
+                        method_call(builder, left, $name, right)
+                    }
+                );
+            }
+
+            match op {
+                O::And => {
+                    let eval_right = builder.block();
+                    let at_last = builder.block();
+
+                    // first evaluate left
+                    let left = convert_expr(scope, builder, left.val())?;
+                    builder.wrap(eval_right, ir::ExitCode::Branch {
+                        when: left,
+                        then: ir::Goto {
+                            block: eval_right,
+                            argument: unit_val,
+                        },
+                        or: ir::Goto {
+                            block: at_last,
+                            argument: bool_true,
+                        },
+                    });
+
+                    // if true, evaluate right
+                    let right = convert_expr(scope, builder, right.val())?;
+                    builder.wrap(at_last, ir::ExitCode::Jump(ir::Goto {
+                        block: at_last,
+                        argument: right,
+                    }));
+
+                    // and return received parameter
+                    builder.param()
+                }
+
+                O::Or => {
+                    let eval_right = builder.block();
+                    let at_last = builder.block();
+
+                    // first, evaluate left
+                    let left = convert_expr(scope, builder, left.val())?;
+                    let not_left = builder.value();
+                    builder.push(ir::Exec::LogicNot {
+                        operand: left,
+                        result: not_left,
+                    });
+                    builder.wrap(eval_right, ir::ExitCode::Branch {
+                        when: not_left,
+                        then: ir::Goto {
+                            block: eval_right,
+                            argument: unit_val,
+                        },
+                        or: ir::Goto {
+                            block: at_last,
+                            argument: bool_true,
+                        },
+                    });
+
+                    // if false, evaluate right
+                    let right = convert_expr(scope, builder, right.val())?;
+                    builder.wrap(at_last, ir::ExitCode::Jump(ir::Goto {
+                        block: at_last,
+                        argument: right,
+                    }));
+
+                    // and return received parameter
+                    builder.param()
+                }
+                O::Add => method!("add"),
+                O::Sub => method!("sub"),
+                O::Mul => method!("mul"),
+                O::Div => method!("div"),
+                O::Eq  => method!("equals"),
+                O::Neq => method!("not_equals"),
+                O::Gt  => method!("greater_than"),
+                O::Gte => method!("not_less_than"),
+                O::Lt  => method!("less_than"),
+                O::Lte => method!("not_greater_than"),
+            }
+        }
+        X::Call { ref callee, ref argument } => {
+            let callee = convert_expr(scope, builder, callee.val())?;
+            let argument = convert_expr(scope, builder, argument.val())?;
+            let result = builder.value();
+            builder.push(ir::Exec::Call {
+                callee,
+                argument,
+                result,
+            });
+            result
+        }
+        X::ObjField { ref parent, ref field } => {
+            let parent = convert_expr(scope, builder, parent.val())?;
+            let value = builder.value();
+            builder.push(ir::Obj::Get {
+                parent,
+                name: field.val().convert()?,
+                value,
+            });
+            value
+        }
+        X::TupleField { ref parent, ref field } => {
+            let parent = convert_expr(scope, builder, parent.val())?;
+            let value = builder.value();
+            builder.push(ir::Tuple::Get {
+                parent,
+                index: *field.val(),
+                value,
+            });
+            value
+        }
+        X::Return(ref value) => {
+            let value = match *value {
+                Some(ref value) => convert_expr(scope, builder, value.val())?,
+                None => unit_val,
+            };
+            let dead_block = builder.dead();
+            builder.wrap(dead_block, ir::ExitCode::Return(value));
+            unit_val
+        }
+        X::Break => {
+            let dead_block = builder.dead();
+            let loop_exit = builder.current_loop().1;
+
+            builder.wrap(dead_block, ir::ExitCode::Jump(ir::Goto {
+                block: loop_exit,
+                argument: unit_val,
+            }));
+            unit_val
+        }
+        X::Continue => {
+            let dead_block = builder.dead();
+            let loop_entry = builder.current_loop().0;
+
+            builder.wrap(dead_block, ir::ExitCode::Jump(ir::Goto {
+                block: loop_entry,
+                argument: unit_val,
+            }));
+            unit_val
+        }
+    })
+}
+
+fn method_call(
+    builder: &mut ir::FunctionBuilder,
+    parent: ir::Value,
+    name: &str,
+    argument: ir::Value
+) -> ir::Value {
+    let method = builder.value();
+    let result = builder.value();
+
+    builder.push(ir::Obj::Get {
+        parent: parent,
+        name: ir::Ident(name.into()),
+        value: method,
+    });
+    builder.push(ir::Exec::Call {
+        callee: method,
+        argument,
+        result,
+    });
+
+    result
 }

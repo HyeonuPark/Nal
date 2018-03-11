@@ -34,7 +34,7 @@ pub enum ExitCode {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Goto {
     pub block: BlockToken,
-    pub param: Value,
+    pub argument: Value,
 }
 
 #[derive(Debug)]
@@ -44,6 +44,7 @@ pub struct FunctionBuilder {
     param: Value,
     current_block: BlockToken,
     current_ops: Vec<Opcode>,
+    loop_stack: Vec<(BlockToken, BlockToken)>,
     blocks: HashMap<BlockToken, ParamBlock>,
     entry: BlockToken,
     dead: BlockToken,
@@ -63,6 +64,7 @@ impl FunctionBuilder {
             param,
             current_block: entry,
             current_ops: vec![],
+            loop_stack: vec![],
             blocks: HashMap::new(),
             entry,
             dead,
@@ -77,8 +79,8 @@ impl FunctionBuilder {
         self.module_builder.borrow_mut()
     }
 
-    pub fn spawn(&self) -> Self {
-        FunctionBuilder::new(self.module_builder.clone())
+    pub fn module_raw(&self) -> Rc<RefCell<ModuleBuilder>> {
+        self.module_builder.clone()
     }
 
     pub fn unit(&self) -> Value {
@@ -122,6 +124,24 @@ impl FunctionBuilder {
 
         self.current_block = next_block;
         self.param = self.value();
+    }
+
+    pub fn loop_push(&mut self, entry: BlockToken, exit: BlockToken) {
+        self.loop_stack.push((entry, exit));
+    }
+
+    pub fn loop_pop(&mut self, entry: BlockToken, exit: BlockToken) {
+        let last_loop = self.loop_stack.pop()
+            .expect("loop_pop must be matched with loop_push");
+        assert_eq!(
+            last_loop, (entry, exit),
+            "loop_pop must be matched with loop_push of same block",
+        );
+    }
+
+    pub fn current_loop(&self) -> (BlockToken, BlockToken) {
+        *self.loop_stack.last()
+            .expect("current_loop should be positioned after some loop_push")
     }
 
     pub fn finish(mut self) -> Function {
