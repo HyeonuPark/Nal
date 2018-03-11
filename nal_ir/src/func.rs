@@ -2,29 +2,35 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::cell::{RefCell, Ref, RefMut};
 
-use common::{Value, BlockToken};
+use common::{Slot, BlockToken};
 use opcode::Opcode;
 use module::ModuleBuilder;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Function {
-    pub entry: ParamBlock,
+    pub entry: BlockToken,
     pub blocks: HashMap<BlockToken, ParamBlock>,
+}
+
+impl Function {
+    pub fn entry_block(&self) -> &ParamBlock {
+        &self.blocks[&self.entry]
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ParamBlock {
-    pub param: Value,
+    pub param: Slot,
     pub body: Vec<Opcode>,
     pub exit: ExitCode,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ExitCode {
-    Return(Value),
+    Return(Slot),
     Jump(Goto),
     Branch {
-        when: Value,
+        when: Slot,
         then: Goto,
         or: Goto,
     },
@@ -34,14 +40,14 @@ pub enum ExitCode {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Goto {
     pub block: BlockToken,
-    pub argument: Value,
+    pub argument: Slot,
 }
 
 #[derive(Debug)]
 pub struct FunctionBuilder {
     module_builder: Rc<RefCell<ModuleBuilder>>,
     count: usize,
-    param: Value,
+    param: Slot,
     current_block: BlockToken,
     current_ops: Vec<Opcode>,
     loop_stack: Vec<(BlockToken, BlockToken)>,
@@ -56,7 +62,7 @@ impl FunctionBuilder {
 
         let entry = BlockToken::new(&mut count);
         let dead = BlockToken::new(&mut count);
-        let param = Value::new(&mut count);
+        let param = Slot::new(&mut count);
 
         FunctionBuilder {
             module_builder,
@@ -83,7 +89,7 @@ impl FunctionBuilder {
         self.module_builder.clone()
     }
 
-    pub fn unit(&self) -> Value {
+    pub fn unit(&self) -> Slot {
         self.module().get_unit().to_value()
     }
 
@@ -91,12 +97,12 @@ impl FunctionBuilder {
         self.dead
     }
 
-    pub fn param(&self) -> Value {
+    pub fn param(&self) -> Slot {
         self.param
     }
 
-    pub fn value(&mut self) -> Value {
-        Value::new(&mut self.count)
+    pub fn value(&mut self) -> Slot {
+        Slot::new(&mut self.count)
     }
 
     pub fn block(&mut self) -> BlockToken {
@@ -145,17 +151,16 @@ impl FunctionBuilder {
     }
 
     pub fn finish(mut self) -> Function {
-        assert!(
-            self.current_ops.is_empty(),
-            "FunctionBuilder failed to finish: this builder is incomplete\n{:#?}",
-            self,
-        );
+        if !self.current_ops.is_empty() {
+            let unit_val = self.unit();
+            let dead_block = self.dead();
+            self.wrap(dead_block, ExitCode::Return(unit_val));
+        }
 
-        let entry = self.blocks.remove(&self.entry).unwrap();
         self.blocks.remove(&self.dead);
 
         Function {
-            entry,
+            entry: self.entry,
             blocks: self.blocks,
         }
     }

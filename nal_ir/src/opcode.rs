@@ -1,11 +1,70 @@
-use common::{Ident, VarName, Value, Ty};
+use common::{Ident, VarName, Slot, Ty, FuncToken};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Opcode {
     Variable(Variable),
     Obj(Obj),
     Tuple(Tuple),
-    Exec(Exec),
+    Misc(Misc),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum Variable {
+    Declare(VarName, Ty),
+    Get(VarName, Slot),
+    Set(VarName, Slot),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum Obj {
+    Open,
+    Push(Ident, Slot),
+    Close(Slot),
+    Get {
+        parent: Slot,
+        name: Ident,
+        result: Slot,
+    },
+    Set {
+        parent: Slot,
+        name: Ident,
+        value: Slot,
+    },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum Tuple {
+    Open,
+    Push(Slot),
+    Close(Slot),
+    Get {
+        parent: Slot,
+        index: usize,
+        result: Slot,
+    },
+    Set {
+        parent: Slot,
+        index: usize,
+        value: Slot,
+    },
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum Misc {
+    Call {
+        callee: Slot,
+        argument: Slot,
+        result: Slot,
+    },
+    LogicNot {
+        operand: Slot,
+        result: Slot,
+    },
+    Closure {
+        name: Option<VarName>,
+        function: FuncToken,
+        result: Slot,
+    }
 }
 
 impl From<Variable> for Opcode {
@@ -26,68 +85,8 @@ impl From<Tuple> for Opcode {
     }
 }
 
-impl From<Exec> for Opcode {
-    fn from(value: Exec) -> Self {
-        Opcode::Exec(value)
+impl From<Misc> for Opcode {
+    fn from(value: Misc) -> Self {
+        Opcode::Misc(value)
     }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum Variable {
-    Declare(VarName, Ty),
-    Get(VarName, Value),
-    Set(VarName, Value),
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum Obj {
-    Open,
-    Push(Ident, Value),
-    Close(Value),
-    Get {
-        parent: Value,
-        name: Ident,
-        value: Value,
-    },
-    Set {
-        parent: Value,
-        name: Ident,
-        value: Value,
-    },
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum Tuple {
-    Open,
-    Push(Value),
-    Close(Value),
-    Get {
-        parent: Value,
-        index: usize,
-        value: Value,
-    },
-    Set {
-        parent: Value,
-        index: usize,
-        value: Value,
-    },
-    Slice {
-        parent: Value,
-        skip: usize,
-        left: usize,
-        value: Value,
-    },
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum Exec {
-    Call {
-        callee: Value,
-        argument: Value,
-        result: Value,
-    },
-    LogicNot {
-        operand: Value,
-        result: Value,
-    },
 }

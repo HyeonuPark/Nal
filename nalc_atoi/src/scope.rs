@@ -15,11 +15,11 @@ impl Scope {
         Self::default()
     }
 
-    pub fn child<F: FnOnce(&mut Self) -> Res<()>>(&mut self, f: F) -> Res<()> {
+    pub fn child<T, F: FnOnce(&mut Self) -> Res<T>>(&mut self, f: F) -> Res<T> {
         self.frame.push();
-        f(self)?;
+        let res = f(self);
         self.frame.pop();
-        Ok(())
+        res
     }
 
     pub fn declare(&mut self, name: &ast::Ident) -> ir::VarName {

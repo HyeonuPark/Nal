@@ -1,11 +1,17 @@
-use internship::InternStr;
+use std::fmt;
 
-use func::Function;
+use internship::InternStr;
 
 pub type Ty = ();
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Ident(pub InternStr);
+
+impl fmt::Display for Ident {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct VarName {
@@ -19,7 +25,7 @@ pub enum Constant {
     Bool(bool),
     Num(f64),
     Str(String),
-    Func(Function),
+    FreeVar(Ident),
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Serialize, Deserialize)]
@@ -32,8 +38,19 @@ impl ConstToken {
         ConstToken(id)
     }
 
-    pub fn to_value(self) -> Value {
-        Value::Constant(self)
+    pub fn to_value(self) -> Slot {
+        Slot::Constant(self)
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Serialize, Deserialize)]
+pub struct FuncToken(usize);
+
+impl FuncToken {
+    pub fn new(ctx: &mut usize) -> Self {
+        let id = *ctx;
+        *ctx += 1;
+        FuncToken(id)
     }
 }
 
@@ -49,7 +66,7 @@ impl BlockToken {
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Serialize, Deserialize)]
-pub enum Value {
+pub enum Slot {
     Constant(ConstToken),
     Local {
         id: usize,
@@ -57,10 +74,10 @@ pub enum Value {
     }
 }
 
-impl Value {
+impl Slot {
     pub fn new(ctx: &mut usize) -> Self {
         let id = *ctx;
         *ctx += 1;
-        Value::Local { id, ty: Ty::default() }
+        Slot::Local { id, ty: Ty::default() }
     }
 }

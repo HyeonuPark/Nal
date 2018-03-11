@@ -6,6 +6,8 @@ pub extern crate nal_ir as ir;
 use std::rc::Rc;
 use std::cell::RefCell;
 
+use ir::Slot;
+
 mod scope;
 use self::scope::Scope;
 
@@ -21,13 +23,13 @@ pub trait Convert {
 }
 
 impl Convert for ast::Module {
-    type Output = ir::Module;
+    type Output = ir::EntryModule;
 
-    fn convert(&self) -> Result<ir::Module> {
+    fn convert(&self) -> Result<ir::EntryModule> {
         let builder = ir::ModuleBuilder::new();
         let builder = Rc::new(RefCell::new(builder));
 
-        convert_func(
+        let main = convert_func(
             builder.clone(),
             &mut Scope::new(),
             &ast::Pattern::Void,
@@ -39,9 +41,14 @@ impl Convert for ast::Module {
         )?;
 
         let builder = Rc::try_unwrap(builder)
-        .expect("Some FunctionBuilders are not terminated yet")
-        .into_inner();
-        Ok(builder.finish())
+            .expect("Some FunctionBuilders are not terminated yet")
+            .into_inner();
+        let module = builder.finish();
+
+        Ok(ir::EntryModule {
+            module,
+            main,
+        })
     }
 }
 
@@ -79,7 +86,7 @@ fn declare(
     scope: &mut Scope,
     builder: &mut ir::FunctionBuilder,
     pat: &ast::Pattern,
-    value: ir::Value
+    value: Slot
 ) -> Result<()> {
     use ast::Pattern as P;
 
@@ -96,7 +103,7 @@ fn declare(
                 builder.push(ir::Tuple::Get {
                     parent: value,
                     index: idx,
-                    value: elem,
+                    result: elem,
                 });
                 declare(scope, builder, pat.val(), elem)?;
             }
@@ -107,7 +114,7 @@ fn declare(
                 builder.push(ir::Obj::Get {
                     parent: value,
                     name: ident.val().convert()?,
-                    value: elem,
+                    result: elem,
                 });
                 declare(scope, builder, pat.val(), elem)?;
             }
@@ -289,17 +296,25 @@ fn convert_expr(
     scope: &mut scope::Scope,
     builder: &mut ir::FunctionBuilder,
     expr: &ast::Expr,
-) -> Result<ir::Value> {
+) -> Result<Slot> {
     use ast::{Expr as X, Literal as Lit};
 
     let unit_val = builder.unit();
 
     Ok(match *expr {
         X::Variable(ref ident) => {
-            let name = scope.get(ident.val())?;
-            let value = builder.value();
-            builder.push(ir::Variable::Get(name, value));
-            value
+            match scope.get(ident.val()) {
+                Ok(name) => {
+                    let value = builder.value();
+                    builder.push(ir::Variable::Get(name, value));
+                    value
+                }
+                Err(_) => {
+                    builder.module_mut()
+                        .add_free_var(ident.val().convert()?)
+                        .to_value()
+                }
+            }
         }
         X::Literal(ref lit) => {
             match *lit.val() {
@@ -342,26 +357,27 @@ fn convert_expr(
         }
         X::Function(ref func) => {
             let func = func.val();
-            let func_const = builder.module_mut().get_const();
+            // let func_const = builder.module_mut().get_const();
 
             scope.child(|scope| {
-                if let Some(ref ident) = func.name {
-                    let name = scope.declare(ident.val());
-                    builder.push(ir::Variable::Declare(name.clone(), ir::Ty::default()));
-                    builder.push(ir::Variable::Set(name, func_const.to_value()));
-                }
+                let name = func.name.as_ref().map(|ident| scope.declare(ident.val()));
 
-                let module_raw = builder.module_raw();
-                builder.module_mut().insert_func(func_const, convert_func(
-                    module_raw,
+                let func = convert_func(
+                    builder.module_raw(),
                     scope, func.param.val(),
                     func.body.val().iter(),
-                )?);
+                )?;
 
-                Ok(())
-            })?;
+                let result = builder.value();
+                let token = builder.module_mut().add_func(func);
+                builder.push(ir::Misc::Closure {
+                    name,
+                    function: token,
+                    result,
+                });
 
-            func_const.to_value()
+                Ok(result)
+            })?
         }
         X::Unary(op, ref expr) => {
             use ast::UnaryOp as O;
@@ -371,7 +387,7 @@ fn convert_expr(
             match op {
                 O::Not => {
                     let value = builder.value();
-                    builder.push(ir::Exec::LogicNot {
+                    builder.push(ir::Misc::LogicNot {
                         operand: inner,
                         result: value,
                     });
@@ -433,7 +449,7 @@ fn convert_expr(
                     // first, evaluate left
                     let left = convert_expr(scope, builder, left.val())?;
                     let not_left = builder.value();
-                    builder.push(ir::Exec::LogicNot {
+                    builder.push(ir::Misc::LogicNot {
                         operand: left,
                         result: not_left,
                     });
@@ -475,7 +491,7 @@ fn convert_expr(
             let callee = convert_expr(scope, builder, callee.val())?;
             let argument = convert_expr(scope, builder, argument.val())?;
             let result = builder.value();
-            builder.push(ir::Exec::Call {
+            builder.push(ir::Misc::Call {
                 callee,
                 argument,
                 result,
@@ -484,23 +500,23 @@ fn convert_expr(
         }
         X::ObjField { ref parent, ref field } => {
             let parent = convert_expr(scope, builder, parent.val())?;
-            let value = builder.value();
+            let result = builder.value();
             builder.push(ir::Obj::Get {
                 parent,
                 name: field.val().convert()?,
-                value,
+                result,
             });
-            value
+            result
         }
         X::TupleField { ref parent, ref field } => {
             let parent = convert_expr(scope, builder, parent.val())?;
-            let value = builder.value();
+            let result = builder.value();
             builder.push(ir::Tuple::Get {
                 parent,
                 index: *field.val(),
-                value,
+                result,
             });
-            value
+            result
         }
         X::Return(ref value) => {
             let value = match *value {
@@ -536,19 +552,19 @@ fn convert_expr(
 
 fn method_call(
     builder: &mut ir::FunctionBuilder,
-    parent: ir::Value,
+    parent: Slot,
     name: &str,
-    argument: ir::Value
-) -> ir::Value {
+    argument: Slot
+) -> Slot {
     let method = builder.value();
     let result = builder.value();
 
     builder.push(ir::Obj::Get {
         parent: parent,
         name: ir::Ident(name.into()),
-        value: method,
+        result: method,
     });
-    builder.push(ir::Exec::Call {
+    builder.push(ir::Misc::Call {
         callee: method,
         argument,
         result,
