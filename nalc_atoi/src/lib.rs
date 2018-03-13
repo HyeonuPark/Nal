@@ -476,9 +476,9 @@ fn convert_expr(
                     builder.param()
                 }
                 O::Add => method!("add"),
-                O::Sub => method!("sub"),
-                O::Mul => method!("mul"),
-                O::Div => method!("div"),
+                O::Sub => method!("subtract"),
+                O::Mul => method!("multiply"),
+                O::Div => method!("divide"),
                 O::Eq  => method!("equals"),
                 O::Neq => method!("not_equals"),
                 O::Gt  => method!("greater_than"),

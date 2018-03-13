@@ -5,6 +5,7 @@ use ir::{self, Ident, Slot};
 use error::Result;
 use value::{Value, ValueRef};
 use scope::Scope;
+use proxy::{proxy_bool, proxy_num, proxy_str};
 
 #[derive(Debug, Default)]
 pub struct Engine {
@@ -18,6 +19,15 @@ impl Engine {
 
     pub fn set<V: Into<Value>>(&mut self, name: &str, value: V) -> &mut Self {
         self.globals.insert(Ident(name.into()), value.into());
+        self
+    }
+
+    pub fn set_all<'a, I>(&mut self, iter: I) -> &mut Self where
+        I: IntoIterator<Item=(&'a str, Value)>
+    {
+        for (name, value) in iter {
+            self.globals.insert(Ident(name.into()), value);
+        }
         self
     }
 
@@ -161,15 +171,18 @@ fn exec_obj(
         O::Get { parent, ref name, result } => {
             let parent = local.get(&parent).unwrap().clone();
 
-            let value = match *parent.borrow() {
+            let parent2 = parent.clone();
+            let value = match *parent2.borrow() {
                 Value::Obj(ref table) => {
                     match table.get(name) {
                         None => Err("Obj::Get field not exist")?,
                         Some(v) => v.clone(),
                     }
                 }
-                // TODO: add primitive method forwarding logic
-                _ => Err("Obj::Get on non-obj value")?,
+                Value::Bool(value) => proxy_bool(value, name)?,
+                Value::Num(value)  => proxy_num(value, name)?,
+                Value::Str(ref v)  => proxy_str(v, parent, name)?,
+                _ => Err("Obj::Get on non-obj type")?,
             };
 
             local.insert(result, value);
@@ -183,7 +196,7 @@ fn exec_obj(
                 Value::Obj(ref mut table) => {
                     table.insert(name.clone(), value);
                 }
-                _ => Err("Obj::Set on non-obj value")?,
+                _ => Err("Obj::Set on non-obj type")?,
             }
         }
     }
@@ -222,7 +235,7 @@ fn exec_tuple(
                     }
                 }
                 // TODO: add primitive method forwarding logic
-                _ => Err("Tuple::Get on non-tuple value")?,
+                _ => Err("Tuple::Get on non-tuple type")?,
             };
 
             local.insert(result, value);
@@ -241,7 +254,7 @@ fn exec_tuple(
                         }
                     }
                 }
-                _ => Err("Tuple::Set on non-tuple value")?,
+                _ => Err("Tuple::Set on non-tuple type")?,
             }
         }
     }
@@ -264,7 +277,7 @@ fn exec_misc(
             let mut callee = callee.borrow_mut();
             let value = match *callee {
                 Value::Func(ref mut f) => f(argument)?,
-                _ => Err("Misc::Call on non-function value")?,
+                _ => Err("Misc::Call on non-function type")?,
             };
 
             local.insert(result, value);
@@ -275,7 +288,7 @@ fn exec_misc(
 
             let value = match *operand {
                 Value::Bool(v) => Value::Bool(!v).into_ref(),
-                _ => Err("Misc::LogicNot on non-bool value")?,
+                _ => Err("Misc::LogicNot on non-bool type")?,
             };
 
             local.insert(result, value);

@@ -31,12 +31,6 @@ impl Value {
     }
 }
 
-impl Default for Value {
-    fn default() -> Self {
-        Value::Unit
-    }
-}
-
 #[derive(Debug, Default)]
 pub struct Obj(HashMap<Ident, ValueRef>);
 
@@ -72,6 +66,12 @@ impl Tuple {
 
     pub fn into_value(self) -> Value {
         Value::Tuple(self.0)
+    }
+}
+
+impl Default for Value {
+    fn default() -> Self {
+        Value::Unit
     }
 }
 
@@ -131,7 +131,7 @@ impl fmt::Debug for Value {
                 let mut f = f.debug_struct("Obj");
 
                 for (name, elem) in v {
-                    f.field(name.0.as_ref(), elem);
+                    f.field(name.as_ref(), elem);
                 }
 
                 f.finish()

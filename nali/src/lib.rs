@@ -5,10 +5,16 @@ extern crate nal_ir as ir;
 pub mod stdnal;
 
 pub mod error;
-pub mod value;
-pub mod scope;
-pub mod engine;
+mod value;
+mod scope;
+mod proxy;
+mod engine;
 
-pub fn exec(_src: &ir::EntryModule) -> Result<(), error::RuntimeError> {
-    unimplemented!()
+pub use value::{Value, ValueRef};
+pub use engine::Engine;
+
+pub fn exec(src: &ir::EntryModule) -> Result<(), error::RuntimeError> {
+    Engine::new()
+        //.set_all(stdnal::get_all())
+        .exec(src)
 }
