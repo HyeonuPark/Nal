@@ -14,8 +14,9 @@ pub mod value;
 use self::value::{Value, ValueRef};
 
 pub type RuntimeError = String;
+pub type Result<T> = ::std::result::Result<T, RuntimeError>;
 
-pub fn exec(_src: &ir::EntryModule) -> Result<(), RuntimeError> {
+pub fn exec(_src: &ir::EntryModule) -> Result<()> {
     unimplemented!()
 }
 
@@ -34,7 +35,7 @@ impl Engine {
         self
     }
 
-    pub fn exec(&mut self, src: &ir::EntryModule) -> Result<(), RuntimeError> {
+    pub fn exec(&mut self, src: &ir::EntryModule) -> Result<()> {
         // check if uncovered free variable exist
         let mut free_vars = src.module.free_vars.clone();
 
@@ -72,7 +73,7 @@ impl Engine {
     }
 }
 
-fn exec_func(func: &ir::Function, scope: Scope, arg: ValueRef) -> Result<ValueRef, RuntimeError> {
+fn exec_func(func: &ir::Function, scope: Scope, arg: ValueRef) -> Result<ValueRef> {
     use ir::Opcode as O;
     use ir::ExitCode as X;
 
@@ -131,7 +132,7 @@ fn exec_variable(
     code: &ir::Variable,
     scope: Scope,
     local: &mut HashMap<Slot, ValueRef>
-) -> Result<(), RuntimeError> {
+) -> Result<()> {
     use ir::Variable as O;
 
     match *code {
@@ -155,33 +156,21 @@ fn exec_obj(
     code: &ir::Obj,
     scope: Scope,
     local: &mut HashMap<Slot, ValueRef>
-) -> Result<(), RuntimeError> {
+) -> Result<()> {
     use ir::Obj as O;
 
     match *code {
         O::Open => {
-            scope.push(LiteralFrame::Obj(Default::default()));
+            scope.push_obj();
         }
         O::Push(ref ident, slot) => {
-            match *scope.peek() {
-                LiteralFrame::Obj(ref mut buf) => {
-                    let value = local.get(&slot).unwrap().clone();
-                    buf.insert(ident.clone(), value);
-                }
-                LiteralFrame::Tuple(_) => {
-                    Err("Obj::Push within tuple literal")?
-                }
-            }
+            let mut buf = scope.peek_obj()?;
+            let value = local.get(&slot).unwrap().clone();
+            buf.insert(ident.clone(), value);
         }
         O::Close(slot) => {
-            match scope.pop() {
-                LiteralFrame::Obj(buf) => {
-                    local.insert(slot, Value::Obj(buf).into_ref());
-                }
-                LiteralFrame::Tuple(_) => {
-                    Err("Obj::Close within tuple literal")?
-                }
-            }
+            let buf = scope.pop_obj()?;
+            local.insert(slot, Value::Obj(buf).into_ref());
         }
         O::Get { parent, ref name, result } => {
             let parent = local.get(&parent).unwrap().clone();
@@ -220,33 +209,21 @@ fn exec_tuple(
     code: &ir::Tuple,
     scope: Scope,
     local: &mut HashMap<Slot, ValueRef>
-) -> Result<(), RuntimeError> {
+) -> Result<()> {
     use ir::Tuple as O;
 
     match *code {
         O::Open => {
-            scope.push(LiteralFrame::Tuple(Default::default()));
+            scope.push_tuple();
         }
         O::Push(slot) => {
-            match *scope.peek() {
-                LiteralFrame::Tuple(ref mut buf) => {
-                    let value = local.get(&slot).unwrap().clone();
-                    buf.push(value);
-                }
-                LiteralFrame::Obj(_) => {
-                    Err("Tuple::Push within obj literal")?
-                }
-            }
+            let mut buf = scope.peek_tuple()?;
+            let value = local.get(&slot).unwrap().clone();
+            buf.push(value);
         }
         O::Close(slot) => {
-            match scope.pop() {
-                LiteralFrame::Tuple(buf) => {
-                    local.insert(slot, Value::Tuple(buf).into_ref());
-                }
-                LiteralFrame::Obj(_) => {
-                    Err("Tuple::Close within obj literal")?
-                }
-            }
+            let buf = scope.pop_tuple()?;
+            local.insert(slot, Value::Tuple(buf).into_ref());
         }
         O::Get { parent, index, result } => {
             let parent = local.get(&parent).unwrap().clone();
@@ -290,7 +267,7 @@ fn exec_misc(
     code: &ir::Misc,
     scope: Scope,
     local: &mut HashMap<Slot, ValueRef>
-) -> Result<(), RuntimeError> {
+) -> Result<()> {
     use ir::Misc as O;
 
     match *code {
@@ -347,7 +324,7 @@ struct ScopeBox {
 }
 
 #[derive(Debug)]
-pub enum LiteralFrame {
+enum LiteralFrame {
     Obj(HashMap<Ident, ValueRef>),
     Tuple(Vec<ValueRef>),
 }
@@ -396,19 +373,62 @@ impl Scope {
         *(local.get_mut(name).unwrap()) = value;
     }
 
-    pub fn push(&self, frame: LiteralFrame) {
-        self.0.stack.borrow_mut().push(frame);
+    pub fn push_obj(&self) {
+        self.0.stack.borrow_mut().push(LiteralFrame::Obj(Default::default()));
     }
 
-    pub fn peek(&self) -> RefMut<LiteralFrame> {
-        RefMut::map(self.0.stack.borrow_mut(), |stack| {
-            stack.last_mut().expect("Scope::peek on empty stack")
-        })
+    pub fn push_tuple(&self) {
+        self.0.stack.borrow_mut().push(LiteralFrame::Tuple(Default::default()));
     }
 
-    pub fn pop(&self) -> LiteralFrame {
-        self.0.stack.borrow_mut().pop()
-            .expect("Scope::pop on empty stack")
+    pub fn peek_obj(&self) -> Result<RefMut<HashMap<Ident, ValueRef>>> {
+        match self.0.stack.borrow().last() {
+            None => Err("Scope::peek_obj on empty stack")?,
+            Some(&LiteralFrame::Tuple(_)) => {
+                Err("Scope::peek_obj within tuple literal")?
+            },
+            Some(&LiteralFrame::Obj(_)) => {}
+        }
+        Ok(RefMut::map(self.0.stack.borrow_mut(), |stack| {
+            match stack.last_mut() {
+                None => unreachable!(),
+                Some(&mut LiteralFrame::Tuple(_)) => unreachable!(),
+                Some(&mut LiteralFrame::Obj(ref mut map)) => map,
+            }
+        }))
+    }
+
+    pub fn peek_tuple(&self) -> Result<RefMut<Vec<ValueRef>>> {
+        match self.0.stack.borrow().last() {
+            None => Err("Scope::peek_tuple on empty stack")?,
+            Some(&LiteralFrame::Obj(_)) => {
+                Err("Scope::peek_tuple within obj literal")?
+            },
+            Some(&LiteralFrame::Tuple(_)) => {}
+        }
+        Ok(RefMut::map(self.0.stack.borrow_mut(), |stack| {
+            match stack.last_mut() {
+                None => unreachable!(),
+                Some(&mut LiteralFrame::Obj(_)) => unreachable!(),
+                Some(&mut LiteralFrame::Tuple(ref mut tup)) => tup,
+            }
+        }))
+    }
+
+    pub fn pop_obj(&self) -> Result<HashMap<Ident, ValueRef>> {
+        match self.0.stack.borrow_mut().pop() {
+            None => Err("Scope::pop_obj on empty stack")?,
+            Some(LiteralFrame::Tuple(_)) => Err("Scope::pop_obj within tuple literal")?,
+            Some(LiteralFrame::Obj(map)) => Ok(map),
+        }
+    }
+
+    pub fn pop_tuple(&self) -> Result<Vec<ValueRef>> {
+        match self.0.stack.borrow_mut().pop() {
+            None => Err("Scope::pop_tuple on empty stack")?,
+            Some(LiteralFrame::Obj(_)) => Err("Scope::pop_tuple within obj literal")?,
+            Some(LiteralFrame::Tuple(tup)) => Ok(tup),
+        }
     }
 
     pub fn func(&self, token: &ir::FuncToken) -> Option<Rc<ir::Function>> {
