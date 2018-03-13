@@ -7,6 +7,8 @@ use internship::InternStr;
 
 use ir::Ident;
 
+use error::Result;
+
 pub type ValueRef = Rc<RefCell<Value>>;
 
 pub enum Value {
@@ -14,7 +16,7 @@ pub enum Value {
     Bool(bool),
     Num(f64),
     Str(String),
-    Func(Box<FnMut(ValueRef) -> Result<ValueRef, super::RuntimeError> + 'static>),
+    Func(Box<FnMut(ValueRef) -> Result<ValueRef> + 'static>),
     Obj(HashMap<Ident, ValueRef>),
     Tuple(Vec<ValueRef>),
 }
@@ -97,7 +99,7 @@ impl<'a> From<&'a str> for Value {
     }
 }
 
-impl<F: FnMut(ValueRef) -> Result<ValueRef, super::RuntimeError> + 'static> From<F> for Value {
+impl<F: FnMut(ValueRef) -> Result<ValueRef> + 'static> From<F> for Value {
     fn from(v: F) -> Value {
         Value::Func(Box::new(v))
     }
