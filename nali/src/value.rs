@@ -38,9 +38,9 @@ impl Default for Value {
 }
 
 #[derive(Debug, Default)]
-pub struct ObjBuilder(HashMap<Ident, ValueRef>);
+pub struct Obj(HashMap<Ident, ValueRef>);
 
-impl ObjBuilder {
+impl Obj {
     pub fn new() -> Self {
         Self::default()
     }
@@ -58,9 +58,9 @@ impl ObjBuilder {
 }
 
 #[derive(Debug, Default)]
-pub struct TupleBuilder(Vec<ValueRef>);
+pub struct Tuple(Vec<ValueRef>);
 
-impl TupleBuilder {
+impl Tuple {
     pub fn new() -> Self {
         Self::default()
     }
@@ -105,14 +105,14 @@ impl<F: FnMut(ValueRef) -> Result<ValueRef> + 'static> From<F> for Value {
     }
 }
 
-impl From<ObjBuilder> for Value {
-    fn from(v: ObjBuilder) -> Value {
+impl From<Obj> for Value {
+    fn from(v: Obj) -> Value {
         v.into_value()
     }
 }
 
-impl From<TupleBuilder> for Value {
-    fn from(v: TupleBuilder) -> Value {
+impl From<Tuple> for Value {
+    fn from(v: Tuple) -> Value {
         v.into_value()
     }
 }
@@ -148,9 +148,3 @@ impl fmt::Debug for Value {
         }
     }
 }
-
-// impl fmt::Debug for Box<FnMut(ValueRef) -> ValueRef> {
-//     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-//         write!(f, "Function")
-//     }
-// }
