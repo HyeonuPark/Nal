@@ -11,12 +11,22 @@ use ir::Slot;
 mod scope;
 use self::scope::Scope;
 
-#[derive(Debug)]
-pub struct ConvertError;
+pub type Result<T> = ::std::result::Result<T, Error>;
 
-pub type Result<T> = ::std::result::Result<T, ConvertError>;
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Error(pub String);
 
-pub trait Convert {
+impl<T: Into<String>> From<T> for Error {
+    fn from(v: T) -> Self {
+        Error(v.into())
+    }
+}
+
+pub fn convert(from: &ast::Module) -> Result<ir::EntryModule> {
+    from.convert()
+}
+
+trait Convert {
     type Output;
 
     fn convert(&self) -> Result<Self::Output>;
@@ -167,7 +177,7 @@ fn convert_stmt(
                         value,
                     });
                 }
-                _ => return Err(ConvertError),
+                _ => return Err(format!("Assign to non-lval expr is not allowed").into()),
             }
         }
         S::If(ref if_stmt) => {

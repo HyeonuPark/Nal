@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use internship::InternStr;
 
-use {ast, ir, Result as Res, ConvertError};
+use {ast, ir, Result};
 
 #[derive(Debug, Default)]
 pub struct Scope {
@@ -15,7 +15,7 @@ impl Scope {
         Self::default()
     }
 
-    pub fn child<T, F: FnOnce(&mut Self) -> Res<T>>(&mut self, f: F) -> Res<T> {
+    pub fn child<T, F: FnOnce(&mut Self) -> Result<T>>(&mut self, f: F) -> Result<T> {
         self.frame.push();
         let res = f(self);
         self.frame.pop();
@@ -39,13 +39,13 @@ impl Scope {
         }
     }
 
-    pub fn get(&self, name: &ast::Ident) -> Result<ir::VarName, ConvertError> {
+    pub fn get(&self, name: &ast::Ident) -> Result<ir::VarName> {
         let name = &name.0;
 
         self.frame.get(name).map(|count| ir::VarName {
             name: ir::Ident(name.clone()),
             count,
-        }).ok_or(ConvertError)
+        }).ok_or(format!("Scope::get({}) failed", name).into())
     }
 }
 

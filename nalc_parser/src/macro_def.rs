@@ -58,7 +58,7 @@ macro_rules! uni_none_of {
     ($i:expr, $filter:expr) => ({
         use ::nom::{FindToken, Err as NomErr};
         use ::nom::ErrorKind::NoneOf;
-        match $crate::parser::common::uni_char($i) {
+        match $crate::common::uni_char($i) {
             Err(e) => Err(e),
             Ok((left, ch)) => match $filter.find_token(ch) {
                 true => Err(NomErr::Error(error_position!($i, NoneOf::<u32>))),
