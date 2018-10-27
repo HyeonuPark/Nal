@@ -31,6 +31,7 @@ path = "./nali"
 
 [workspace]
 members = [
+  "nal_ident",
   "nal_ast",
   "nal_ir",
   "nalc_parser",

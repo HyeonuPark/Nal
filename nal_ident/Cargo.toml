@@ -1,0 +1,6 @@
+[package]
+name = "nal_ident"
+version = "0.1.0"
+authors = ["Hyeonu Park <nemo1275@gmail.com>"]
+
+[dependencies]

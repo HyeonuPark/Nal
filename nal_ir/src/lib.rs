@@ -1,14 +1,5 @@
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-extern crate internship;
 
-mod common;
-mod opcode;
-mod func;
-mod module;
+extern crate nal_ident;
 
-pub use self::common::*;
-pub use self::opcode::*;
-pub use self::func::*;
-pub use self::module::*;
+pub mod ty;
+pub mod flow;
