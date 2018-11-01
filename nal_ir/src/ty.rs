@@ -3,8 +3,8 @@ use std::collections::HashMap;
 
 use nal_ident::Ident;
 
-mod primitive;
-pub use self::primitive::Primitive;
+use crate::primitive::{self, Primitive};
+
 use self::Ty::*;
 
 #[derive(Debug, Clone)]
@@ -45,7 +45,7 @@ impl Ty {
                 that.len() == 1 && self.is_subtype_of(&that[0])
             }
             (Primitive(this), Primitive(that)) => this == that,
-            (_, Primitive(_)) => false, // primitives can't be other's supertype
+            (_, Primitive(_)) => false, // primitives can't be other type's supertype
             (Primitive(this), _) => primitive::wrap(*this).is_subtype_of(that),
         }
     }

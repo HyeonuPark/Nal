@@ -1,5 +1,5 @@
 
-use super::Ty;
+use crate::ty::Ty;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub enum Primitive {
