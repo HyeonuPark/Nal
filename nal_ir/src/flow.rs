@@ -1,11 +1,9 @@
 //! Structured control flow representations
 
-use std::collections::HashMap;
 use std::fmt;
 
 use nal_ident::Ident;
 
-use crate::ty::Ty;
 use crate::instruction::Instr;
 
 pub trait Break: fmt::Debug {
@@ -40,7 +38,7 @@ pub enum Step<B: Break> {
     /// 1. Popped value is not `Enum` type.
     /// 1. Branch block with matching tag not exist.
     /// 1. Any branch produces non-identical program state after execution.
-    Branch(HashMap<Ident, Block<B>>),
+    Branch(Vec<(Ident, Block<B>)>),
 
     /// Execute given block repeatedly, until it breaks out.
     ///
@@ -59,16 +57,15 @@ pub enum Step<B: Break> {
 
 #[derive(Debug)]
 pub struct Block<B: Break> {
-    depth: usize,
-    scope: HashMap<Slot, Ty>,
+    scope: Vec<Slot>,
     body: Vec<Step<B>>,
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Slot {
     name: Ident,
+    /// Disambigute variables with same name.
     order: usize,
-    depth: usize,
 }
 
 #[derive(Debug, Default)]
