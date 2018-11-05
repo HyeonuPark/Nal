@@ -3,6 +3,11 @@ use nal_ident::Ident;
 
 use crate::flow::{Break, Slot};
 
+/// Leaf instructions.
+///
+/// Instruction modifies program state.
+/// It doesn't have operations that can be handled via `Call` instruction
+/// like arithmetic operations.
 #[derive(Debug)]
 pub enum Instr<B: Break> {
     /// > [,] -> !
@@ -15,10 +20,8 @@ pub enum Instr<B: Break> {
     Push(Slot),
     /// > [, a] -> [,], Store(slot, a) if Some(slot)
     Pop(Option<Slot>),
-    /// > [, a] -> [, a, a]
-    Dupe,
-    /// > [, a, ..b, c] -> [, c, ..b, a], Len(b) == count
-    Swap(usize),
+    /// > [, a, ..b] -> [, a, ..b, a], Len(b) == count
+    Dupe(usize),
     /// > [, a, b] -> [, Call(a, b)]
     Call,
     /// > [,] -> [, {}]

@@ -1,13 +1,32 @@
-//! Structured control flow representations
+//! Structured control flow representations.
+//!
+//! Types here are designed mainly for type check and inference.
 
 use std::fmt;
 
 use nal_ident::Ident;
 
+use crate::ty::Ty;
 use crate::instruction::Instr;
 
 pub trait Break: fmt::Debug {
     type Inner: Break;
+}
+
+#[derive(Debug, Default)]
+pub struct CanBreak<B: Break>(Option<B>);
+
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Slot {
+    name: Ident,
+    /// Disambigute variables with same name.
+    order: usize,
+}
+
+#[derive(Debug)]
+pub struct Block<B: Break> {
+    scope: Vec<(Slot, Option<Ty>)>,
+    body: Vec<Step<B>>,
 }
 
 /// A `Step` is the unit of change in program state.
@@ -32,12 +51,11 @@ pub enum Step<B: Break> {
     ///
     /// # Error
     ///
-    /// Throw type error if:
+    /// Throw type error if any of the following conditons are not met.
     ///
-    /// 1. Current stack is empty.
-    /// 1. Popped value is not `Enum` type.
-    /// 1. Branch block with matching tag not exist.
-    /// 1. Any branch produces non-identical program state after execution.
+    /// 1. Current stack has a value with `Enum` at its top.
+    /// 1. This step contains branch with matching tag.
+    /// 1. All branches should produce same program state in the end.
     Branch(Vec<(Ident, Block<B>)>),
 
     /// Execute given block repeatedly, until it breaks out.
@@ -51,28 +69,32 @@ pub enum Step<B: Break> {
     ///
     /// # Error
     ///
+    /// Throw type error if any of the following conditions are not met.
+    ///
+    /// 1. If execution reaches the end of the given block, the program state should be same
+    ///     as the state before this `Loop` step.
+    /// 1. All breaks in this block should produce same program state.
+    ///
     /// Throw type error if any breakage within given block produces non-identical program state.
     Loop(Block<CanBreak<B>>),
 }
 
 #[derive(Debug)]
-pub struct Block<B: Break> {
-    scope: Vec<Slot>,
-    body: Vec<Step<B>>,
+pub struct Func {
+    // `Break` in function body means returning function.
+    body: Block<CanBreak<()>>,
 }
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Slot {
-    name: Ident,
-    /// Disambigute variables with same name.
-    order: usize,
-}
+#[doc(hidden)]
+#[derive(Debug)]
+pub enum Never {}
 
-#[derive(Debug, Default)]
-pub struct CanBreak<B: Break>(Option<B>);
+impl Break for Never {
+    type Inner = Never;
+}
 
 impl Break for () {
-    type Inner = ();
+    type Inner = Never;
 }
 
 impl<B: Break> Break for CanBreak<B> {

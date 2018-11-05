@@ -18,6 +18,6 @@ pub enum Primitive {
     F64,
 }
 
-pub fn wrap(primitive: Primitive) -> Ty {
+pub fn wrap(_primitive: Primitive) -> Ty {
     unimplemented!()
 }
