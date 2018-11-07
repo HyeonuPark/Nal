@@ -1,7 +1,7 @@
 
 use nal_ident::Ident;
 
-use crate::flow::{Break, Slot};
+use crate::flow::Var;
 
 /// Leaf instructions.
 ///
@@ -9,17 +9,22 @@ use crate::flow::{Break, Slot};
 /// It doesn't have operations that can be handled via `Call` instruction
 /// like arithmetic operations.
 #[derive(Debug)]
-pub enum Instr<B: Break> {
+pub enum Instr {
     /// > [,] -> !
     ///
-    /// Breaks enclosing loop with inner type.
-    /// If `inner` is `CanBreak(Some(b))`,
-    /// break will be bubbled up to the outer loop with `b`.
-    Break(B::Inner),
-    /// > [,] -> [, Load(slot)]
-    Push(Slot),
-    /// > [, a] -> [,], Store(slot, a) if Some(slot)
-    Pop(Option<Slot>),
+    /// Breaks out enclosing loop.
+    ///
+    /// If its counter is greater than 0, it also breaks nested loop, with given amount.
+    /// Breaking out function boundery is same as returning from it.
+    ///
+    /// # Error
+    ///
+    /// Throw compile error if its counter is greater than its loop depth.
+    Break(usize),
+    /// > [,] -> [, Load(var)]
+    Push(Var),
+    /// > [, a] -> [,], Store(var, a) if Some(var)
+    Pop(Option<Var>),
     /// > [, a, ..b] -> [, a, ..b, a], Len(b) == count
     Dupe(usize),
     /// > [, a, b] -> [, Call(a, b)]
