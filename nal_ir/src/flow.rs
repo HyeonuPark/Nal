@@ -4,21 +4,9 @@
 
 use nal_ident::Ident;
 
-use crate::ty::Ty;
 use crate::instruction::Instr;
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Var {
-    name: Ident,
-    /// Disambigute variables with same name.
-    order: usize,
-}
-
-#[derive(Debug)]
-pub struct Block {
-    scope: Vec<(Var, Option<Ty>)>,
-    body: Vec<Step>,
-}
+pub type Block = Vec<Step>;
 
 /// A `Step` is the unit of change in program state.
 #[derive(Debug)]

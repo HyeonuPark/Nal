@@ -1,8 +1,6 @@
 
 use nal_ident::Ident;
 
-use crate::flow::Var;
-
 /// Leaf instructions.
 ///
 /// Instruction modifies program state.
@@ -21,26 +19,40 @@ pub enum Instr {
     ///
     /// Throw compile error if its counter is greater than its loop depth.
     Break(usize),
-    /// > [,] -> [, Load(var)]
-    Push(Var),
-    /// > [, a] -> [,], Store(var, a) if Some(var)
-    Pop(Option<Var>),
-    /// > [, a, ..b] -> [, a, ..b, a], Len(b) == count
-    Dupe(usize),
+    /// [, ...a] -> [,], Len(a) == count
+    Pop(usize),
+    /// > [,] -> [, Global]
+    ///
+    /// Push a record of global values to the stack.
+    Global,
+    /// > [, a, ...b] -> [, a, ...b, Reference(a, ref_type)], Len(b) == count
+    ///
+    /// Push a reference of the value at stack's given depth.
+    Ref(RefType, usize),
     /// > [, a, b] -> [, Call(a, b)]
+    ///
+    /// Pop two values from the stack,
+    /// call the lower value with upper value as an argument.
     Call,
     /// > [,] -> [, {}]
-    Record,
+    RecordNew,
     /// > [, a] -> [, a.ident]
-    FieldGet(Ident),
+    RecordGet(Ident),
     /// > [, a, b] -> [, a[ident = b]]
-    FieldSet(Ident),
+    RecordSet(Ident),
     /// > [, ..a] -> [, (..a)], Len(a) == count
-    Tuple(usize),
+    TupleNew(usize),
     /// > [, a] -> [, a.idx]
-    IndexGet(usize),
+    TupleGet(usize),
     /// > [, a, b] -> [, a[idx = b]]
-    IndexSet(usize),
+    TupleSet(usize),
     /// > [, a] -> [, .ident a]
     Enum(Ident),
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum RefType {
+    Imut,
+    Mut,
+    Move,
 }
