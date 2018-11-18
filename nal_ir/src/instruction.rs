@@ -1,5 +1,5 @@
 
-use nal_ident::Ident;
+use nal_symbol::Symbol;
 
 /// Leaf instructions.
 ///
@@ -37,9 +37,9 @@ pub enum Instr {
     /// > [,] -> [, {}]
     RecordNew,
     /// > [, a] -> [, a.ident]
-    RecordGet(Ident),
+    RecordGet(Symbol),
     /// > [, a, b] -> [, a[ident = b]]
-    RecordSet(Ident),
+    RecordSet(Symbol),
     /// > [, ..a] -> [, (..a)], Len(a) == count
     TupleNew(usize),
     /// > [, a] -> [, a.idx]
@@ -47,7 +47,7 @@ pub enum Instr {
     /// > [, a, b] -> [, a[idx = b]]
     TupleSet(usize),
     /// > [, a] -> [, .ident a]
-    Enum(Ident),
+    Enum(Symbol),
 }
 
 #[derive(Debug, Clone, Copy)]

@@ -5,5 +5,5 @@ authors = ["Hyeonu Park <nemo1275@gmail.com>"]
 
 [dependencies]
 
-[dependencies.nal_ident]
-path = "../nal_ident"
+[dependencies.nal_symbol]
+path = "../nal_symbol"

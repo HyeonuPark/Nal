@@ -2,7 +2,7 @@
 //!
 //! Types here are designed mainly for type check and inference.
 
-use nal_ident::Ident;
+use nal_symbol::Symbol;
 
 use crate::instruction::Instr;
 
@@ -35,7 +35,7 @@ pub enum Step {
     /// 1. Current stack has a value with `Enum` at its top.
     /// 1. This step contains branch with matching tag.
     /// 1. All branches should produce same program state in the end.
-    Branch(Vec<(Ident, Block)>),
+    Branch(Vec<(Symbol, Block)>),
 
     /// Execute given block repeatedly, until it breaks out.
     ///

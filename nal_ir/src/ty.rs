@@ -1,7 +1,7 @@
 
 use std::collections::HashMap;
 
-use nal_ident::Ident;
+use nal_symbol::Symbol;
 
 use crate::primitive::{self, Primitive};
 
@@ -9,8 +9,8 @@ use self::Ty::*;
 
 #[derive(Debug, Clone)]
 pub enum Ty {
-    Record(HashMap<Ident, Ty>),
-    Enum(HashMap<Ident, Ty>),
+    Record(HashMap<Symbol, Ty>),
+    Enum(HashMap<Symbol, Ty>),
     Tuple(Vec<Ty>),
     Primitive(Primitive),
 }

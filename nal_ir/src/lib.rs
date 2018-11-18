@@ -1,5 +1,5 @@
 
-extern crate nal_ident;
+extern crate nal_symbol;
 
 mod primitive;
 pub mod ty;
