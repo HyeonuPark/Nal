@@ -8,7 +8,7 @@ use crate::instruction::Instr;
 
 pub type Block = Vec<Step>;
 
-/// A `Step` is the unit of change in program state.
+/// A `Step` is the unit of change in stack state.
 #[derive(Debug)]
 pub enum Step {
     /// Execute given instruction using expression stack.
@@ -34,7 +34,7 @@ pub enum Step {
     ///
     /// 1. Current stack has a value with `Enum` at its top.
     /// 1. This step contains branch with matching tag.
-    /// 1. All branches should produce same program state in the end.
+    /// 1. All branches should produce same stack state in type level in the end.
     Branch(Vec<(Symbol, Block)>),
 
     /// Execute given block repeatedly, until it breaks out.
@@ -50,11 +50,12 @@ pub enum Step {
     ///
     /// Throw compile error if any of the following conditions are not met.
     ///
-    /// 1. If execution reaches the end of the given block, the program state should be same
-    ///     as the state before this `Loop` step.
-    /// 1. All breaks in this block should produce same program state.
+    /// 1. If execution reaches the end of the given block,
+    ///     the stack state in type level should be same as the state before this `Loop` step.
+    /// 1. All breaks in this block should produce same stack state in type level.
     ///
-    /// Throw compile error if any breakage within given block produces non-identical program state.
+    /// Throw compile error if any breakage within given block produces
+    /// non-identical stack state in type level.
     Loop(Block),
 }
 

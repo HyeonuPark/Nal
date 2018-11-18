@@ -3,7 +3,7 @@ use nal_symbol::Symbol;
 
 /// Leaf instructions.
 ///
-/// Instruction modifies program state.
+/// Instruction modifies stack state.
 /// It doesn't have operations that can be handled via `Call` instruction
 /// like arithmetic operations.
 #[derive(Debug)]
