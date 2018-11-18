@@ -42,8 +42,8 @@ pub enum Step {
     /// # Step
     ///
     /// 1. Execute given block.
-    /// 1. When encounter `Instr(Break(b))` within this block, stop the execution.
-    /// 1. If `b` is `CanBreak(Some(b2))`, treat this `Loop` step as `Instr(Break(b2))`.
+    /// 1. When encounter `Instr(Break(count))` within this block, stop the execution.
+    /// 1. If `count` is greater than 0, treat this `Loop` step as `Instr(Break(count - 1))`.
     /// 1. If execution of given block is done without break, goto step 1 and run it again.
     ///
     /// # Error
