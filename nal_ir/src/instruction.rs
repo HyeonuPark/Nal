@@ -34,18 +34,52 @@ pub enum Instr {
     /// Pop two values from the stack,
     /// call the lower value with upper value as an argument.
     Call,
-    /// > [,] -> [, {}]
-    RecordNew,
+    /// > [, .name field, ...] -> [, {name = field, ...}]
+    ///
+    /// Create new record of given size from stack values.
+    /// Each values popped from the stack should be enum type,
+    /// and its tag will be its field name.
+    ///
+    /// # Error
+    ///
+    /// Throw compile error if any of popped value is not an enum type,
+    /// or 2 of them has same tag name.
+    RecordNew(usize),
     /// > [, a] -> [, a.ident]
+    ///
+    /// # Error
+    ///
+    /// Throw compile error if the record doesn't have field `ident`.
     RecordGet(Symbol),
     /// > [, a, b] -> [, a[ident = b]]
+    ///
+    /// # Error
+    ///
+    /// Throw compile error if the record `a` doesn't have field `ident`.
     RecordSet(Symbol),
+    /// > [, {name = field, ...}] -> [, .name field, ...]
+    ///
+    /// Spreads record's fields to the stack.
+    /// Actual order of spreaded fields are not specified.
+    /// Each fields are pushed to the stack as an enum type,
+    /// whose tag name is same as its field name.
+    RecordSpread,
     /// > [, ..a] -> [, (..a)], Len(a) == count
     TupleNew(usize),
     /// > [, a] -> [, a.idx]
+    ///
+    /// # Error
+    ///
+    /// Throw comiple error on index out of bound.
     TupleGet(usize),
     /// > [, a, b] -> [, a[idx = b]]
+    ///
+    /// # Error
+    ///
+    /// Throw comiple error on index out of bound.
     TupleSet(usize),
+    /// > [, (..a)] -> [, ..a]
+    TupleSpread,
     /// > [, a] -> [, .ident a]
     Enum(Symbol),
 }
